@@ -13,10 +13,7 @@ jobs:
       pages: write      # to deploy to Pages
       id-token: write   # to verify the deployment originates from an appropriate source
     
-    # Deploy to the github-pages environment
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+    
     
     steps:
       - uses: actions/checkout@v2
@@ -35,6 +32,11 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./build/html
       
+    # Deploy to the github-pages environment
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
       # Specify runner + deployment step
       - name: Deploy to GitHub Pages
         id: deployment

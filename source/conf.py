@@ -6,19 +6,32 @@
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
-project = 'TKF\'s Daily Notes'
-copyright = '2022, TKF'
-author = 'TKF'
+project = 'TKF\'s Notes'
+copyright = '2022, Kaifu Tian'
+author = 'Kaifu Tian'
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
-extensions = []
+extensions = [
+    "sphinx_comments"
+]
+
+comments_config = {
+    "utterances": {
+        "repo": "rcore-os/rCore-Tutorial-Book-v3",
+        "issue-term": "pathname",
+        "label": "comments",
+        "theme": "github-light",
+        "crossorigin": "anonymous",
+    }
+}
 
 templates_path = ['_templates']
 exclude_patterns = []
 
-language = 'zh'
+language = 'zh_CN'
+html_search_language = 'zh'
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
@@ -44,7 +57,7 @@ html_theme_options = {
 # Custom options for Furo
 
 # html_logo = '_static/logo.jpeg'
-html_title = "Daily Notes"
+html_title = "Notes"
 
 pygments_style = "sphinx"
 pygments_dark_style = "monokai"

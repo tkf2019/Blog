@@ -19,7 +19,7 @@ extensions = [
 
 comments_config = {
     "utterances": {
-        "repo": "rcore-os/rCore-Tutorial-Book-v3",
+        "repo": "tkf2019/Blog",
         "issue-term": "pathname",
         "label": "comments",
         "theme": "github-light",

@@ -8,6 +8,16 @@ jobs:
   deploy-doc:
     runs-on: ubuntu-latest
 
+    # Grant GITHUB_TOKEN the permissions required to make a Pages deployment
+    permissions:
+      pages: write      # to deploy to Pages
+      id-token: write   # to verify the deployment originates from an appropriate source
+    
+    # Deploy to the github-pages environment
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v2
@@ -15,18 +25,17 @@ jobs:
           python-version: "3.8.10"
       - name: Install dependencies
         run: pip install -r requirements.txt
-
       - name: build doc
         run: make html
-
       - name: create .nojekyll
         run: touch build/html/.nojekyll
-
       - name: Push to gh-pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./build/html
-          
+      
+      # Specify runner + deployment step
       - name: Deploy to GitHub Pages
+        id: deployment
         uses: actions/deploy-pages@v1

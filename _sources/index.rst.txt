@@ -4,7 +4,8 @@
 
 .. toctree::
    :maxdepth: 2
-   :caption: 龙芯杯
    :hidden:
 
-   loong/thoughts
+   os/index
+   rust/index
+   thoughts/index

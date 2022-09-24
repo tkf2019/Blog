@@ -14,7 +14,9 @@ author = 'Kaifu Tian'
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
 extensions = [
-    "sphinx_comments"
+    "sphinx_comments",
+    "myst_parser",
+    "sphinx_design"
 ]
 
 comments_config = {

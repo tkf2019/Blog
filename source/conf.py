@@ -41,7 +41,7 @@ html_search_language = 'zh'
 html_theme = 'furo'
 html_static_path = ['_static']
 html_theme_options = {
-    "sidebar_hide_name": True,
+    # "sidebar_hide_name": True,
 
     # Adding an edit button
     "source_repository": "https://github.com/tkf2019/Blog",

@@ -32,8 +32,19 @@ html_theme_options = {
     "source_repository": "https://github.com/tkf2019/Blog",
     "source_branch": "main",
     "source_directory": "source/",
+
+    # Changing Furo's blue accent
+    "light_css_variables": {
+        "color-brand-primary": "#7C4DFF",
+        "color-brand-content": "#7C4DFF",
+    },
+
 }
 
 # Custom options for Furo
 
 # html_logo = '_static/logo.jpeg'
+html_title = "Daily Notes"
+
+pygments_style = "sphinx"
+pygments_dark_style = "monokai"

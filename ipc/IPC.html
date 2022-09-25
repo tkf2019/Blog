@@ -2,10 +2,10 @@
 <html class="no-js" lang="zh_CN">
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <meta name="color-scheme" content="light dark"><link rel="index" title="索引" href="../genindex.html" /><link rel="search" title="搜索" href="../search.html" /><link rel="next" title="IPC" href="../ipc/index.html" /><link rel="prev" title="学习 Rust" href="index.html" />
+    <meta name="color-scheme" content="light dark"><link rel="index" title="索引" href="../genindex.html" /><link rel="search" title="搜索" href="../search.html" /><link rel="next" title="其他" href="../others/index.html" /><link rel="prev" title="IPC" href="index.html" />
 
     <meta name="generator" content="sphinx-4.3.2, furo 2022.06.21"/>
-        <title>学习 Rust - Notes</title>
+        <title>SkyBridge and XPC - Notes</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?digest=40978830699223671f4072448e654b5958f38b89" />
     <link rel="stylesheet" type="text/css" href="../_static/design-style.4045f2051d55cab465a707391d5b2007.min.css" />
@@ -136,7 +136,7 @@
           <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
         </button>
       </div>
-      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
         <div class="visually-hidden">Toggle table of contents sidebar</div>
         <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
       </label>
@@ -162,12 +162,12 @@
 <li class="toctree-l2"><a class="reference internal" href="../os/unikraft.html">Unikraft</a></li>
 </ul>
 </li>
-<li class="toctree-l1 current has-children"><a class="reference internal" href="index.html">学习 Rust</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
-<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">学习 Rust</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../rust/index.html">学习 Rust</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../rust/rust.html">学习 Rust</a></li>
 </ul>
 </li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../ipc/index.html">IPC</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
-<li class="toctree-l2"><a class="reference internal" href="../ipc/IPC.html">SkyBridge and XPC</a></li>
+<li class="toctree-l1 current has-children"><a class="reference internal" href="index.html">IPC</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
+<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">SkyBridge and XPC</a></li>
 </ul>
 </li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../others/index.html">其他</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
@@ -195,7 +195,7 @@
         </a>
         <div class="content-icon-container">
           <div class="edit-this-page">
-  <a class="muted-link" href="https://github.com/tkf2019/Blog/edit/main/source/rust/rust.rst" title="Edit this page">
+  <a class="muted-link" href="https://github.com/tkf2019/Blog/edit/main/source/ipc/IPC.md" title="Edit this page">
     <svg aria-hidden="true" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
       <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
       <path d="M4 20h4l10.5 -10.5a1.5 1.5 0 0 0 -4 -4l-10.5 10.5v4" />
@@ -211,36 +211,133 @@
               <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
             </button>
           </div>
-          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
             <div class="visually-hidden">Toggle table of contents sidebar</div>
             <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
           </label>
         </div>
         <article role="main">
-          <div class="section" id="rust">
-<h1>学习 Rust<a class="headerlink" href="#rust" title="永久链接至标题">#</a></h1>
-<p><code class="docutils literal notranslate"><span class="pre">static</span></code></p>
+          <div class="section" id="skybridge-and-xpc">
+<h1>SkyBridge and XPC<a class="headerlink" href="#skybridge-and-xpc" title="永久链接至标题">#</a></h1>
+<div class="section" id="id1">
+<h2>背景<a class="headerlink" href="#id1" title="永久链接至标题">#</a></h2>
 <ul class="simple">
-<li><p>全局变量不会被内联，整个程序中，全局变量只有一个实例，所有的引用会指向相同的地址</p></li>
-<li><p>可变全局变量可能出现多个线程同时访问的情况，因而引发内存不安全的问题，所以对于可变全局变量的访问和修改代码必须在 <code class="docutils literal notranslate"><span class="pre">unsafe</span></code> 块中定义</p></li>
-<li><p>存储在全局变量中的值必须实现 <code class="docutils literal notranslate"><span class="pre">trait</span> <span class="pre">Sync</span></code></p></li>
-<li><p>全局变量需要在编译期确定好内存布局</p></li>
-<li><p>如何定义 <code class="docutils literal notranslate"><span class="pre">static</span></code> 变量，用于全局访问，且运行时才对这一变量进行初始化？最直观的做法是使用 <code class="docutils literal notranslate"><span class="pre">lazy_static</span></code>，查看 <code class="docutils literal notranslate"><span class="pre">lazy_static</span></code> 内部源码发现，可以使用 <code class="docutils literal notranslate"><span class="pre">spin::Once</span></code> 结构对变量进行封装，在运行时调用 <code class="docutils literal notranslate"><span class="pre">call_once</span></code> 函数进行初始化。传入参数需要返回初始化后的结果。</p></li>
+<li><p>陈老师推荐的有关微内核的两篇论文，一篇讲软件层面的优化，一篇讲硬件层面的优化</p></li>
+<li><p>两篇论文都是上交陈海波团队发表的，微内核可能会应用在鸿蒙OS中</p></li>
 </ul>
-<div class="highlight-rust notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="w">  </span><span class="k">fn</span> <span class="nf">call_once</span><span class="o">&lt;&#39;</span><span class="na">a</span><span class="p">,</span><span class="w"> </span><span class="n">F</span><span class="o">&gt;</span><span class="p">(</span><span class="o">&amp;&#39;</span><span class="na">a</span><span class="w"> </span><span class="bp">self</span><span class="p">,</span><span class="w"> </span><span class="n">builder</span>: <span class="nc">F</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="kp">&amp;</span><span class="o">&#39;</span><span class="na">a</span> <span class="nc">T</span><span class="w"></span>
-<span class="linenos">2</span><span class="w">  </span><span class="k">where</span><span class="w"></span>
-<span class="linenos">3</span><span class="w">      </span><span class="n">F</span>: <span class="nb">FnOnce</span><span class="p">()</span><span class="w"> </span>-&gt; <span class="nc">T</span><span class="p">,</span><span class="w"></span>
-</pre></div>
 </div>
-<hr class="docutils" />
-<p><code class="docutils literal notranslate"><span class="pre">PathBuf</span></code></p>
+<div class="section" id="skybridge">
+<h2>SkyBridge<a class="headerlink" href="#skybridge" title="永久链接至标题">#</a></h2>
 <ul class="simple">
-<li><p>用来方便地进行系统路径的操作（在 Windows 和 Unix 中表现不同）</p></li>
-<li><p>调用 <code class="docutils literal notranslate"><span class="pre">into_os_string().into_string().unwrap().to_str()</span></code> 方法转化为 <code class="docutils literal notranslate"><span class="pre">&amp;str</span></code></p></li>
-<li><p>可将根目录视为栈底，支持 <code class="docutils literal notranslate"><span class="pre">push</span></code> 和 <code class="docutils literal notranslate"><span class="pre">pop</span></code> 操作动态添加路径中的目录</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">set_file_name</span></code>：替换栈顶元素</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">set_extension</span></code>：为栈顶元素增加文件类型</p></li>
+<li><p>论文多次提到熔断漏洞，近几年受到广泛关注和研究的安全性问题；</p></li>
+<li><p>微内核最关键的机制是核间通信，在用户层实现很多系统级应用，内核只保留最基本的功能；传统的进程通信依赖于内核进程切换，带来了巨大的开销</p></li>
+<li><p>seL4的fastpath IPC</p></li>
+<li><p>SkyBridge 提出了一些应用 VMFUNC 的方法：</p>
+<ul>
+<li><p>位于microkernel下方的Rootkernel，使用巨页避免microkernel频繁触发缺页中断；采用Subkernel和Rootkernel两级分管</p></li>
+<li><p>SkyBridge巧妙地将Client的CR3映射为对应Server的CR3，Client通过EPTP list来指向不同Server的EPT</p></li>
+<li><p>安全机制在kernel处理IPC，SkyBridge检查process的二进制文件避免非法VMFUNC，通过查表来验证IPC请求</p></li>
 </ul>
+</li>
+<li><p>Rootkernel:</p>
+<ul>
+<li><p>从Subkernel启动，通过VMCALL与Subkernel通信</p></li>
+<li><p>确保大多数VM行为不触发VM exit，VM exits包含三类：</p>
+<ul>
+<li><p>特权指令：不触发VM exits</p></li>
+<li><p>硬件中断：直接将中断交给microkernel处理</p></li>
+<li><p>EPT异常（miss，invalid）：Subkernel到Rootkernel采用1GB的页，SkyBridge仅为Rootkernel保留100MB的物理空间，减少TLB miss等问题出现的次数和开销</p></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>Subkernel：</p>
+<ul>
+<li><p>server注册：将trampoline code page和stack pages映射到server的虚拟地址空间，为server分配ID</p></li>
+<li><p>client注册：绑定到指定ID的server，同样进行映射；EPT处理，将client的CR3映射到server的CR3；将所有和server有关的EPTP添加到client的EPTP list</p></li>
+<li><p>跨虚拟地址空间执行时陷入内核的问题：Subkernel可以记录进程的信息来判断</p></li>
+</ul>
+</li>
+<li><p>Rewriting Illegal VMFUNC:</p>
+<ul>
+<li><p>替换VMFUNC指令，若只有一条指令，则直接替换，若需要执行多条指令，则替换为跳转指令，跳转到待执行代码再返回</p></li>
+<li><p>（具体策略和x86的指令编码有关，暂时还没有深入学习x86体系结构）</p></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="section" id="xpc">
+<h2>XPC<a class="headerlink" href="#xpc" title="永久链接至标题">#</a></h2>
+<ul class="simple">
+<li><p>硬件层面优化IPC性能的实现，我理解为新的进程管理方法，通过引入更复杂的硬件设计来适应microkernel对IPC的高度依赖，有硬件操作系统的趋势？</p></li>
+<li><p>存在的问题：</p>
+<ul>
+<li><p>解决不了多核跨进程通信问题</p></li>
+<li><p>设计较为复杂，但安全方面可能比较薄弱，论文中只采用了控制位和预设的物理空间来进行安全检查（可能通过硬件漏洞直接窃听内存中的通信数据</p></li>
+</ul>
+</li>
+<li><p>实现高性能IPC的两个重要层面：</p>
+<ul>
+<li><p>如何摆脱kernel带来的开销：</p>
+<ul>
+<li><p>陷入和恢复</p></li>
+<li><p>IPC 相关执行逻辑</p></li>
+<li><p>进程上下文切换</p></li>
+</ul>
+</li>
+<li><p>如何实现无拷贝通信</p></li>
+</ul>
+</li>
+<li><p>设计目标：</p>
+<ul>
+<li><p>无陷入进程切换</p></li>
+<li><p>无拷贝进程通信</p></li>
+<li><p>适应现有内核</p></li>
+<li><p>尽可能简化硬件设计</p></li>
+</ul>
+</li>
+<li><p>基本组成：</p>
+<ul>
+<li><p>x-entry:区分ID，访问权限控制xcall-cap</p></li>
+<li><p>xcall和xret指令：快速的进程切换</p></li>
+<li><p>地址映射策略relay-seg：使用寄存器保存message在内存中的基址和范围；进程间原子性拥有message控制权，避免TOCTOU攻击</p></li>
+<li><p>migrating thread model: ？</p></li>
+</ul>
+</li>
+<li><p>Zircon通过异步IPC模拟文件系统接口的同步语义带来了高昂的开销</p></li>
+<li><p>seL4的IPC处理机制，检查以下条件来判断是否采用slowpath还是fastpath：</p>
+<ul>
+<li><p>通信双方有不同的特权级别</p></li>
+<li><p>通信双方位于不同的核上</p></li>
+<li><p>message大小是否超出寄存器大小但未超过buffer大小</p></li>
+<li><p>这些机制可以通过硬件并行化来降低延迟</p></li>
+</ul>
+</li>
+<li><p>seL4的IPC通信机制，根据消息长度采用三种策略：寄存器、IPC buffer、shared memory；并不安全，多线程可以篡改数据？</p></li>
+<li><p>XPC engine：</p></li>
+</ul>
+<p><img alt="xpc.png" src="../_images/xpc.png" /></p>
+<ul class="simple">
+<li><p>xcall #reg:</p>
+<ul>
+<li><p>访问bitmap检查xcall-cap</p></li>
+<li><p>访问x-entry-table并检查valid标志位</p></li>
+<li><p>将恢复需要的信息推入link stack中</p></li>
+<li><p>指向callee页表，pc跳转到目标进程entry point，保存caller的信息</p></li>
+</ul>
+</li>
+<li><p>xret：</p>
+<ul>
+<li><p>将link stack的栈顶弹出，检查valid标志位，并根据信息返回caller进程（嵌套？）</p></li>
+</ul>
+</li>
+<li><p>xcall-cap：xcall-cap-reg保存bitmap在内存中的基址</p></li>
+<li><p>link stack：可以非阻塞方式写stack</p></li>
+<li><p>cached x-entries：利用prefetch，进程可提前将x-entry加载到cache</p></li>
+<li><p>swapseg #reg: reg-seg和seg-list中的一项交换内容：</p></li>
+</ul>
+<p><img alt="relay-seg-chain.png" src="../_images/relay-seg-chain.png" /></p>
+</div>
 </div>
 
         </article>
@@ -248,12 +345,12 @@
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="../ipc/index.html">
+          <a class="next-page" href="../others/index.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">IPC</div>
+                <div class="title">其他</div>
               </div>
               <svg><use href="#svg-arrow-right"></use></svg>
             </a>
@@ -264,7 +361,7 @@
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">学习 Rust</div>
+                <div class="title">IPC</div>
                 
               </div>
             </a>
@@ -288,8 +385,29 @@
         
       </footer>
     </div>
-    <aside class="toc-drawer no-toc">
+    <aside class="toc-drawer">
       
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            目录
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">SkyBridge and XPC</a><ul>
+<li><a class="reference internal" href="#id1">背景</a></li>
+<li><a class="reference internal" href="#skybridge">SkyBridge</a></li>
+<li><a class="reference internal" href="#xpc">XPC</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
       
       
     </aside>

@@ -8,4 +8,5 @@
 
    os/index
    rust/index
-   thoughts/index
+   ipc/index
+   others/index

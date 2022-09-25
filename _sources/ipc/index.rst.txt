@@ -1,5 +1,5 @@
 ------------
-OSes
+IPC
 ------------
 
 .. toctree:: 
@@ -7,5 +7,4 @@ OSes
     :caption: 论文阅读
     :hidden:
 
-    theseus
-    unikraft
+    IPC

@@ -2,7 +2,7 @@
 <html class="no-js" lang="zh_CN">
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <meta name="color-scheme" content="light dark"><link rel="index" title="索引" href="../genindex.html" /><link rel="search" title="搜索" href="../search.html" /><link rel="next" title="学习 Rust" href="../rust/index.html" /><link rel="prev" title="论文阅读" href="index.html" />
+    <meta name="color-scheme" content="light dark"><link rel="index" title="索引" href="../genindex.html" /><link rel="search" title="搜索" href="../search.html" /><link rel="next" title="Unikraft" href="unikraft.html" /><link rel="prev" title="OSes" href="index.html" />
 
     <meta name="generator" content="sphinx-4.3.2, furo 2022.06.21"/>
         <title>Theseus - Notes</title>
@@ -157,16 +157,22 @@
 </form>
 <div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
   <ul class="current">
-<li class="toctree-l1 current has-children"><a class="reference internal" href="index.html">论文阅读</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
+<li class="toctree-l1 current has-children"><a class="reference internal" href="index.html">OSes</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
 <li class="toctree-l2 current current-page"><a class="current reference internal" href="#">Theseus</a></li>
+<li class="toctree-l2"><a class="reference internal" href="unikraft.html">Unikraft</a></li>
 </ul>
 </li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../rust/index.html">学习 Rust</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../rust/rust.html">学习 Rust</a></li>
 </ul>
 </li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../thoughts/index.html">心得体会</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
-<li class="toctree-l2"><a class="reference internal" href="../thoughts/loongson.html">龙芯杯比赛回顾</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../ipc/index.html">IPC</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../ipc/IPC.html">SkyBridge and XPC</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../others/index.html">其他</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../others/loongson.html">龙芯杯比赛回顾</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../others/wifi.html">破解 WIFI</a></li>
 </ul>
 </li>
 </ul>
@@ -213,6 +219,46 @@
         <article role="main">
           <div class="section" id="theseus">
 <h1>Theseus<a class="headerlink" href="#theseus" title="永久链接至标题">#</a></h1>
+<div class="admonition-links admonition">
+<p class="admonition-title">Links</p>
+<p><a class="reference external" href="https://www.usenix.org/conference/osdi20/presentation/narayanan-vikram">https://www.usenix.org/conference/osdi20/presentation/narayanan-vikram</a></p>
+<p><a class="reference external" href="https://github.com/mars-research/redleaf">https://github.com/mars-research/redleaf</a></p>
+<p><a class="reference external" href="https://www.usenix.org/conference/osdi20/presentation/boos">https://www.usenix.org/conference/osdi20/presentation/boos</a></p>
+<p><a class="reference external" href="https://github.com/theseus-os/Theseus">https://github.com/theseus-os/Theseus</a></p>
+</div>
+<p>Safety over all alse (convenience, performance)</p>
+<p>Single address space (SAS), Single privilege level (SPL)</p>
+<p>Structure of cells:</p>
+<ul class="simple">
+<li><p>persistence of cell bounds reduces complexity:</p></li>
+<li><p>striking a balance with cell granularity: extract would-be modules into distinct crates (organized into folders)</p></li>
+</ul>
+<p>Boot by <code class="docutils literal notranslate"><span class="pre">`nono_core`</span></code>:</p>
+<ol class="arabic simple">
+<li><p>Cells statically linked into a kernel image, comprising only components needed to bootstrap a bare-minimum environment (vm, loading/linking object files).</p></li>
+<li><p>The <cite>nano_core</cite> fully replaces itself at the final bootstrap stage by dinamically loading its constituent cells one by one.</p></li>
+<li><p>The <cite>nano_core</cite> image is unloaded after bootstrap.</p></li>
+</ol>
+<p>Intralingual design:</p>
+<ul class="simple">
+<li><p>Uses Rust’s built-in reference types <code class="docutils literal notranslate"><span class="pre">&amp;T</span></code> and <code class="docutils literal notranslate"><span class="pre">Arc&lt;T&gt;</span></code></p></li>
+<li><p>Employs lossless interfaces (presering all language-level context)</p></li>
+<li><p>Implements all cleanup semantics in drop handlers</p></li>
+<li><p>Employs stack unwinding</p></li>
+</ul>
+<p>Memory management:</p>
+<ul class="simple">
+<li><p>The mapping from virtual pages to physical frames must be one-to-one, which prevents aliasing, an extralingual approach that renders sharing transparent to the compiler and thus uncheckable for safety.</p></li>
+<li><p>Memory must be accessible beyond the mapped region’s bounds.</p></li>
+<li><p>A memory region must be unmapped exactly once, only after there remain no outstanding references to it. (Tie the lifetime of the re-typed borrowed reference <cite>&amp;’m T</cite> to the lifetime of its backing memory region)</p></li>
+<li><p>A memory region must only be mutable or executable if mapped as such.</p></li>
+</ul>
+<p>Task management:</p>
+<ul class="simple">
+<li><p>Spawning a new task must not violate memory safety.</p></li>
+<li><p>All task states must be released in all possible execution paths.</p></li>
+<li><p>All memory transitively reachable from a task’s entry function must outlive that task.</p></li>
+</ul>
 </div>
 
         </article>
@@ -220,12 +266,12 @@
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="../rust/index.html">
+          <a class="next-page" href="unikraft.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">学习 Rust</div>
+                <div class="title">Unikraft</div>
               </div>
               <svg><use href="#svg-arrow-right"></use></svg>
             </a>
@@ -236,7 +282,7 @@
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">论文阅读</div>
+                <div class="title">OSes</div>
                 
               </div>
             </a>

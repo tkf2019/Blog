@@ -9,4 +9,4 @@
 
     loongson
     wifi
-    
+    s7

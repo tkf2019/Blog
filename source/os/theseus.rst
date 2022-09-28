@@ -12,6 +12,8 @@ Theseus
 
     https://github.com/theseus-os/Theseus
 
+    https://www.theseus-os.com/Theseus/doc/___Theseus_Crates___/index.html
+
 Safety over all alse (convenience, performance)
 
 Single address space (SAS), Single privilege level (SPL)

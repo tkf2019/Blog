@@ -136,7 +136,7 @@
           <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
         </button>
       </div>
-      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
         <div class="visually-hidden">Toggle table of contents sidebar</div>
         <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
       </label>
@@ -160,6 +160,8 @@
 <li class="toctree-l1 current has-children current-page"><a class="current reference internal" href="#">OSes</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="theseus.html">Theseus</a></li>
 <li class="toctree-l2"><a class="reference internal" href="unikraft.html">Unikraft</a></li>
+<li class="toctree-l2"><a class="reference internal" href="redleaf.html">Redleaf</a></li>
+<li class="toctree-l2"><a class="reference internal" href="micro.html">Microkernel</a></li>
 </ul>
 </li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../rust/index.html">学习 Rust</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
@@ -170,7 +172,13 @@
 <li class="toctree-l2"><a class="reference internal" href="../ipc/IPC.html">SkyBridge and XPC</a></li>
 </ul>
 </li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../others/index.html">其他</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../economics/index.html">经济与金融</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../economics/corporate.html">Corporate Finance</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../economics/engineering.html">Financial Engineering</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../economics/political.html">Political Economy</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../others/index.html">其他</a><input class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../others/loongson.html">龙芯杯比赛回顾</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../others/wifi.html">破解 WIFI</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../others/s7.html">启动 S7 核</a></li>
@@ -212,7 +220,7 @@
               <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
             </button>
           </div>
-          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
             <div class="visually-hidden">Toggle table of contents sidebar</div>
             <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
           </label>
@@ -221,6 +229,15 @@
           <div class="section" id="oses">
 <h1>OSes<a class="headerlink" href="#oses" title="永久链接至标题">#</a></h1>
 <div class="toctree-wrapper compound">
+</div>
+<div class="section" id="id1">
+<h2>关于模块化的一些思考<a class="headerlink" href="#id1" title="永久链接至标题">#</a></h2>
+<p>模块化工程应满足 <strong>高内聚低耦合</strong> 原则，低耦合模块不应该了解其他模块的内部工作原理，高内聚意味着模块应该仅包含相关性的代码。</p>
+<p>模块间的通信不可避免，通信的方法一般是实现中间层，例如 <code class="docutils literal notranslate"><span class="pre">Redleaf</span></code> 中的 <code class="docutils literal notranslate"><span class="pre">Shared</span> <span class="pre">Heap</span></code> 。</p>
+<p>模块间通信可以划分为两种形式，一种是 <strong>数据交互</strong>，另一种是 <strong>模块切换</strong>，类似于 <code class="docutils literal notranslate"><span class="pre">Theseus</span></code> 中的 <code class="docutils literal notranslate"><span class="pre">Swap</span> <span class="pre">Cell</span></code>。</p>
+<p>模块的接口应该保证是最小的，不应该对外暴露内部实现细节，尽可能地减少外部调用者对于接口的访问范围。</p>
+<p>对上应封装 POSIX 接口，用来支持不同语言环境下的应用的调用，对下根据选择的模块对这些接口采用不同的实现。</p>
+<p>在阅读有关 <strong>Unikernel</strong> 的论文时，我不禁要思考这个问题。对于传统的宏内核来说，特权级和地址空间都提供了内核和应用、应用和应用之间的隔离，这尚且不能完全确保隔离性和安全性，但是对于单一特权级、单一地址空间的 <strong>Unikernel</strong> 来说，模块之间清晰的边界真的能确保安全吗？</p>
 </div>
 </div>
 
@@ -269,8 +286,27 @@
         
       </footer>
     </div>
-    <aside class="toc-drawer no-toc">
+    <aside class="toc-drawer">
       
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            目录
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">OSes</a><ul>
+<li><a class="reference internal" href="#id1">关于模块化的一些思考</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
       
       
     </aside>

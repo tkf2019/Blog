@@ -93,41 +93,19 @@ ukalloc
         /* memory allocation */
         uk_alloc_malloc_func_t malloc;
         // ...
-
         /* internal */
         struct uk_alloc *next;
         __u8 priv[];
     };
-    /* wrapper functions */
-    static inline void *uk_do_malloc(struct uk_alloc *a, __sz size) {
-        UK_ASSERT(a);
-        return a->malloc(a, size);
-    }
-    static inline void *uk_malloc(struct uk_alloc *a, __sz size) {
-        if (unlikely(!a)) {
-            errno = ENOMEM;
-            return __NULL;
-        }
-        return uk_do_malloc(a, size);
-    }
-    /* Platform common functions */
-    static struct uk_alloc *plat_allocator;
-    int ukplat_memallocator_set(struct uk_alloc *a) {
-        UK_ASSERT(a != NULL);
 
-        if (plat_allocator != NULL)
-            return -1;
+++++++++++++++++++++
+ukplat_memregion
+++++++++++++++++++++
 
-        plat_allocator = a;
+**Unikraft** 为不同平台（KVM、Linuxu 等）下的内存管理提供 `ukplat_memregion*` 相关接口。
 
-        _ukplat_mem_mappings_init();
-
-        return 0;
-    }
-    struct uk_alloc *ukplat_memallocator_get(void) {
-        return plat_allocator;
-    }
-
+.. code-block:: c
+    :linenos:
 
     /* Descriptor of a memory region */
     struct ukplat_memregion_desc {
@@ -138,18 +116,220 @@ ukalloc
         const char *name;
     #endif
     };
+    /**
+    * Returns the number of available memory regions
+    * @return Number of memory regions
+    */
+    int ukplat_memregion_count(void);
+    /**
+    * Reads a memory region to mrd
+    * @param i Memory region number
+    * @param mrd Pointer to memory region descriptor that will be filled out
+    * @return 0 on success, < 0 otherwise
+    */
+    int ukplat_memregion_get(int i, struct ukplat_memregion_desc *mrd);
 
++++++++++
+ukboot
++++++++++
 
+Unikraf 在 ukboot 中对 memory allocator 等模块进行初始化，根据编译选项（ ``CONFIG_LIBUKALLOC`` 等），选择对应的接口实现。
 
+.. code-block:: c
+    :linenos:
+
+    /* defined in <uk/plat.h> */
+    void ukplat_entry(int argc, char *argv[])
+    {
+        struct thread_main_arg tma;
+        int kern_args = 0;
+        int rc __maybe_unused = 0;
+    #if CONFIG_LIBUKALLOC
+        struct uk_alloc *a = NULL;
+    #endif
+    #if !CONFIG_LIBUKBOOT_NOALLOC
+        struct ukplat_memregion_desc md;
+    #endif
+    #if CONFIG_LIBUKSCHED
+        struct uk_sched *s = NULL;
+        struct uk_thread *main_thread = NULL;
+    #endif
+
+    // ...
+
+    #if !CONFIG_LIBUKBOOT_NOALLOC
+        /* initialize memory allocator */
+        ukplat_memregion_foreach(&md, UKPLAT_MEMRF_ALLOCATABLE) {
+
+            /* try to use memory region to initialize allocator
+            * if it fails, we will try  again with the next region.
+            * As soon we have an allocator, we simply add every
+            * subsequent region to it
+            */
+            if (!a) {
+    #if CONFIG_LIBUKBOOT_INITBBUDDY
+                a = uk_allocbbuddy_init(md.base, md.len);
+                // Other implementations...
+    #endif
+            } else {
+                uk_alloc_addmem(a, md.base, md.len);
+            }
+        }
+        rc = ukplat_memallocator_set(a);
+    #endif
+
+    #if CONFIG_LIBUKALLOC
+        rc = ukplat_irq_init(a);
+    #endif
+
+        ukplat_time_init();
+
+    #if CONFIG_LIBUKSCHED
+        /* Init scheduler. */
+        s = uk_sched_default_init(a);
+    #endif
+
+        tma.argc = argc - kern_args;
+        tma.argv = &argv[kern_args];
+
+    #if CONFIG_LIBUKSCHED
+        main_thread = uk_thread_create("main", main_thread_func, &tma);
+        uk_sched_start(s);
+    #else
+        /* Enable interrupts before starting the application */
+        ukplat_lcpu_enable_irq();
+        main_thread_func(&tma);
+    #endif
+    }
 
 +++++++++
 uksched
 +++++++++
 
+_________
+uk_thread
+_________
+
 .. code-block:: c
     :linenos:
 
+    struct uk_thread {
+        const char *name;
+        void *stack;
+        void *tls;
+        void *ctx;
+        UK_TAILQ_ENTRY(struct uk_thread) thread_list;
+        uint32_t flags;
+        __snsec wakeup_time;
+        bool detached;
+        struct uk_waitq waiting_threads;
+        struct uk_sched *sched;
+        void (*entry)(void *);
+        void *arg;
+        void *prv;
+    #ifdef CONFIG_LIBNEWLIBC
+        struct _reent reent;
+    #endif
+    #if CONFIG_LIBUKSIGNAL
+        /* TODO: Move to `TLS` and define within uksignal */
+        struct uk_thread_sig signals_container;
+    #endif
+    };
 
-++++++++
-ukboot
-++++++++
+``struct thread`` 结构类型与传统定义方式类似，内部含有上下文指针、栈指针、状态位等。
+
+以 ``uk_thread_init`` 函数为例，可以看出 **Unikraft** 模块解耦的特点。通过调用注册的内存管理模块中的函数来完成线程上下文的创建。
+此外，线程对外提供了初始化接口 ``struct uk_thread_inittab_entry::init``，可以进一步自定义初始化方法。
+
+.. code-block:: c
+    :linenos:
+
+    int uk_thread_init(
+        struct uk_thread *thread, 
+        struct ukplat_ctx_callbacks *cbs, 
+        struct uk_alloc *allocator,
+		const char *name,
+        void *stack,
+        void *tls,
+		void (*function)(void *),
+        void *arg) {
+        // ...
+        /* Allocate thread context */
+        ctx = uk_zalloc(allocator, ukplat_thread_ctx_size(cbs));
+        if (!ctx) {
+            ret = -1;
+            goto err_out;
+        }
+        // ...
+        /* Iterate over registered thread initialization functions */
+        uk_thread_inittab_foreach(itr) {
+            ret = (itr->init)(thread);
+            if (ret < 0)
+                goto err_fini;
+        }
+        // ...
+        err_fini:
+            /* Run fini functions starting from one level before the failed one
+            * because we expect that the failed one cleaned up.
+            */
+            uk_thread_inittab_foreach_reverse2(itr, itr - 2) {
+                (itr->fini)(thread);
+            }
+            uk_free(allocator, thread->ctx);
+        // ...
+    }
+
+_________
+uk_sched
+_________
+
+.. code-block:: c
+    :linenos:
+
+    struct uk_sched {
+        uk_sched_yield_func_t yield;
+        
+        // ...
+
+        /* internal */
+        bool threads_started;
+        struct uk_thread idle;
+        struct uk_thread_list exited_threads;
+        struct ukplat_ctx_callbacks plat_ctx_cbs;
+        // bind to memory allocator
+        struct uk_alloc *allocator;
+        struct uk_sched *next;
+        void *prv;
+    };
+
+ukboot 的入口中，对调度器进行了初始化。在调用 ``uk_thread_create`` 后创建主线程，并调用 ``uk_sched_start`` 开始执行线程。
+这个主线程绑定到用户自定义的 ``main`` 函数，默认采用 Weak Symbol 的方式，如果没有实现就直接 panic。
+
+
+.. code-block:: c
+    :linenos:
+    
+    // defined in lib/ukboot/boot.c
+    #if CONFIG_LIBUKSCHED
+        main_thread = uk_thread_create("main", main_thread_func, &tma);
+        uk_sched_start(s);
+    #else
+
+    // defined in lib/uksched/sched.h
+    /* Set s as the default scheduler. */
+    int uk_sched_set_default(struct uk_sched *s);
+    // Other APIs...
+
+从 ``uksched`` 的整体设计来看， ``uksched`` 依赖于 ``ukalloc`` 的实现（创建 uk_thread 和 uk_sched 实例等），需要调用内存管理的接口。
+所以图中的两个部分严格上来讲应该存在依赖关系（涉及到未来可能引入的 Fault Isolation 问题）。
+
++++++++++
+uklock
++++++++++
+
+.. TODO
+
+=========
+总结
+=========
+

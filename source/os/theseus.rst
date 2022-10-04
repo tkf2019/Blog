@@ -2,18 +2,6 @@
 Theseus
 -----------
 
-.. admonition:: Links
-
-    https://www.usenix.org/conference/osdi20/presentation/narayanan-vikram
-
-    https://github.com/mars-research/redleaf
-
-    https://www.usenix.org/conference/osdi20/presentation/boos
-
-    https://github.com/theseus-os/Theseus
-
-    https://www.theseus-os.com/Theseus/doc/___Theseus_Crates___/index.html
-
 Safety over all alse (convenience, performance)
 
 Single address space (SAS), Single privilege level (SPL)

@@ -228,11 +228,6 @@
         <article role="main">
           <div class="section" id="unikraft">
 <h1>Unikraft<a class="headerlink" href="#unikraft" title="永久链接至标题">#</a></h1>
-<blockquote>
-<div><p><a class="reference external" href="https://unikraft.org/docs/getting-started/">https://unikraft.org/docs/getting-started/</a></p>
-<p><a class="reference external" href="https://asplos22.unikraft.org/">https://asplos22.unikraft.org/</a></p>
-<p><a class="reference external" href="https://github.com/unikraft/unikraft">https://github.com/unikraft/unikraft</a></p>
-</div></blockquote>
 <div class="section" id="id1">
 <h2>概述<a class="headerlink" href="#id1" title="永久链接至标题">#</a></h2>
 <div class="admonition-what-is-unikernel admonition">
@@ -518,12 +513,19 @@
 所以图中的两个部分严格上来讲应该存在依赖关系（涉及到未来可能引入的 Fault Isolation 问题）。</p>
 </div>
 </div>
-<div class="section" id="uklock">
-<h3>uklock<a class="headerlink" href="#uklock" title="永久链接至标题">#</a></h3>
-</div>
 </div>
 <div class="section" id="id5">
 <h2>总结<a class="headerlink" href="#id5" title="永久链接至标题">#</a></h2>
+<p>Unikraft 采用 Unikernel 的架构，避开了特权级切换和地址空间切换等带来的开销，在一定程度上提高了性能。
+此外， Unikraft 在编译期对应用进行定制化构建，通过大量的编译选项和脚本工具来为应用选择依赖库。
+这个方法虽然能减小镜像规模，但如果未来想要支持更多大型项目，代码内加入大量的编译选项会使项目变得臃肿不堪。
+Unikraft 不提供容错机制，即应用的崩溃是不可恢复的，更底层的安全性要依赖于 Hypervisor。
+对于很多内核来说，性能和错误隔离机制二者是相冲突的，具体的取舍要取决于内核的设计目标（运行时环境、支持的应用等）。
+对于大多数 Unikernel 来说，由于不存在地址空间的区分，进程退化为了线程，或者说二者之间的区别不明显。
+对于传统的宏内核来说，进程间存在父子关系的概念，应用会采用类似 spawn 和 fork 的系统调用。
+fork 采用 COW 的机制，而 spawn 则是全部复制一份（具体实现参考 Linux 官方文档）。
+地址空间的隔离是操作系统配合硬件地址翻译机制实现的一种隔离方法，
+多道程序下，TLB 缺失的概率也会比较高，所以用户和内核的切换的开销有一部分来自于地址翻译（一次 TLB 缺失至少要多访问内存一次）。所以关键问题在于，能否设计单一地址空间来模拟传统的多地址空间隔离。</p>
 </div>
 </div>
 
@@ -595,7 +597,6 @@
 <li><a class="reference internal" href="#uk-sched">uk_sched</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#uklock">uklock</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#id5">总结</a></li>

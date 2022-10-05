@@ -6,5 +6,5 @@
    :maxdepth: 2
    :hidden:
 
-   os/index
+   papers/index
    others/index

@@ -7,7 +7,4 @@
    :hidden:
 
    os/index
-   rust/index
-   ipc/index
-   economics/index
    others/index

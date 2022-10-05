@@ -10,3 +10,5 @@
     loongson
     wifi
     s7
+    rust
+    linux

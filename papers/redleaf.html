@@ -2,10 +2,10 @@
 <html class="no-js" lang="zh_CN">
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <meta name="color-scheme" content="light dark"><link rel="index" title="索引" href="../genindex.html" /><link rel="search" title="搜索" href="../search.html" /><link rel="next" title="学习 Rust" href="rust.html" /><link rel="prev" title="Microkernel" href="../os/micro.html" />
+    <meta name="color-scheme" content="light dark"><link rel="index" title="索引" href="../genindex.html" /><link rel="search" title="搜索" href="../search.html" />
 
     <meta name="generator" content="sphinx-4.3.2, furo 2022.06.21"/>
-        <title>学习 Rust - Notes</title>
+        <title>Redleaf - Notes</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?digest=40978830699223671f4072448e654b5958f38b89" />
     <link rel="stylesheet" type="text/css" href="../_static/design-style.4045f2051d55cab465a707391d5b2007.min.css" />
@@ -136,7 +136,7 @@
           <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
         </button>
       </div>
-      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
         <div class="visually-hidden">Toggle table of contents sidebar</div>
         <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
       </label>
@@ -156,32 +156,13 @@
   <input type="hidden" name="area" value="default">
 </form>
 <div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
-  <ul class="current">
-<li class="toctree-l1 has-children"><a class="reference internal" href="../os/index.html">OSes</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
-<li class="toctree-l2"><a class="reference internal" href="../os/theseus.html">Theseus</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../os/unikraft.html">Unikraft</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../os/redleaf.html">Redleaf</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../os/micro.html">Microkernel</a></li>
-</ul>
-</li>
-<li class="toctree-l1 current has-children current-page"><a class="current reference internal" href="#">学习 Rust</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
-<li class="toctree-l2"><a class="reference internal" href="rust.html">学习 Rust</a></li>
-</ul>
-</li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../ipc/index.html">IPC</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
-<li class="toctree-l2"><a class="reference internal" href="../ipc/IPC.html">SkyBridge and XPC</a></li>
-</ul>
-</li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../economics/index.html">经济与金融</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
-<li class="toctree-l2"><a class="reference internal" href="../economics/corporate.html">Corporate Finance</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../economics/engineering.html">Financial Engineering</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../economics/political.html">Political Economy</a></li>
-</ul>
-</li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../others/index.html">其他</a><input class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+  <ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../others/index.html">其他</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../others/loongson.html">龙芯杯比赛回顾</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../others/wifi.html">破解 WIFI</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../others/s7.html">启动 S7 核</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../others/rust.html">学习 Rust</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../others/linux.html">Linux 学习笔记</a></li>
 </ul>
 </li>
 </ul>
@@ -204,7 +185,7 @@
         </a>
         <div class="content-icon-container">
           <div class="edit-this-page">
-  <a class="muted-link" href="https://github.com/tkf2019/Blog/edit/main/source/rust/index.rst" title="Edit this page">
+  <a class="muted-link" href="https://github.com/tkf2019/Blog/edit/main/source/papers/redleaf.rst" title="Edit this page">
     <svg aria-hidden="true" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
       <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
       <path d="M4 20h4l10.5 -10.5a1.5 1.5 0 0 0 -4 -4l-10.5 10.5v4" />
@@ -220,15 +201,28 @@
               <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
             </button>
           </div>
-          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
             <div class="visually-hidden">Toggle table of contents sidebar</div>
             <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
           </label>
         </div>
         <article role="main">
-          <div class="section" id="rust">
-<h1>学习 Rust<a class="headerlink" href="#rust" title="永久链接至标题">#</a></h1>
-<div class="toctree-wrapper compound">
+          <div class="section" id="redleaf">
+<h1>Redleaf<a class="headerlink" href="#redleaf" title="永久链接至标题">#</a></h1>
+<div class="section" id="communication">
+<h2>Communication<a class="headerlink" href="#communication" title="永久链接至标题">#</a></h2>
+<p>核心类型 <code class="docutils literal notranslate"><span class="pre">RRef&lt;T&gt;</span></code> (Remote reference)</p>
+<div class="highlight-rust notranslate"><div class="highlight"><pre><span></span><span class="k">pub</span><span class="w"> </span><span class="k">struct</span> <span class="nc">RRef</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span><span class="w"> </span><span class="k">where</span><span class="w"> </span><span class="n">T</span>: <span class="o">&#39;</span><span class="nb">static</span> <span class="o">+</span><span class="w"> </span><span class="n">RRefable</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="c1">// 仅在 mutable borrow 时变更所有者</span>
+<span class="w">    </span><span class="n">domain_id_pointer</span>: <span class="o">*</span><span class="k">mut</span><span class="w"> </span><span class="kt">u64</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="c1">// 记录 immutable borrow 的数量</span>
+<span class="w">    </span><span class="k">pub</span><span class="p">(</span><span class="k">crate</span><span class="p">)</span><span class="w"> </span><span class="n">borrow_count_pointer</span>: <span class="o">*</span><span class="k">mut</span><span class="w"> </span><span class="kt">u64</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="k">pub</span><span class="p">(</span><span class="k">crate</span><span class="p">)</span><span class="w"> </span><span class="n">value_pointer</span>: <span class="o">*</span><span class="k">mut</span><span class="w"> </span><span class="n">T</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+<p>利用 Rust 所有权机制，通过 shared heap 传递数据。在确保隔离的条件下，不引入拷贝带来的开销。Domains 之间通过 <code class="docutils literal notranslate"><span class="pre">RRef&lt;T&gt;</span></code> 类型获得数据的所有权（Redleaf 是单一地址空间的）。</p>
+<p>shared heap 上分配的 object 只能通过 <code class="docutils literal notranslate"><span class="pre">RRef&lt;T&gt;</span></code> 访问 shared heap 上的其他 object，这个规则通过 IDL Compiler 的类型检查来确保（称之为 Exchangable Types）。</p>
 </div>
 </div>
 
@@ -237,26 +231,8 @@
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="rust.html">
-              <div class="page-info">
-                <div class="context">
-                  <span>Next</span>
-                </div>
-                <div class="title">学习 Rust</div>
-              </div>
-              <svg><use href="#svg-arrow-right"></use></svg>
-            </a>
-          <a class="prev-page" href="../os/micro.html">
-              <svg><use href="#svg-arrow-right"></use></svg>
-              <div class="page-info">
-                <div class="context">
-                  <span>Previous</span>
-                </div>
-                
-                <div class="title">Microkernel</div>
-                
-              </div>
-            </a>
+          
+          
         </div>
         <div class="bottom-of-page">
           <div class="left-details">
@@ -277,8 +253,27 @@
         
       </footer>
     </div>
-    <aside class="toc-drawer no-toc">
+    <aside class="toc-drawer">
       
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            目录
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">Redleaf</a><ul>
+<li><a class="reference internal" href="#communication">Communication</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
       
       
     </aside>

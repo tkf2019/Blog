@@ -2,10 +2,10 @@
 <html class="no-js" lang="zh_CN">
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <meta name="color-scheme" content="light dark"><link rel="index" title="索引" href="../genindex.html" /><link rel="search" title="搜索" href="../search.html" /><link rel="next" title="经济与金融" href="../economics/index.html" /><link rel="prev" title="IPC" href="index.html" />
+    <meta name="color-scheme" content="light dark"><link rel="index" title="索引" href="../genindex.html" /><link rel="search" title="搜索" href="../search.html" /><link rel="prev" title="学习 Rust" href="rust.html" />
 
     <meta name="generator" content="sphinx-4.3.2, furo 2022.06.21"/>
-        <title>SkyBridge and XPC - Notes</title>
+        <title>Linux 学习笔记 - Notes</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?digest=40978830699223671f4072448e654b5958f38b89" />
     <link rel="stylesheet" type="text/css" href="../_static/design-style.4045f2051d55cab465a707391d5b2007.min.css" />
@@ -157,31 +157,12 @@
 </form>
 <div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
   <ul class="current">
-<li class="toctree-l1 has-children"><a class="reference internal" href="../os/index.html">OSes</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
-<li class="toctree-l2"><a class="reference internal" href="../os/theseus.html">Theseus</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../os/unikraft.html">Unikraft</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../os/redleaf.html">Redleaf</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../os/micro.html">Microkernel</a></li>
-</ul>
-</li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../rust/index.html">学习 Rust</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
-<li class="toctree-l2"><a class="reference internal" href="../rust/rust.html">学习 Rust</a></li>
-</ul>
-</li>
-<li class="toctree-l1 current has-children"><a class="reference internal" href="index.html">IPC</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
-<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">SkyBridge and XPC</a></li>
-</ul>
-</li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../economics/index.html">经济与金融</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
-<li class="toctree-l2"><a class="reference internal" href="../economics/corporate.html">Corporate Finance</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../economics/engineering.html">Financial Engineering</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../economics/political.html">Political Economy</a></li>
-</ul>
-</li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../others/index.html">其他</a><input class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
-<li class="toctree-l2"><a class="reference internal" href="../others/loongson.html">龙芯杯比赛回顾</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../others/wifi.html">破解 WIFI</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../others/s7.html">启动 S7 核</a></li>
+<li class="toctree-l1 current has-children"><a class="reference internal" href="index.html">其他</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="loongson.html">龙芯杯比赛回顾</a></li>
+<li class="toctree-l2"><a class="reference internal" href="wifi.html">破解 WIFI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="s7.html">启动 S7 核</a></li>
+<li class="toctree-l2"><a class="reference internal" href="rust.html">学习 Rust</a></li>
+<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">Linux 学习笔记</a></li>
 </ul>
 </li>
 </ul>
@@ -204,7 +185,7 @@
         </a>
         <div class="content-icon-container">
           <div class="edit-this-page">
-  <a class="muted-link" href="https://github.com/tkf2019/Blog/edit/main/source/ipc/IPC.md" title="Edit this page">
+  <a class="muted-link" href="https://github.com/tkf2019/Blog/edit/main/source/others/linux.rst" title="Edit this page">
     <svg aria-hidden="true" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
       <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
       <path d="M4 20h4l10.5 -10.5a1.5 1.5 0 0 0 -4 -4l-10.5 10.5v4" />
@@ -226,126 +207,46 @@
           </label>
         </div>
         <article role="main">
-          <div class="section" id="skybridge-and-xpc">
-<h1>SkyBridge and XPC<a class="headerlink" href="#skybridge-and-xpc" title="永久链接至标题">#</a></h1>
-<div class="section" id="id1">
-<h2>背景<a class="headerlink" href="#id1" title="永久链接至标题">#</a></h2>
+          <div class="section" id="linux">
+<h1>Linux 学习笔记<a class="headerlink" href="#linux" title="永久链接至标题">#</a></h1>
+<div class="section" id="posix-apis">
+<h2>POSIX APIs<a class="headerlink" href="#posix-apis" title="永久链接至标题">#</a></h2>
+<div class="section" id="fork">
+<h3>fork<a class="headerlink" href="#fork" title="永久链接至标题">#</a></h3>
+<p>创建一个新的进程，调用者称为父进程，新创建的进程称为子进程。两个进程运行在不同的地址空间，内存读写、文件映射等操作不会互相干扰。除了以下几点外，子进程会在创建时复制父进程的状态：</p>
 <ul class="simple">
-<li><p>陈老师推荐的有关微内核的两篇论文，一篇讲软件层面的优化，一篇讲硬件层面的优化</p></li>
-<li><p>两篇论文都是上交陈海波团队发表的，微内核可能会应用在鸿蒙OS中</p></li>
+<li><p>分配新的 PID，不会于现有的 PGID 冲突</p></li>
+<li><p>父进程 PID 与调用者的 PID 一致</p></li>
+<li><p>不会继承父进程的内存锁（mlock）</p></li>
+<li><p>进程资源占用情况（getrusage），CPU 时间会清零（times）</p></li>
+<li><p>等待处理的信号集合会清空 （sigpending）</p></li>
+<li><p>不会继承 semaphore adjustments （不太理解）</p></li>
+<li><p>不会继承 process-assosiated record locks</p></li>
+<li><p>不会继承计时器（setitimer、alarm、timer_create）</p></li>
+<li><p>不会继承异步 IO 的上下文和未完成的请求</p></li>
 </ul>
 </div>
-<div class="section" id="skybridge">
-<h2>SkyBridge<a class="headerlink" href="#skybridge" title="永久链接至标题">#</a></h2>
-<ul class="simple">
-<li><p>论文多次提到熔断漏洞，近几年受到广泛关注和研究的安全性问题；</p></li>
-<li><p>微内核最关键的机制是核间通信，在用户层实现很多系统级应用，内核只保留最基本的功能；传统的进程通信依赖于内核进程切换，带来了巨大的开销</p></li>
-<li><p>seL4的fastpath IPC</p></li>
-<li><p>SkyBridge 提出了一些应用 VMFUNC 的方法：</p>
-<ul>
-<li><p>位于microkernel下方的Rootkernel，使用巨页避免microkernel频繁触发缺页中断；采用Subkernel和Rootkernel两级分管</p></li>
-<li><p>SkyBridge巧妙地将Client的CR3映射为对应Server的CR3，Client通过EPTP list来指向不同Server的EPT</p></li>
-<li><p>安全机制在kernel处理IPC，SkyBridge检查process的二进制文件避免非法VMFUNC，通过查表来验证IPC请求</p></li>
-</ul>
-</li>
-<li><p>Rootkernel:</p>
-<ul>
-<li><p>从Subkernel启动，通过VMCALL与Subkernel通信</p></li>
-<li><p>确保大多数VM行为不触发VM exit，VM exits包含三类：</p>
-<ul>
-<li><p>特权指令：不触发VM exits</p></li>
-<li><p>硬件中断：直接将中断交给microkernel处理</p></li>
-<li><p>EPT异常（miss，invalid）：Subkernel到Rootkernel采用1GB的页，SkyBridge仅为Rootkernel保留100MB的物理空间，减少TLB miss等问题出现的次数和开销</p></li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>Subkernel：</p>
-<ul>
-<li><p>server注册：将trampoline code page和stack pages映射到server的虚拟地址空间，为server分配ID</p></li>
-<li><p>client注册：绑定到指定ID的server，同样进行映射；EPT处理，将client的CR3映射到server的CR3；将所有和server有关的EPTP添加到client的EPTP list</p></li>
-<li><p>跨虚拟地址空间执行时陷入内核的问题：Subkernel可以记录进程的信息来判断</p></li>
-</ul>
-</li>
-<li><p>Rewriting Illegal VMFUNC:</p>
-<ul>
-<li><p>替换VMFUNC指令，若只有一条指令，则直接替换，若需要执行多条指令，则替换为跳转指令，跳转到待执行代码再返回</p></li>
-<li><p>（具体策略和x86的指令编码有关，暂时还没有深入学习x86体系结构）</p></li>
-</ul>
-</li>
-</ul>
+<div class="section" id="fcntl">
+<h3>fcntl<a class="headerlink" href="#fcntl" title="永久链接至标题">#</a></h3>
+<p><a class="reference external" href="https://saltigavv.net/articles/file-locks/">这篇博客</a> 详细地介绍了 Linux 中的文件锁。</p>
 </div>
-<div class="section" id="xpc">
-<h2>XPC<a class="headerlink" href="#xpc" title="永久链接至标题">#</a></h2>
-<ul class="simple">
-<li><p>硬件层面优化IPC性能的实现，我理解为新的进程管理方法，通过引入更复杂的硬件设计来适应microkernel对IPC的高度依赖，有硬件操作系统的趋势？</p></li>
-<li><p>存在的问题：</p>
-<ul>
-<li><p>解决不了多核跨进程通信问题</p></li>
-<li><p>设计较为复杂，但安全方面可能比较薄弱，论文中只采用了控制位和预设的物理空间来进行安全检查（可能通过硬件漏洞直接窃听内存中的通信数据</p></li>
-</ul>
-</li>
-<li><p>实现高性能IPC的两个重要层面：</p>
-<ul>
-<li><p>如何摆脱kernel带来的开销：</p>
-<ul>
-<li><p>陷入和恢复</p></li>
-<li><p>IPC 相关执行逻辑</p></li>
-<li><p>进程上下文切换</p></li>
-</ul>
-</li>
-<li><p>如何实现无拷贝通信</p></li>
-</ul>
-</li>
-<li><p>设计目标：</p>
-<ul>
-<li><p>无陷入进程切换</p></li>
-<li><p>无拷贝进程通信</p></li>
-<li><p>适应现有内核</p></li>
-<li><p>尽可能简化硬件设计</p></li>
-</ul>
-</li>
-<li><p>基本组成：</p>
-<ul>
-<li><p>x-entry:区分ID，访问权限控制xcall-cap</p></li>
-<li><p>xcall和xret指令：快速的进程切换</p></li>
-<li><p>地址映射策略relay-seg：使用寄存器保存message在内存中的基址和范围；进程间原子性拥有message控制权，避免TOCTOU攻击</p></li>
-<li><p>migrating thread model: ？</p></li>
-</ul>
-</li>
-<li><p>Zircon通过异步IPC模拟文件系统接口的同步语义带来了高昂的开销</p></li>
-<li><p>seL4的IPC处理机制，检查以下条件来判断是否采用slowpath还是fastpath：</p>
-<ul>
-<li><p>通信双方有不同的特权级别</p></li>
-<li><p>通信双方位于不同的核上</p></li>
-<li><p>message大小是否超出寄存器大小但未超过buffer大小</p></li>
-<li><p>这些机制可以通过硬件并行化来降低延迟</p></li>
-</ul>
-</li>
-<li><p>seL4的IPC通信机制，根据消息长度采用三种策略：寄存器、IPC buffer、shared memory；并不安全，多线程可以篡改数据？</p></li>
-<li><p>XPC engine：</p></li>
-</ul>
-<p><img alt="xpc.png" src="../_images/xpc.png" /></p>
-<ul class="simple">
-<li><p>xcall #reg:</p>
-<ul>
-<li><p>访问bitmap检查xcall-cap</p></li>
-<li><p>访问x-entry-table并检查valid标志位</p></li>
-<li><p>将恢复需要的信息推入link stack中</p></li>
-<li><p>指向callee页表，pc跳转到目标进程entry point，保存caller的信息</p></li>
-</ul>
-</li>
-<li><p>xret：</p>
-<ul>
-<li><p>将link stack的栈顶弹出，检查valid标志位，并根据信息返回caller进程（嵌套？）</p></li>
-</ul>
-</li>
-<li><p>xcall-cap：xcall-cap-reg保存bitmap在内存中的基址</p></li>
-<li><p>link stack：可以非阻塞方式写stack</p></li>
-<li><p>cached x-entries：利用prefetch，进程可提前将x-entry加载到cache</p></li>
-<li><p>swapseg #reg: reg-seg和seg-list中的一项交换内容：</p></li>
-</ul>
-<p><img alt="relay-seg-chain.png" src="../_images/relay-seg-chain.png" /></p>
+<div class="section" id="execve">
+<h3>execve<a class="headerlink" href="#execve" title="永久链接至标题">#</a></h3>
+</div>
+<div class="section" id="getrusage">
+<h3>getrusage<a class="headerlink" href="#getrusage" title="永久链接至标题">#</a></h3>
+<p>获取当前进程、当前进程的全部子进程或当前线程的资源占用情况。具体信息直接参考 <code class="docutils literal notranslate"><span class="pre">usage</span></code> 结构体。</p>
+</div>
+<div class="section" id="mlock">
+<h3>mlock 系列<a class="headerlink" href="#mlock" title="永久链接至标题">#</a></h3>
+<p>对某个范围内连续的页进行上锁，确保该页不会被系统换出。主要应用场景为实时算法和高安全性数据处理。</p>
+<p>实时算法需要统计任务调度等性能瓶颈带来的开销，而换页则是具有很高不确定性的机制。
+实时算法测试可以将全部页面算法，同时使用一些 dummy 写操作来避免页的强制缺失。注意 fork 调用会准备 COW 机制，也就是说这之后的写操作会触发缺页异常，因此应该在对时间精度要求较高的场景下避免使用 fork。</p>
+<p>安全性需求则是防止用户的隐私信息在处理过程中被换入外存，从而增大泄漏的风险。但是一些电脑会在挂起时将内存拷贝到外存，这一机制无法通过 mlock 来避免。</p>
+</div>
+</div>
+<div class="section" id="io-uring">
+<h2>io_uring<a class="headerlink" href="#io-uring" title="永久链接至标题">#</a></h2>
 </div>
 </div>
 
@@ -354,23 +255,15 @@
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="../economics/index.html">
-              <div class="page-info">
-                <div class="context">
-                  <span>Next</span>
-                </div>
-                <div class="title">经济与金融</div>
-              </div>
-              <svg><use href="#svg-arrow-right"></use></svg>
-            </a>
-          <a class="prev-page" href="index.html">
+          
+          <a class="prev-page" href="rust.html">
               <svg><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">IPC</div>
+                <div class="title">学习 Rust</div>
                 
               </div>
             </a>
@@ -406,10 +299,16 @@
         <div class="toc-tree-container">
           <div class="toc-tree">
             <ul>
-<li><a class="reference internal" href="#">SkyBridge and XPC</a><ul>
-<li><a class="reference internal" href="#id1">背景</a></li>
-<li><a class="reference internal" href="#skybridge">SkyBridge</a></li>
-<li><a class="reference internal" href="#xpc">XPC</a></li>
+<li><a class="reference internal" href="#">Linux 学习笔记</a><ul>
+<li><a class="reference internal" href="#posix-apis">POSIX APIs</a><ul>
+<li><a class="reference internal" href="#fork">fork</a></li>
+<li><a class="reference internal" href="#fcntl">fcntl</a></li>
+<li><a class="reference internal" href="#execve">execve</a></li>
+<li><a class="reference internal" href="#getrusage">getrusage</a></li>
+<li><a class="reference internal" href="#mlock">mlock 系列</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#io-uring">io_uring</a></li>
 </ul>
 </li>
 </ul>

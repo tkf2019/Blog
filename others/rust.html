@@ -2,10 +2,10 @@
 <html class="no-js" lang="zh_CN">
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <meta name="color-scheme" content="light dark"><link rel="index" title="索引" href="../genindex.html" /><link rel="search" title="搜索" href="../search.html" /><link rel="next" title="Political Economy" href="political.html" /><link rel="prev" title="Corporate Finance" href="corporate.html" />
+    <meta name="color-scheme" content="light dark"><link rel="index" title="索引" href="../genindex.html" /><link rel="search" title="搜索" href="../search.html" /><link rel="next" title="Linux 学习笔记" href="linux.html" /><link rel="prev" title="启动 S7 核" href="s7.html" />
 
     <meta name="generator" content="sphinx-4.3.2, furo 2022.06.21"/>
-        <title>Financial Engineering - Notes</title>
+        <title>学习 Rust - Notes</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?digest=40978830699223671f4072448e654b5958f38b89" />
     <link rel="stylesheet" type="text/css" href="../_static/design-style.4045f2051d55cab465a707391d5b2007.min.css" />
@@ -136,7 +136,7 @@
           <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
         </button>
       </div>
-      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
         <div class="visually-hidden">Toggle table of contents sidebar</div>
         <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
       </label>
@@ -157,31 +157,12 @@
 </form>
 <div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
   <ul class="current">
-<li class="toctree-l1 has-children"><a class="reference internal" href="../os/index.html">OSes</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
-<li class="toctree-l2"><a class="reference internal" href="../os/theseus.html">Theseus</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../os/unikraft.html">Unikraft</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../os/redleaf.html">Redleaf</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../os/micro.html">Microkernel</a></li>
-</ul>
-</li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../rust/index.html">学习 Rust</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
-<li class="toctree-l2"><a class="reference internal" href="../rust/rust.html">学习 Rust</a></li>
-</ul>
-</li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../ipc/index.html">IPC</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
-<li class="toctree-l2"><a class="reference internal" href="../ipc/IPC.html">SkyBridge and XPC</a></li>
-</ul>
-</li>
-<li class="toctree-l1 current has-children"><a class="reference internal" href="index.html">经济与金融</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="corporate.html">Corporate Finance</a></li>
-<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">Financial Engineering</a></li>
-<li class="toctree-l2"><a class="reference internal" href="political.html">Political Economy</a></li>
-</ul>
-</li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../others/index.html">其他</a><input class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
-<li class="toctree-l2"><a class="reference internal" href="../others/loongson.html">龙芯杯比赛回顾</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../others/wifi.html">破解 WIFI</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../others/s7.html">启动 S7 核</a></li>
+<li class="toctree-l1 current has-children"><a class="reference internal" href="index.html">其他</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="loongson.html">龙芯杯比赛回顾</a></li>
+<li class="toctree-l2"><a class="reference internal" href="wifi.html">破解 WIFI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="s7.html">启动 S7 核</a></li>
+<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">学习 Rust</a></li>
+<li class="toctree-l2"><a class="reference internal" href="linux.html">Linux 学习笔记</a></li>
 </ul>
 </li>
 </ul>
@@ -204,7 +185,7 @@
         </a>
         <div class="content-icon-container">
           <div class="edit-this-page">
-  <a class="muted-link" href="https://github.com/tkf2019/Blog/edit/main/source/economics/engineering.md" title="Edit this page">
+  <a class="muted-link" href="https://github.com/tkf2019/Blog/edit/main/source/others/rust.rst" title="Edit this page">
     <svg aria-hidden="true" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
       <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
       <path d="M4 20h4l10.5 -10.5a1.5 1.5 0 0 0 -4 -4l-10.5 10.5v4" />
@@ -220,46 +201,50 @@
               <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
             </button>
           </div>
-          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
             <div class="visually-hidden">Toggle table of contents sidebar</div>
             <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
           </label>
         </div>
         <article role="main">
-          <div class="section" id="financial-engineering">
-<h1>Financial Engineering<a class="headerlink" href="#financial-engineering" title="永久链接至标题">#</a></h1>
-<div class="section" id="id1">
-<h2>无套利均衡<a class="headerlink" href="#id1" title="永久链接至标题">#</a></h2>
-<div class="section" id="mm">
-<h3>MM 理论<a class="headerlink" href="#mm" title="永久链接至标题">#</a></h3>
-<p><strong>无摩擦市场假设</strong>：</p>
+          <div class="section" id="rust">
+<h1>学习 Rust<a class="headerlink" href="#rust" title="永久链接至标题">#</a></h1>
+<p><code class="docutils literal notranslate"><span class="pre">static</span></code></p>
 <ul class="simple">
-<li><p>企业不需要缴纳所得税</p></li>
-<li><p>无交易成本</p></li>
-<li><p>不存在信息不对称</p></li>
-<li><p>企业的利益相关方可以无成本地解决利益冲突</p></li>
+<li><p>全局变量不会被内联，整个程序中，全局变量只有一个实例，所有的引用会指向相同的地址</p></li>
+<li><p>可变全局变量可能出现多个线程同时访问的情况，因而引发内存不安全的问题，所以对于可变全局变量的访问和修改代码必须在 <code class="docutils literal notranslate"><span class="pre">unsafe</span></code> 块中定义</p></li>
+<li><p>存储在全局变量中的值必须实现 <code class="docutils literal notranslate"><span class="pre">trait</span> <span class="pre">Sync</span></code></p></li>
+<li><p>全局变量需要在编译期确定好内存布局</p></li>
+<li><p>如何定义 <code class="docutils literal notranslate"><span class="pre">static</span></code> 变量，用于全局访问，且运行时才对这一变量进行初始化？最直观的做法是使用 <code class="docutils literal notranslate"><span class="pre">lazy_static</span></code>，查看 <code class="docutils literal notranslate"><span class="pre">lazy_static</span></code> 内部源码发现，可以使用 <code class="docutils literal notranslate"><span class="pre">spin::Once</span></code> 结构对变量进行封装，在运行时调用 <code class="docutils literal notranslate"><span class="pre">call_once</span></code> 函数进行初始化。传入参数需要返回初始化后的结果。</p></li>
 </ul>
-<p><strong>负债无风险假设</strong></p>
-<p><strong>第一命题</strong>：在以上假设条件下，企业价值与其资本结构无关</p>
-<p><strong>WACC</strong>：考虑资本结构中每个成分的相对权重并体现出该公司的新资产的预期成本</p>
-<p>$$
-WACC = \frac{E}{D + E}\cdot r_e + \frac{D}{D + E}\cdot r_f
-$$</p>
+<div class="highlight-rust notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="w">  </span><span class="k">fn</span> <span class="nf">call_once</span><span class="o">&lt;&#39;</span><span class="na">a</span><span class="p">,</span><span class="w"> </span><span class="n">F</span><span class="o">&gt;</span><span class="p">(</span><span class="o">&amp;&#39;</span><span class="na">a</span><span class="w"> </span><span class="bp">self</span><span class="p">,</span><span class="w"> </span><span class="n">builder</span>: <span class="nc">F</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="kp">&amp;</span><span class="o">&#39;</span><span class="na">a</span> <span class="nc">T</span><span class="w"></span>
+<span class="linenos">2</span><span class="w">  </span><span class="k">where</span><span class="w"></span>
+<span class="linenos">3</span><span class="w">      </span><span class="n">F</span>: <span class="nb">FnOnce</span><span class="p">()</span><span class="w"> </span>-&gt; <span class="nc">T</span><span class="p">,</span><span class="w"></span>
+</pre></div>
+</div>
+<hr class="docutils" />
+<p><code class="docutils literal notranslate"><span class="pre">PathBuf</span></code></p>
 <ul class="simple">
-<li><p>$r_e$：所需的或预期的股本回报率，或者股本成本</p></li>
-<li><p>$r_f$：所需的或预期的贷款回报率，或者债务成本</p></li>
+<li><p>用来方便地进行系统路径的操作（在 Windows 和 Unix 中表现不同）</p></li>
+<li><p>调用 <code class="docutils literal notranslate"><span class="pre">into_os_string().into_string().unwrap().to_str()</span></code> 方法转化为 <code class="docutils literal notranslate"><span class="pre">&amp;str</span></code></p></li>
+<li><p>可将根目录视为栈底，支持 <code class="docutils literal notranslate"><span class="pre">push</span></code> 和 <code class="docutils literal notranslate"><span class="pre">pop</span></code> 操作动态添加路径中的目录</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">set_file_name</span></code>：替换栈顶元素</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">set_extension</span></code>：为栈顶元素增加文件类型</p></li>
 </ul>
-<p><strong>第二命题</strong>：企业的资本成本等于<strong>无负债企业的资本成本</strong>加上 WACC 的<strong>风险溢价</strong>乘以金融杠杆率</p>
-<p>$$
-r_e = WACC + (WACC - r_f)\frac{D}{E}
-$$</p>
-<p>税收情况下的加权平均成本：</p>
-<p>$$
-WACC = r_e \cdot \frac{E}{D + E} + r_f \cdot (1 - T)  \cdot \frac{D}{D + E}= \frac{EBIT \cdot (1 - T)}{D + E}
-$$</p>
-<p><strong>税盾 TAX SHIELD</strong>：税盾数额=债务额x债务利率x企业所得税税率。资本结构中税盾的存在并不会使息税前盈余总额增加。不同的资本结构，只表现为既定的息税前盈余总额怎样在政府、债权人、股东之间分配。债务资本带来的税盾是存在风险的。</p>
-</div>
-</div>
+<hr class="docutils" />
+<p><code class="docutils literal notranslate"><span class="pre">Generics</span></code></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">where</span></code> 更清晰地指定泛型约束，且支持间接指定类型</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">associated</span> <span class="pre">types</span></code> 将类型放入 <code class="docutils literal notranslate"><span class="pre">trait</span></code> 内部作为输出类型，增强了代码可读性</p></li>
+</ul>
+<hr class="docutils" />
+<p><code class="docutils literal notranslate"><span class="pre">Closure</span></code></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">FnOnce</span></code> 闭包只能运行一次，通过 <code class="docutils literal notranslate"><span class="pre">self</span></code> 参数获取对象的所有权，调用后即释放</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">FnMut</span></code> 闭包可运行多次，且可以修改捕获变量的值</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Fn</span></code> 闭包可运行多次，不可以修改捕获变量的值</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">move</span></code> 强制将要捕获的变量的所有权转移到闭包内部的存储区域</p></li>
+</ul>
 </div>
 
         </article>
@@ -267,23 +252,23 @@ $$</p>
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="political.html">
+          <a class="next-page" href="linux.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">Political Economy</div>
+                <div class="title">Linux 学习笔记</div>
               </div>
               <svg><use href="#svg-arrow-right"></use></svg>
             </a>
-          <a class="prev-page" href="corporate.html">
+          <a class="prev-page" href="s7.html">
               <svg><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">Corporate Finance</div>
+                <div class="title">启动 S7 核</div>
                 
               </div>
             </a>
@@ -307,30 +292,8 @@ $$</p>
         
       </footer>
     </div>
-    <aside class="toc-drawer">
+    <aside class="toc-drawer no-toc">
       
-      
-      <div class="toc-sticky toc-scroll">
-        <div class="toc-title-container">
-          <span class="toc-title">
-            目录
-          </span>
-        </div>
-        <div class="toc-tree-container">
-          <div class="toc-tree">
-            <ul>
-<li><a class="reference internal" href="#">Financial Engineering</a><ul>
-<li><a class="reference internal" href="#id1">无套利均衡</a><ul>
-<li><a class="reference internal" href="#mm">MM 理论</a></li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-
-          </div>
-        </div>
-      </div>
       
       
     </aside>

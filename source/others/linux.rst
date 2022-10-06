@@ -28,6 +28,18 @@ fcntl
 
 `这篇博客 <https://saltigavv.net/articles/file-locks/>`_ 详细地介绍了 Linux 中的文件锁。
 
+- BSD locks：
+    - 通过 ``flock`` 创建文件锁
+    - 整个文件上锁
+    - 和 ``File`` 对象关联
+    - 不支持原子的读写锁类型转换
+    - 复制的文件描述符（指向同一个 ``File`` ）不提供同步机制
+- POSIX record locks:
+    - 通过 ``fcntl`` 创建文件锁
+    - 上锁范围精确到字节
+    - 和 ``[inode, pid]`` 对关联
+    - 支持原子的读写锁类型转换
+
 ------------
 execve
 ------------

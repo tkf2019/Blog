@@ -12,3 +12,4 @@
     s7
     rust
     linux
+    uint

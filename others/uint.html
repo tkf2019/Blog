@@ -1,0 +1,589 @@
+<!doctype html>
+<html class="no-js" lang="zh_CN">
+  <head><meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <meta name="color-scheme" content="light dark"><link rel="index" title="索引" href="../genindex.html" /><link rel="search" title="搜索" href="../search.html" /><link rel="prev" title="学习 Linux" href="linux.html" />
+
+    <meta name="generator" content="sphinx-4.3.2, furo 2022.06.21"/>
+        <title>User Interrupt - Notes</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?digest=40978830699223671f4072448e654b5958f38b89" />
+    <link rel="stylesheet" type="text/css" href="../_static/design-style.4045f2051d55cab465a707391d5b2007.min.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #eeffcc;
+  --color-code-foreground: black;
+  --color-brand-primary: #7C4DFF;
+  --color-brand-content: #7C4DFF;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #272822;
+  --color-code-foreground: #f8f8f2;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #272822;
+  --color-code-foreground: #f8f8f2;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-half" viewBox="0 0 24 24">
+    <title>Auto light/dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-shadow">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M13 12h5" />
+      <path d="M13 15h4" />
+      <path d="M13 18h1" />
+      <path d="M13 9h4" />
+      <path d="M13 6h1" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
+<label class="overlay sidebar-overlay" for="__navigation">
+  <div class="visually-hidden">Hide navigation sidebar</div>
+</label>
+<label class="overlay toc-overlay" for="__toc">
+  <div class="visually-hidden">Hide table of contents sidebar</div>
+</label>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <div class="visually-hidden">Toggle site navigation sidebar</div>
+        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../index.html"><div class="brand">Notes</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle">
+          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+          <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <div class="visually-hidden">Toggle table of contents sidebar</div>
+        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../index.html">
+  
+  
+  <span class="sidebar-brand-text">Notes</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../search.html" role="search">
+  <input class="sidebar-search" placeholder=搜索 name="q" aria-label="搜索">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <ul class="current">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../papers/index.html">论文阅读</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../papers/theseus.html">Theseus</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../papers/unikraft.html">Unikraft</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../papers/redleaf.html">Redleaf</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../papers/IPC.html">SkyBridge and XPC</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current has-children"><a class="reference internal" href="index.html">其他</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="loongson.html">龙芯杯比赛回顾</a></li>
+<li class="toctree-l2"><a class="reference internal" href="wifi.html">破解 WIFI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="s7.html">启动 S7 核</a></li>
+<li class="toctree-l2"><a class="reference internal" href="rust.html">学习 Rust</a></li>
+<li class="toctree-l2"><a class="reference internal" href="linux.html">学习 Linux</a></li>
+<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">User Interrupt</a></li>
+</ul>
+</li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="edit-this-page">
+  <a class="muted-link" href="https://github.com/tkf2019/Blog/edit/main/source/others/uint.rst" title="Edit this page">
+    <svg aria-hidden="true" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+      <path d="M4 20h4l10.5 -10.5a1.5 1.5 0 0 0 -4 -4l-10.5 10.5v4" />
+      <line x1="13.5" y1="6.5" x2="17.5" y2="10.5" />
+    </svg>
+    <span class="visually-hidden">Edit this page</span>
+  </a>
+</div><div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle">
+              <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+              <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <div class="visually-hidden">Toggle table of contents sidebar</div>
+            <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+          </label>
+        </div>
+        <article role="main">
+          <div class="section" id="user-interrupt">
+<h1>User Interrupt<a class="headerlink" href="#user-interrupt" title="永久链接至标题">#</a></h1>
+<div class="section" id="intel-uintr">
+<h2>Intel UINTR<a class="headerlink" href="#intel-uintr" title="永久链接至标题">#</a></h2>
+<div class="section" id="intro">
+<h3>Intro.<a class="headerlink" href="#intro" title="永久链接至标题">#</a></h3>
+<p>User interrupts are delivered to software operating in 64-bit mode with CPL=3 without any change to segmentation state. Different user interrupts are distinguished by a 6-bit user-interrupt vector. Based on x86, the UINTR state is configured by new supervisor-managed state, including new MSRs.</p>
+<p><strong>UPID</strong> : user posted-interrupt descriptor. User interrupts for an OS-managed thread can be posted in the UPID associated with that thread after receipt of an ordinary interrupt called a <strong>user-interrupt notification</strong>.</p>
+<ul class="simple">
+<li><p>Outstanding notification (0): For one or more user interrupts in PIR (as <code class="docutils literal notranslate"><span class="pre">|pir_bits</span></code>).</p></li>
+<li><p>Suppress notification (1): If set, agents should not send notifications when posting user interrupts in this descriptor.</p></li>
+<li><p>Notification vector (23:16): Used by SENDUIPI.</p></li>
+<li><p>Notification destination (63:32): Target physical APIC ID.</p></li>
+<li><p>Posted-interrupt requests (PIR) (127:64): One bit for each user-interrupt vector. See UIRR.</p></li>
+</ul>
+<p>Setting <code class="docutils literal notranslate"><span class="pre">CR4[25]</span> <span class="pre">(as</span> <span class="pre">CR4.UINTR)</span></code> enables user-interrupt delivery, user-interrupt notification identification and the user-interrupt instructions (UIRET, SENDUIPI).</p>
+<p><strong>User-interrupt State</strong> :</p>
+<ul class="simple">
+<li><p><strong>UIRR</strong> : If UIRR[i] = 1, a user interrupt with vector i is requesting service.</p></li>
+<li><p><strong>UIF</strong> : If UIF = 0, user-interrupt delivery is blocked; if UIF = 1, user interrupts may be delivered. User-interrupt delivery clears UIF, and the new UIRET instruction sets it.</p></li>
+<li><p><strong>UIHANDLER</strong> : The linear address of the user-interrupt handler.</p></li>
+<li><p><strong>UISTACKADJUST</strong> : This value controls adjustment to the stack pointer prior to user-interrupt delivery.</p></li>
+<li><p><strong>UINV</strong> : The vector of those ordinary interrupts that are treated as user-interrupt notifications.</p></li>
+<li><p><strong>UPIDADDR</strong> : The linear address of the UPID that the logical processor consults upon receiving an ordinary interrupt with vector UINV.</p></li>
+<li><p><strong>UITTADDR</strong> : The linear address of user-interrupt target table, which the logical processor consults when software invokes the SENDUIPI instruction.</p></li>
+<li><p><strong>UITTSZ</strong> : The highest index of a valid entry in the UITT.</p></li>
+</ul>
+<p><strong>User-interrupt MSRs</strong> :</p>
+<ul class="simple">
+<li><p>IA32_UINTR_RR -&gt; UIRR</p></li>
+<li><p>IA32_UINTR_HANDLER -&gt; UIHANDLER</p></li>
+<li><p>IA32_UINTR_STACKADJUST -&gt; UISTACKADJUST</p></li>
+<li><p>IA32_UINTR_MISC -&gt; {24’b0, UINV[7:0], UITTSZ[31:0]}</p></li>
+<li><p>IA32_UINTR_PD -&gt; UPIDADDR</p></li>
+<li><p>IA32_UINTR_TT -&gt; UITTADDR</p></li>
+</ul>
+<p><strong>User-interrupt notification identification</strong> : How to identify an ordinary interrupt as user-interrupt notification? The local <strong>APIC</strong> is acknowledged; move to the next step if the processor get an interrupt vector V = UINV. The processor writes zero to the EOI register in the local APIC; this dismiss the interrupt with vector V = UINV from the local APIC.</p>
+<div class="admonition-apic admonition">
+<p class="admonition-title">APIC</p>
+<p>Advanced Programmable Interrupt Controller. Intended to solve interrupt routing efficiency issues in computer systems.
+In a APIC-based system, each CPU is made of a core and a local APIC. In addition, there is an I/O APIC that is part of the chipset and provides multi-processor interrupt management.
+Each interrupt pin is individually programmable as either edge or level triggered. The interrupt vector and interrupt steering information can be specified per interrupt.</p>
+</div>
+<p><strong>User-interrupt notification processing</strong> :</p>
+<ul class="simple">
+<li><p>The logical processor clears the outstanding-notification bit in the UPID. This is done atomically so as to leave the remainder of the descriptor unmodified.</p></li>
+<li><p>The logical processor reads PIR into a temporary register and writes all zeros to PIR. This is done atomically so as to ensure that each bit cleared is set in the temporary register.</p></li>
+<li><p>If any bit is set in the temporary register, the logical processor sets in UIRR each bit corresponding to a bit set in the temporary register and recognize a pending user interrupt.</p></li>
+</ul>
+</div>
+<div class="section" id="impl-in-linux">
+<h3>Impl. in Linux<a class="headerlink" href="#impl-in-linux" title="永久链接至标题">#</a></h3>
+<p>UPID and UITT are managed by kernel.</p>
+<p>Instructions:</p>
+<ul class="simple">
+<li><p>SENDUIPI &lt;index&gt;: send a user IPI to a target task based on the UITT index.</p></li>
+<li><p>CLUI: Mask user interrupts by clearing UIF.</p></li>
+<li><p>STUI: Unmask user interrupts by setting UIF.</p></li>
+<li><p>TESTUI: Test current value of UIF.</p></li>
+<li><p>UIRET: return from a user interrupt handler.</p></li>
+</ul>
+<p>UITT entry:</p>
+<ul class="simple">
+<li><p>(0): V, a valid bit</p></li>
+<li><p>(7:1): reserved</p></li>
+<li><p>(15:8): UV, the user-interrupt vector (15:14 is wired to zero)</p></li>
+<li><p>(63:16): reserved</p></li>
+<li><p>(127:64): UPIDADDR (64-byte aligned, so 69:64 is wired to zero)</p></li>
+</ul>
+<p>See implementations in <a class="reference external" href="https://github.com/intel/uintr-linux-kernel">uintr_linux</a> .</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="cm">/* Vector for User interrupt notifications */</span><span class="w"></span>
+<span class="linenos"> 2</span><span class="cp">#define UINTR_NOTIFICATION_VECTOR       0xec</span>
+<span class="linenos"> 3</span><span class="cp">#define UINTR_KERNEL_VECTOR                 0xeb</span>
+<span class="linenos"> 4</span>
+<span class="linenos"> 5</span><span class="kt">int</span><span class="w"> </span><span class="nf">do_uintr_register_handler</span><span class="p">(</span><span class="n">u64</span><span class="w"> </span><span class="n">handler</span><span class="p">)</span><span class="w"></span>
+<span class="linenos"> 6</span><span class="p">{</span><span class="w"></span>
+<span class="linenos"> 7</span><span class="w">    </span><span class="k">struct</span><span class="w"> </span><span class="nc">uintr_receiver</span><span class="w"> </span><span class="o">*</span><span class="n">ui_recv</span><span class="p">;</span><span class="w"></span>
+<span class="linenos"> 8</span><span class="w">    </span><span class="k">struct</span><span class="w"> </span><span class="nc">uintr_upid</span><span class="w"> </span><span class="o">*</span><span class="n">upid</span><span class="p">;</span><span class="w"></span>
+<span class="linenos"> 9</span><span class="w">    </span><span class="k">struct</span><span class="w"> </span><span class="nc">task_struct</span><span class="w"> </span><span class="o">*</span><span class="n">t</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">current</span><span class="p">;</span><span class="w"></span>
+<span class="linenos">10</span><span class="w">    </span><span class="k">struct</span><span class="w"> </span><span class="nc">fpu</span><span class="w"> </span><span class="o">*</span><span class="n">fpu</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&amp;</span><span class="n">t</span><span class="o">-&gt;</span><span class="kr">thread</span><span class="p">.</span><span class="n">fpu</span><span class="p">;</span><span class="w"></span>
+<span class="linenos">11</span><span class="w">    </span><span class="n">u64</span><span class="w"> </span><span class="n">misc_msr</span><span class="p">;</span><span class="w"></span>
+<span class="linenos">12</span><span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">cpu</span><span class="p">;</span><span class="w"></span>
+<span class="linenos">13</span>
+<span class="linenos">14</span><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">is_uintr_receiver</span><span class="p">(</span><span class="n">t</span><span class="p">))</span><span class="w"></span>
+<span class="linenos">15</span><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="o">-</span><span class="n">EBUSY</span><span class="p">;</span><span class="w"></span>
+<span class="linenos">16</span>
+<span class="linenos">17</span><span class="w">    </span><span class="cm">/* Alloc new uintr receiver with UPID */</span><span class="w"></span>
+<span class="linenos">18</span><span class="w">    </span><span class="n">ui_recv</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">kzalloc</span><span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="o">*</span><span class="n">ui_recv</span><span class="p">),</span><span class="w"> </span><span class="n">GFP_KERNEL</span><span class="p">);</span><span class="w"></span>
+<span class="linenos">19</span><span class="w">    </span><span class="n">ui_recv</span><span class="o">-&gt;</span><span class="n">upid_ctx</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">alloc_upid</span><span class="p">();</span><span class="w"></span>
+<span class="linenos">20</span>
+<span class="linenos">21</span><span class="w">    </span><span class="cm">/*</span>
+<span class="linenos">22</span><span class="cm">     * UPID and ui_recv will be referenced during context switch. Need to</span>
+<span class="linenos">23</span><span class="cm">     * disable preemption while modifying the MSRs, UPID and ui_recv thread</span>
+<span class="linenos">24</span><span class="cm">     * struct.</span>
+<span class="linenos">25</span><span class="cm">     */</span><span class="w"></span>
+<span class="linenos">26</span><span class="w">    </span><span class="n">fpregs_lock</span><span class="p">();</span><span class="w"></span>
+<span class="linenos">27</span>
+<span class="linenos">28</span><span class="w">    </span><span class="cm">/* Find the receiver and set the notification vector and destination */</span><span class="w"></span>
+<span class="linenos">29</span><span class="w">    </span><span class="n">cpu</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">smp_processor_id</span><span class="p">();</span><span class="w"></span>
+<span class="linenos">30</span><span class="w">    </span><span class="n">upid</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ui_recv</span><span class="o">-&gt;</span><span class="n">upid_ctx</span><span class="o">-&gt;</span><span class="n">upid</span><span class="p">;</span><span class="w"></span>
+<span class="linenos">31</span><span class="w">    </span><span class="n">upid</span><span class="o">-&gt;</span><span class="n">nc</span><span class="p">.</span><span class="n">nv</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UINTR_NOTIFICATION_VECTOR</span><span class="p">;</span><span class="w"></span>
+<span class="linenos">32</span><span class="w">    </span><span class="n">upid</span><span class="o">-&gt;</span><span class="n">nc</span><span class="p">.</span><span class="n">ndst</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">cpu_to_ndst</span><span class="p">(</span><span class="n">cpu</span><span class="p">);</span><span class="w"></span>
+<span class="linenos">33</span>
+<span class="linenos">34</span><span class="w">    </span><span class="n">t</span><span class="o">-&gt;</span><span class="kr">thread</span><span class="p">.</span><span class="n">ui_recv</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ui_recv</span><span class="p">;</span><span class="w"></span>
+<span class="linenos">35</span>
+<span class="linenos">36</span><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">fpregs_state_valid</span><span class="p">(</span><span class="n">fpu</span><span class="p">,</span><span class="w"> </span><span class="n">cpu</span><span class="p">))</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="linenos">37</span><span class="w">        </span><span class="n">wrmsrl</span><span class="p">(</span><span class="n">MSR_IA32_UINTR_HANDLER</span><span class="p">,</span><span class="w"> </span><span class="n">handler</span><span class="p">);</span><span class="w"></span>
+<span class="linenos">38</span><span class="w">        </span><span class="n">wrmsrl</span><span class="p">(</span><span class="n">MSR_IA32_UINTR_PD</span><span class="p">,</span><span class="w"> </span><span class="p">(</span><span class="n">u64</span><span class="p">)</span><span class="n">ui_recv</span><span class="o">-&gt;</span><span class="n">upid_ctx</span><span class="o">-&gt;</span><span class="n">upid</span><span class="p">);</span><span class="w"></span>
+<span class="linenos">39</span>
+<span class="linenos">40</span><span class="w">        </span><span class="cm">/* Set value as size of ABI redzone */</span><span class="w"></span>
+<span class="linenos">41</span><span class="w">        </span><span class="n">wrmsrl</span><span class="p">(</span><span class="n">MSR_IA32_UINTR_STACKADJUST</span><span class="p">,</span><span class="w"> </span><span class="mi">128</span><span class="p">);</span><span class="w"></span>
+<span class="linenos">42</span>
+<span class="linenos">43</span><span class="w">        </span><span class="cm">/* Modify only the relevant bits of the MISC MSR */</span><span class="w"></span>
+<span class="linenos">44</span><span class="w">        </span><span class="n">rdmsrl</span><span class="p">(</span><span class="n">MSR_IA32_UINTR_MISC</span><span class="p">,</span><span class="w"> </span><span class="n">misc_msr</span><span class="p">);</span><span class="w"></span>
+<span class="linenos">45</span><span class="w">        </span><span class="n">misc_msr</span><span class="w"> </span><span class="o">|=</span><span class="w"> </span><span class="p">(</span><span class="n">u64</span><span class="p">)</span><span class="n">UINTR_NOTIFICATION_VECTOR</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="mi">32</span><span class="p">;</span><span class="w"></span>
+<span class="linenos">46</span><span class="w">        </span><span class="n">wrmsrl</span><span class="p">(</span><span class="n">MSR_IA32_UINTR_MISC</span><span class="p">,</span><span class="w"> </span><span class="n">misc_msr</span><span class="p">);</span><span class="w"></span>
+<span class="linenos">47</span><span class="w">    </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="linenos">48</span><span class="w">        </span><span class="k">struct</span><span class="w"> </span><span class="nc">xregs_state</span><span class="w"> </span><span class="o">*</span><span class="n">xsave</span><span class="p">;</span><span class="w"></span>
+<span class="linenos">49</span><span class="w">        </span><span class="k">struct</span><span class="w"> </span><span class="nc">uintr_state</span><span class="w"> </span><span class="o">*</span><span class="n">p</span><span class="p">;</span><span class="w"></span>
+<span class="linenos">50</span>
+<span class="linenos">51</span><span class="w">        </span><span class="n">xsave</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&amp;</span><span class="n">fpu</span><span class="o">-&gt;</span><span class="n">state</span><span class="p">.</span><span class="n">xsave</span><span class="p">;</span><span class="w"></span>
+<span class="linenos">52</span><span class="w">        </span><span class="n">xsave</span><span class="o">-&gt;</span><span class="n">header</span><span class="p">.</span><span class="n">xfeatures</span><span class="w"> </span><span class="o">|=</span><span class="w"> </span><span class="n">XFEATURE_MASK_UINTR</span><span class="p">;</span><span class="w"></span>
+<span class="linenos">53</span><span class="w">        </span><span class="n">p</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">get_xsave_addr</span><span class="p">(</span><span class="o">&amp;</span><span class="n">fpu</span><span class="o">-&gt;</span><span class="n">state</span><span class="p">.</span><span class="n">xsave</span><span class="p">,</span><span class="w"> </span><span class="n">XFEATURE_UINTR</span><span class="p">);</span><span class="w"></span>
+<span class="linenos">54</span><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">p</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="linenos">55</span><span class="w">            </span><span class="n">p</span><span class="o">-&gt;</span><span class="n">handler</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">handler</span><span class="p">;</span><span class="w"></span>
+<span class="linenos">56</span><span class="w">            </span><span class="n">p</span><span class="o">-&gt;</span><span class="n">upid_addr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">u64</span><span class="p">)</span><span class="n">ui_recv</span><span class="o">-&gt;</span><span class="n">upid_ctx</span><span class="o">-&gt;</span><span class="n">upid</span><span class="p">;</span><span class="w"></span>
+<span class="linenos">57</span><span class="w">            </span><span class="n">p</span><span class="o">-&gt;</span><span class="n">stack_adjust</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">128</span><span class="p">;</span><span class="w"></span>
+<span class="linenos">58</span><span class="w">            </span><span class="n">p</span><span class="o">-&gt;</span><span class="n">uinv</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UINTR_NOTIFICATION_VECTOR</span><span class="p">;</span><span class="w"></span>
+<span class="linenos">59</span><span class="w">        </span><span class="p">}</span><span class="w"></span>
+<span class="linenos">60</span><span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="linenos">61</span>
+<span class="linenos">62</span><span class="w">    </span><span class="n">fpregs_unlock</span><span class="p">();</span><span class="w"></span>
+<span class="linenos">63</span>
+<span class="linenos">64</span><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+<span class="linenos">65</span><span class="p">}</span><span class="w"></span>
+<span class="linenos">66</span>
+<span class="linenos">67</span><span class="kt">int</span><span class="w"> </span><span class="nf">do_uintr_register_vector</span><span class="p">(</span><span class="k">struct</span><span class="w"> </span><span class="nc">uintr_receiver_info</span><span class="w"> </span><span class="o">*</span><span class="n">r_info</span><span class="p">)</span><span class="w"></span>
+<span class="linenos">68</span><span class="p">{</span><span class="w"></span>
+<span class="linenos">69</span><span class="w">    </span><span class="k">struct</span><span class="w"> </span><span class="nc">uintr_receiver</span><span class="w"> </span><span class="o">*</span><span class="n">ui_recv</span><span class="p">;</span><span class="w"></span>
+<span class="linenos">70</span><span class="w">    </span><span class="k">struct</span><span class="w"> </span><span class="nc">task_struct</span><span class="w"> </span><span class="o">*</span><span class="n">t</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">current</span><span class="p">;</span><span class="w"></span>
+<span class="linenos">71</span><span class="w">    </span><span class="cm">/*</span>
+<span class="linenos">72</span><span class="cm">    * A vector should only be registered by a task that</span>
+<span class="linenos">73</span><span class="cm">    * has an interrupt handler registered.</span>
+<span class="linenos">74</span><span class="cm">    */</span><span class="w"></span>
+<span class="linenos">75</span><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">is_uintr_receiver</span><span class="p">(</span><span class="n">t</span><span class="p">))</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="o">-</span><span class="n">EINVAL</span><span class="p">;</span><span class="w"></span>
+<span class="linenos">76</span><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">r_info</span><span class="o">-&gt;</span><span class="n">uvec</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="n">UINTR_MAX_UVEC_NR</span><span class="p">)</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="o">-</span><span class="n">ENOSPC</span><span class="p">;</span><span class="w"></span>
+<span class="linenos">77</span><span class="w">    </span><span class="n">ui_recv</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">t</span><span class="o">-&gt;</span><span class="kr">thread</span><span class="p">.</span><span class="n">ui_recv</span><span class="p">;</span><span class="w"></span>
+<span class="linenos">78</span><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">ui_recv</span><span class="o">-&gt;</span><span class="n">uvec_mask</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="n">BIT_ULL</span><span class="p">(</span><span class="n">r_info</span><span class="o">-&gt;</span><span class="n">uvec</span><span class="p">))</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="o">-</span><span class="n">EBUSY</span><span class="p">;</span><span class="w"></span>
+<span class="linenos">79</span><span class="w">    </span><span class="n">ui_recv</span><span class="o">-&gt;</span><span class="n">uvec_mask</span><span class="w"> </span><span class="o">|=</span><span class="w"> </span><span class="n">BIT_ULL</span><span class="p">(</span><span class="n">r_info</span><span class="o">-&gt;</span><span class="n">uvec</span><span class="p">);</span><span class="w"></span>
+<span class="linenos">80</span><span class="w">    </span><span class="n">r_info</span><span class="o">-&gt;</span><span class="n">upid_ctx</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">get_upid_ref</span><span class="p">(</span><span class="n">ui_recv</span><span class="o">-&gt;</span><span class="n">upid_ctx</span><span class="p">);</span><span class="w"></span>
+<span class="linenos">81</span><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+<span class="linenos">82</span><span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">int</span> <span class="pre">do_uintr_register_handler(u64</span> <span class="pre">handler)</span></code> allocates new user-interrupt context and UPID for current task.
+It disables preemption (the ability of the operating system to preempt or stop a currently scheduled task in favour of a higher priority task) during modifying task states.
+Then it sets the destination as target APIC id. It writes MSRs finally (or xsave states) to activate hardware process.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kt">int</span><span class="w"> </span><span class="nf">do_uintr_register_sender</span><span class="p">(</span><span class="k">struct</span><span class="w"> </span><span class="nc">uintr_receiver_info</span><span class="w"> </span><span class="o">*</span><span class="n">r_info</span><span class="p">,</span><span class="w"></span>
+<span class="linenos"> 2</span><span class="w">                         </span><span class="k">struct</span><span class="w"> </span><span class="nc">uintr_sender_info</span><span class="w"> </span><span class="o">*</span><span class="n">s_info</span><span class="p">)</span><span class="w"></span>
+<span class="linenos"> 3</span><span class="p">{</span><span class="w"></span>
+<span class="linenos"> 4</span><span class="w">    </span><span class="k">struct</span><span class="w"> </span><span class="nc">uintr_uitt_entry</span><span class="w"> </span><span class="o">*</span><span class="n">uitte</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span><span class="w"></span>
+<span class="linenos"> 5</span><span class="w">    </span><span class="k">struct</span><span class="w"> </span><span class="nc">uintr_sender</span><span class="w"> </span><span class="o">*</span><span class="n">ui_send</span><span class="p">;</span><span class="w"></span>
+<span class="linenos"> 6</span><span class="w">    </span><span class="k">struct</span><span class="w"> </span><span class="nc">task_struct</span><span class="w"> </span><span class="o">*</span><span class="n">t</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">current</span><span class="p">;</span><span class="w"></span>
+<span class="linenos"> 7</span><span class="w">    </span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">long</span><span class="w"> </span><span class="n">flags</span><span class="p">;</span><span class="w"></span>
+<span class="linenos"> 8</span><span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">entry</span><span class="p">;</span><span class="w"></span>
+<span class="linenos"> 9</span><span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">ret</span><span class="p">;</span><span class="w"></span>
+<span class="linenos">10</span>
+<span class="linenos">11</span><span class="w">    </span><span class="cm">/*</span>
+<span class="linenos">12</span><span class="cm">    * Only a static check. Receiver could exit anytime after this check.</span>
+<span class="linenos">13</span><span class="cm">    * This check only prevents connections using uintr_fd after the</span>
+<span class="linenos">14</span><span class="cm">    * receiver has already exited/unregistered.</span>
+<span class="linenos">15</span><span class="cm">    */</span><span class="w"></span>
+<span class="linenos">16</span><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">uintr_is_receiver_active</span><span class="p">(</span><span class="n">r_info</span><span class="p">))</span><span class="w"></span>
+<span class="linenos">17</span><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="o">-</span><span class="n">ESHUTDOWN</span><span class="p">;</span><span class="w"></span>
+<span class="linenos">18</span>
+<span class="linenos">19</span><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">is_uintr_sender</span><span class="p">(</span><span class="n">t</span><span class="p">))</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="linenos">20</span><span class="w">        </span><span class="n">entry</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">find_first_zero_bit</span><span class="p">((</span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">long</span><span class="w"> </span><span class="o">*</span><span class="p">)</span><span class="n">t</span><span class="o">-&gt;</span><span class="kr">thread</span><span class="p">.</span><span class="n">ui_send</span><span class="o">-&gt;</span><span class="n">uitt_mask</span><span class="p">,</span><span class="w"></span>
+<span class="linenos">21</span><span class="w">                        </span><span class="n">UINTR_MAX_UITT_NR</span><span class="p">);</span><span class="w"></span>
+<span class="linenos">22</span><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">entry</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="n">UINTR_MAX_UITT_NR</span><span class="p">)</span><span class="w"></span>
+<span class="linenos">23</span><span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="o">-</span><span class="n">ENOSPC</span><span class="p">;</span><span class="w"></span>
+<span class="linenos">24</span><span class="w">    </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="linenos">25</span><span class="w">        </span><span class="n">BUILD_BUG_ON</span><span class="p">(</span><span class="n">UINTR_MAX_UITT_NR</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span><span class="w"></span>
+<span class="linenos">26</span><span class="w">        </span><span class="n">entry</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+<span class="linenos">27</span><span class="w">        </span><span class="n">ret</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">init_uitt</span><span class="p">();</span><span class="w"></span>
+<span class="linenos">28</span><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">ret</span><span class="p">)</span><span class="w"></span>
+<span class="linenos">29</span><span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="n">ret</span><span class="p">;</span><span class="w"></span>
+<span class="linenos">30</span><span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="linenos">31</span>
+<span class="linenos">32</span><span class="w">    </span><span class="n">ui_send</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">t</span><span class="o">-&gt;</span><span class="kr">thread</span><span class="p">.</span><span class="n">ui_send</span><span class="p">;</span><span class="w"></span>
+<span class="linenos">33</span>
+<span class="linenos">34</span><span class="w">    </span><span class="n">set_bit</span><span class="p">(</span><span class="n">entry</span><span class="p">,</span><span class="w"> </span><span class="p">(</span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">long</span><span class="w"> </span><span class="o">*</span><span class="p">)</span><span class="n">ui_send</span><span class="o">-&gt;</span><span class="n">uitt_mask</span><span class="p">);</span><span class="w"></span>
+<span class="linenos">35</span>
+<span class="linenos">36</span><span class="w">    </span><span class="n">spin_lock_irqsave</span><span class="p">(</span><span class="o">&amp;</span><span class="n">ui_send</span><span class="o">-&gt;</span><span class="n">uitt_ctx</span><span class="o">-&gt;</span><span class="n">uitt_lock</span><span class="p">,</span><span class="w"> </span><span class="n">flags</span><span class="p">);</span><span class="w"></span>
+<span class="linenos">37</span><span class="w">    </span><span class="n">uitte</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&amp;</span><span class="n">ui_send</span><span class="o">-&gt;</span><span class="n">uitt_ctx</span><span class="o">-&gt;</span><span class="n">uitt</span><span class="p">[</span><span class="n">entry</span><span class="p">];</span><span class="w"></span>
+<span class="linenos">38</span><span class="w">    </span><span class="n">pr_debug</span><span class="p">(</span><span class="s">&quot;send: sender=%d receiver=%d UITTE entry %d address %px</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="linenos">39</span><span class="w">        </span><span class="n">current</span><span class="o">-&gt;</span><span class="n">pid</span><span class="p">,</span><span class="w"> </span><span class="n">r_info</span><span class="o">-&gt;</span><span class="n">upid_ctx</span><span class="o">-&gt;</span><span class="n">task</span><span class="o">-&gt;</span><span class="n">pid</span><span class="p">,</span><span class="w"> </span><span class="n">entry</span><span class="p">,</span><span class="w"> </span><span class="n">uitte</span><span class="p">);</span><span class="w"></span>
+<span class="linenos">40</span>
+<span class="linenos">41</span><span class="w">    </span><span class="n">uitte</span><span class="o">-&gt;</span><span class="n">user_vec</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">r_info</span><span class="o">-&gt;</span><span class="n">uvec</span><span class="p">;</span><span class="w"></span>
+<span class="linenos">42</span><span class="w">    </span><span class="n">uitte</span><span class="o">-&gt;</span><span class="n">target_upid_addr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">u64</span><span class="p">)</span><span class="n">r_info</span><span class="o">-&gt;</span><span class="n">upid_ctx</span><span class="o">-&gt;</span><span class="n">upid</span><span class="p">;</span><span class="w"></span>
+<span class="linenos">43</span><span class="w">    </span><span class="n">uitte</span><span class="o">-&gt;</span><span class="n">valid</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w"></span>
+<span class="linenos">44</span><span class="w">    </span><span class="n">spin_unlock_irqrestore</span><span class="p">(</span><span class="o">&amp;</span><span class="n">ui_send</span><span class="o">-&gt;</span><span class="n">uitt_ctx</span><span class="o">-&gt;</span><span class="n">uitt_lock</span><span class="p">,</span><span class="w"> </span><span class="n">flags</span><span class="p">);</span><span class="w"></span>
+<span class="linenos">45</span>
+<span class="linenos">46</span><span class="w">    </span><span class="n">s_info</span><span class="o">-&gt;</span><span class="n">r_upid_ctx</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">get_upid_ref</span><span class="p">(</span><span class="n">r_info</span><span class="o">-&gt;</span><span class="n">upid_ctx</span><span class="p">);</span><span class="w"></span>
+<span class="linenos">47</span><span class="w">    </span><span class="n">s_info</span><span class="o">-&gt;</span><span class="n">uitt_ctx</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">get_uitt_ref</span><span class="p">(</span><span class="n">ui_send</span><span class="o">-&gt;</span><span class="n">uitt_ctx</span><span class="p">);</span><span class="w"></span>
+<span class="linenos">48</span><span class="w">    </span><span class="n">s_info</span><span class="o">-&gt;</span><span class="n">task</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">get_task_struct</span><span class="p">(</span><span class="n">current</span><span class="p">);</span><span class="w"></span>
+<span class="linenos">49</span><span class="w">    </span><span class="n">s_info</span><span class="o">-&gt;</span><span class="n">uitt_index</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">entry</span><span class="p">;</span><span class="w"></span>
+<span class="linenos">50</span>
+<span class="linenos">51</span><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+<span class="linenos">52</span><span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kt">int</span><span class="w"> </span><span class="nf">uintr_receiver_wait</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="w"></span>
+<span class="linenos"> 2</span><span class="p">{</span><span class="w"></span>
+<span class="linenos"> 3</span><span class="w">    </span><span class="k">struct</span><span class="w"> </span><span class="nc">uintr_upid_ctx</span><span class="w"> </span><span class="o">*</span><span class="n">upid_ctx</span><span class="p">;</span><span class="w"></span>
+<span class="linenos"> 4</span><span class="w">    </span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">long</span><span class="w"> </span><span class="n">flags</span><span class="p">;</span><span class="w"></span>
+<span class="linenos"> 5</span>
+<span class="linenos"> 6</span><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">is_uintr_receiver</span><span class="p">(</span><span class="n">current</span><span class="p">))</span><span class="w"></span>
+<span class="linenos"> 7</span><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="o">-</span><span class="n">EOPNOTSUPP</span><span class="p">;</span><span class="w"></span>
+<span class="linenos"> 8</span>
+<span class="linenos"> 9</span><span class="w">    </span><span class="n">upid_ctx</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">current</span><span class="o">-&gt;</span><span class="kr">thread</span><span class="p">.</span><span class="n">ui_recv</span><span class="o">-&gt;</span><span class="n">upid_ctx</span><span class="p">;</span><span class="w"></span>
+<span class="linenos">10</span><span class="w">    </span><span class="n">upid_ctx</span><span class="o">-&gt;</span><span class="n">upid</span><span class="o">-&gt;</span><span class="n">nc</span><span class="p">.</span><span class="n">nv</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UINTR_KERNEL_VECTOR</span><span class="p">;</span><span class="w"></span>
+<span class="linenos">11</span><span class="w">    </span><span class="n">upid_ctx</span><span class="o">-&gt;</span><span class="n">waiting</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span><span class="w"></span>
+<span class="linenos">12</span><span class="w">    </span><span class="n">spin_lock_irqsave</span><span class="p">(</span><span class="o">&amp;</span><span class="n">uintr_wait_lock</span><span class="p">,</span><span class="w"> </span><span class="n">flags</span><span class="p">);</span><span class="w"></span>
+<span class="linenos">13</span><span class="w">    </span><span class="n">list_add</span><span class="p">(</span><span class="o">&amp;</span><span class="n">upid_ctx</span><span class="o">-&gt;</span><span class="n">node</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">uintr_wait_list</span><span class="p">);</span><span class="w"></span>
+<span class="linenos">14</span><span class="w">    </span><span class="n">spin_unlock_irqrestore</span><span class="p">(</span><span class="o">&amp;</span><span class="n">uintr_wait_lock</span><span class="p">,</span><span class="w"> </span><span class="n">flags</span><span class="p">);</span><span class="w"></span>
+<span class="linenos">15</span>
+<span class="linenos">16</span><span class="w">    </span><span class="n">set_current_state</span><span class="p">(</span><span class="n">TASK_INTERRUPTIBLE</span><span class="p">);</span><span class="w"></span>
+<span class="linenos">17</span><span class="w">    </span><span class="n">schedule</span><span class="p">();</span><span class="w"></span>
+<span class="linenos">18</span>
+<span class="linenos">19</span><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="o">-</span><span class="n">EINTR</span><span class="p">;</span><span class="w"></span>
+<span class="linenos">20</span><span class="p">}</span><span class="w"></span>
+<span class="linenos">21</span>
+<span class="linenos">22</span><span class="cm">/*</span>
+<span class="linenos">23</span><span class="cm"> * Runs in interrupt context.</span>
+<span class="linenos">24</span><span class="cm"> * Scan through all UPIDs to check if any interrupt is on going.</span>
+<span class="linenos">25</span><span class="cm"> */</span><span class="w"></span>
+<span class="linenos">26</span><span class="kt">void</span><span class="w"> </span><span class="nf">uintr_wake_up_process</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="w"></span>
+<span class="linenos">27</span><span class="p">{</span><span class="w"></span>
+<span class="linenos">28</span><span class="w">    </span><span class="k">struct</span><span class="w"> </span><span class="nc">uintr_upid_ctx</span><span class="w"> </span><span class="o">*</span><span class="n">upid_ctx</span><span class="p">,</span><span class="w"> </span><span class="o">*</span><span class="n">tmp</span><span class="p">;</span><span class="w"></span>
+<span class="linenos">29</span><span class="w">    </span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">long</span><span class="w"> </span><span class="n">flags</span><span class="p">;</span><span class="w"></span>
+<span class="linenos">30</span>
+<span class="linenos">31</span><span class="w">    </span><span class="n">spin_lock_irqsave</span><span class="p">(</span><span class="o">&amp;</span><span class="n">uintr_wait_lock</span><span class="p">,</span><span class="w"> </span><span class="n">flags</span><span class="p">);</span><span class="w"></span>
+<span class="linenos">32</span><span class="w">    </span><span class="n">list_for_each_entry_safe</span><span class="p">(</span><span class="n">upid_ctx</span><span class="p">,</span><span class="w"> </span><span class="n">tmp</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">uintr_wait_list</span><span class="p">,</span><span class="w"> </span><span class="n">node</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="linenos">33</span><span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">test_bit</span><span class="p">(</span><span class="n">UPID_ON</span><span class="p">,</span><span class="w"> </span><span class="p">(</span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">long</span><span class="w"> </span><span class="o">*</span><span class="p">)</span><span class="o">&amp;</span><span class="n">upid_ctx</span><span class="o">-&gt;</span><span class="n">upid</span><span class="o">-&gt;</span><span class="n">nc</span><span class="p">.</span><span class="n">status</span><span class="p">))</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="linenos">34</span><span class="w">                    </span><span class="n">set_bit</span><span class="p">(</span><span class="n">UPID_SN</span><span class="p">,</span><span class="w"> </span><span class="p">(</span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">long</span><span class="w"> </span><span class="o">*</span><span class="p">)</span><span class="o">&amp;</span><span class="n">upid_ctx</span><span class="o">-&gt;</span><span class="n">upid</span><span class="o">-&gt;</span><span class="n">nc</span><span class="p">.</span><span class="n">status</span><span class="p">);</span><span class="w"></span>
+<span class="linenos">35</span><span class="w">                    </span><span class="n">upid_ctx</span><span class="o">-&gt;</span><span class="n">upid</span><span class="o">-&gt;</span><span class="n">nc</span><span class="p">.</span><span class="n">nv</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UINTR_NOTIFICATION_VECTOR</span><span class="p">;</span><span class="w"></span>
+<span class="linenos">36</span><span class="w">                    </span><span class="n">upid_ctx</span><span class="o">-&gt;</span><span class="n">waiting</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span><span class="w"></span>
+<span class="linenos">37</span><span class="w">                    </span><span class="n">wake_up_process</span><span class="p">(</span><span class="n">upid_ctx</span><span class="o">-&gt;</span><span class="n">task</span><span class="p">);</span><span class="w"></span>
+<span class="linenos">38</span><span class="w">                    </span><span class="n">list_del</span><span class="p">(</span><span class="o">&amp;</span><span class="n">upid_ctx</span><span class="o">-&gt;</span><span class="n">node</span><span class="p">);</span><span class="w"></span>
+<span class="linenos">39</span><span class="w">            </span><span class="p">}</span><span class="w"></span>
+<span class="linenos">40</span><span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="linenos">41</span><span class="w">    </span><span class="n">spin_unlock_irqrestore</span><span class="p">(</span><span class="o">&amp;</span><span class="n">uintr_wait_lock</span><span class="p">,</span><span class="w"> </span><span class="n">flags</span><span class="p">);</span><span class="w"></span>
+<span class="linenos">42</span><span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="io-uring">
+<h2>io_uring<a class="headerlink" href="#io-uring" title="永久链接至标题">#</a></h2>
+</div>
+</div>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          
+          <a class="prev-page" href="linux.html">
+              <svg><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">学习 Linux</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2022, Kaifu Tian
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            <div class="icons">
+              
+            </div>
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            目录
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">User Interrupt</a><ul>
+<li><a class="reference internal" href="#intel-uintr">Intel UINTR</a><ul>
+<li><a class="reference internal" href="#intro">Intro.</a></li>
+<li><a class="reference internal" href="#impl-in-linux">Impl. in Linux</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#io-uring">io_uring</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/scripts/furo.js"></script>
+    <script kind="utterances">
+
+    var commentsRunWhenDOMLoaded = cb => {
+    if (document.readyState != 'loading') {
+        cb()
+    } else if (document.addEventListener) {
+        document.addEventListener('DOMContentLoaded', cb)
+    } else {
+        document.attachEvent('onreadystatechange', function() {
+        if (document.readyState == 'complete') cb()
+        })
+    }
+}
+
+var addUtterances = () => {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src = "https://utteranc.es/client.js";
+    script.async = "async";
+
+    script.setAttribute("repo", "tkf2019/Blog");
+    script.setAttribute("issue-term", "pathname");
+    script.setAttribute("theme", "github-light");
+    script.setAttribute("label", "comments");
+    script.setAttribute("crossorigin", "anonymous");
+
+    sections = document.querySelectorAll("div.section");
+    if (sections !== null) {
+        section = sections[sections.length-1];
+        section.appendChild(script);
+    }
+}
+commentsRunWhenDOMLoaded(addUtterances);
+</script>
+    <script src="../_static/translations.js"></script>
+    <script src="../_static/design-tabs.js"></script>
+    </body>
+</html>

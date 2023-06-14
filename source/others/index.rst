@@ -12,3 +12,5 @@
     s7
     rust
     uint
+    daily
+    seL4

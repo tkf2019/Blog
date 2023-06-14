@@ -10,6 +10,5 @@
     theseus
     unikraft
     redleaf
-    IPC  
 
 

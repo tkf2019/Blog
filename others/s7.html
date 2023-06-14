@@ -161,7 +161,6 @@
 <li class="toctree-l2"><a class="reference internal" href="../papers/theseus.html">Theseus</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../papers/unikraft.html">Unikraft</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../papers/redleaf.html">Redleaf</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../papers/IPC.html">SkyBridge and XPC</a></li>
 </ul>
 </li>
 <li class="toctree-l1 current has-children"><a class="reference internal" href="index.html">其他</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
@@ -169,8 +168,9 @@
 <li class="toctree-l2"><a class="reference internal" href="wifi.html">破解 WIFI</a></li>
 <li class="toctree-l2 current current-page"><a class="current reference internal" href="#">启动 S7 核</a></li>
 <li class="toctree-l2"><a class="reference internal" href="rust.html">学习 Rust</a></li>
-<li class="toctree-l2"><a class="reference internal" href="linux.html">学习 Linux</a></li>
 <li class="toctree-l2"><a class="reference internal" href="uint.html">User Interrupt</a></li>
+<li class="toctree-l2"><a class="reference internal" href="daily.html">阅读笔记</a></li>
+<li class="toctree-l2"><a class="reference internal" href="seL4.html">seL4</a></li>
 </ul>
 </li>
 </ul>
@@ -264,14 +264,14 @@
 <li><p>如果想移除U-Boot SPL，并添加自己的FSBL（First Stage Bootloader），需要对启动位置（SD卡，Flash等）的第一个分区（GUID 5B193300-FC78-40CD-8002-E86C45580B47）进行覆写。对于SD卡，具体操作方法为直接执行如下命令：</p></li>
 </ul>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="c1"># 将SD卡制作成如下分区格式</span>
-sudo sgdisk -g --clear -a <span class="m">1</span> <span class="se">\</span>
-	  --new<span class="o">=</span><span class="m">1</span>:34:2081         --change-name<span class="o">=</span><span class="m">1</span>:spl --typecode<span class="o">=</span><span class="m">1</span>:5B193300-FC78-40CD-8002-E86C45580B47 <span class="se">\</span>
-	  --new<span class="o">=</span><span class="m">2</span>:2082:10273      --change-name<span class="o">=</span><span class="m">2</span>:uboot  --typecode<span class="o">=</span><span class="m">2</span>:2E54B353-1271-4842-806F-E436D6AF6985 <span class="se">\</span>
-	  --new<span class="o">=</span><span class="m">3</span>:16384:282623    --change-name<span class="o">=</span><span class="m">3</span>:boot --typecode<span class="o">=</span><span class="m">3</span>:0x0700 <span class="se">\</span>
-	  --new<span class="o">=</span><span class="m">4</span>:286720:13918207 --change-name<span class="o">=</span><span class="m">4</span>:root --typecode<span class="o">=</span><span class="m">4</span>:0x8300 <span class="se">\</span>
-	  /dev/sdX
+sudo<span class="w"> </span>sgdisk<span class="w"> </span>-g<span class="w"> </span>--clear<span class="w"> </span>-a<span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="se">\</span>
+<span class="w">	  </span>--new<span class="o">=</span><span class="m">1</span>:34:2081<span class="w">         </span>--change-name<span class="o">=</span><span class="m">1</span>:spl<span class="w"> </span>--typecode<span class="o">=</span><span class="m">1</span>:5B193300-FC78-40CD-8002-E86C45580B47<span class="w"> </span><span class="se">\</span>
+<span class="w">	  </span>--new<span class="o">=</span><span class="m">2</span>:2082:10273<span class="w">      </span>--change-name<span class="o">=</span><span class="m">2</span>:uboot<span class="w">  </span>--typecode<span class="o">=</span><span class="m">2</span>:2E54B353-1271-4842-806F-E436D6AF6985<span class="w"> </span><span class="se">\</span>
+<span class="w">	  </span>--new<span class="o">=</span><span class="m">3</span>:16384:282623<span class="w">    </span>--change-name<span class="o">=</span><span class="m">3</span>:boot<span class="w"> </span>--typecode<span class="o">=</span><span class="m">3</span>:0x0700<span class="w"> </span><span class="se">\</span>
+<span class="w">	  </span>--new<span class="o">=</span><span class="m">4</span>:286720:13918207<span class="w"> </span>--change-name<span class="o">=</span><span class="m">4</span>:root<span class="w"> </span>--typecode<span class="o">=</span><span class="m">4</span>:0x8300<span class="w"> </span><span class="se">\</span>
+<span class="w">	  </span>/dev/sdX
 <span class="c1"># 覆写FSBL的二进制文件</span>
-dd <span class="k">if</span><span class="o">=</span>&lt;your fsbl&gt;.bin <span class="nv">of</span><span class="o">=</span>/dev/sdX <span class="nv">seek</span><span class="o">=</span><span class="m">34</span>
+dd<span class="w"> </span><span class="k">if</span><span class="o">=</span>&lt;your<span class="w"> </span>fsbl&gt;.bin<span class="w"> </span><span class="nv">of</span><span class="o">=</span>/dev/sdX<span class="w"> </span><span class="nv">seek</span><span class="o">=</span><span class="m">34</span>
 </pre></div>
 </div>
 <ul class="simple">
@@ -345,8 +345,8 @@ dd <span class="k">if</span><span class="o">=</span>&lt;your fsbl&gt;.bin <span 
 <li><p>如上面的分区配置所示，完整的文件<a class="reference external" href="https://github.com/tkf2019/tCore/tree/main/bin">参考</a>，完整文件中包含了U-Boot Proper可识别的fdt信息，且原始的配置信息中，Kernel位置的是U-Boot Proper文件，已经将默认的Kernel位置的data注释掉了，因此，如果想在S7核上运行内核，可以选择将内核的二进制放在Kernel的位置；如果在U7核上运行内核，可以采用官方默认的U-Boot的启动办法。但是如果想不同的核同时运行不同的内核，欢迎持续关注<a class="reference external" href="https://github.com/rustsbi/rustsbi-hifive-unmatched">RustSBI</a>的更新情况，后续会引入功能：SBI根据<code class="docutils literal notranslate"><span class="pre">misa</span></code>等信息判断当前硬件支持的特权级别，并选择不同的加载方式。</p></li>
 <li><p>执行以下命令覆写SD卡对应分区：</p></li>
 </ul>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>mkimage -f sd-image.dts target.img
-dd <span class="k">if</span><span class="o">=</span>target.img <span class="nv">of</span><span class="o">=</span>/dev/sdX <span class="nv">seek</span><span class="o">=</span><span class="m">2082</span>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>mkimage<span class="w"> </span>-f<span class="w"> </span>sd-image.dts<span class="w"> </span>target.img
+dd<span class="w"> </span><span class="k">if</span><span class="o">=</span>target.img<span class="w"> </span><span class="nv">of</span><span class="o">=</span>/dev/sdX<span class="w"> </span><span class="nv">seek</span><span class="o">=</span><span class="m">2082</span>
 </pre></div>
 </div>
 </div>
@@ -370,14 +370,14 @@ dd <span class="k">if</span><span class="o">=</span>target.img <span class="nv">
 </li>
 <li><p>等待软件中断相关代码：</p></li>
 </ul>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="kt">int</span><span class="w"> </span><span class="nf">wait_ipi</span><span class="p">(</span><span class="kt">size_t</span><span class="w"> </span><span class="n">hartid</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="kt">int</span><span class="w"> </span><span class="nf">wait_ipi</span><span class="p">(</span><span class="kt">size_t</span><span class="w"> </span><span class="n">hartid</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="c1">// loop and wait for software interrupt</span>
 <span class="w">    </span><span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="p">(</span><span class="n">read_csr</span><span class="p">(</span><span class="n">mip</span><span class="p">)</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="n">MIP_MSIP</span><span class="p">))</span><span class="w"> </span>
-<span class="w">        </span><span class="n">wfi</span><span class="p">();</span><span class="w"></span>
+<span class="w">        </span><span class="n">wfi</span><span class="p">();</span>
 <span class="w">    </span><span class="c1">// receive software interrupt now</span>
-<span class="w">    </span><span class="n">clint_clear_soft</span><span class="p">(</span><span class="n">hartid</span><span class="p">);</span><span class="w"></span>
-<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<span class="w">    </span><span class="n">clint_clear_soft</span><span class="p">(</span><span class="n">hartid</span><span class="p">);</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
 </pre></div>
 </div>
 <ul class="simple">
@@ -506,21 +506,21 @@ dd <span class="k">if</span><span class="o">=</span>target.img <span class="nv">
 </li>
 <li><p>以<code class="docutils literal notranslate"><span class="pre">demo-coreip-cli</span></code>镜像为例，在Unmatched上构建镜像，相关命令如下：</p></li>
 </ul>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>mkdir riscv-sifive <span class="o">&amp;&amp;</span> <span class="nb">cd</span> riscv-sifive
-repo init -u git://github.com/sifive/freedom-u-sdk -b <span class="m">2021</span>.10 -m tools/manifests/sifive.xml
-repo sync
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>mkdir<span class="w"> </span>riscv-sifive<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">cd</span><span class="w"> </span>riscv-sifive
+repo<span class="w"> </span>init<span class="w"> </span>-u<span class="w"> </span>git://github.com/sifive/freedom-u-sdk<span class="w"> </span>-b<span class="w"> </span><span class="m">2021</span>.10<span class="w"> </span>-m<span class="w"> </span>tools/manifests/sifive.xml
+repo<span class="w"> </span>sync
 <span class="c1"># optional</span>
-repo start work --all
+repo<span class="w"> </span>start<span class="w"> </span>work<span class="w"> </span>--all
 <span class="c1"># Setting up Building Environment</span>
-bash ./freedom-u-sdk/setup.sh
+bash<span class="w"> </span>./freedom-u-sdk/setup.sh
 <span class="c1"># BitBake</span>
-<span class="nv">PARALLEL_MAKE</span><span class="o">=</span><span class="s2">&quot;-j 4&quot;</span> <span class="nv">BB_NUMBER_THREADS</span><span class="o">=</span><span class="m">4</span> <span class="nv">MACHINE</span><span class="o">=</span>unmatched bitbake demo-coreip-cli
+<span class="nv">PARALLEL_MAKE</span><span class="o">=</span><span class="s2">&quot;-j 4&quot;</span><span class="w"> </span><span class="nv">BB_NUMBER_THREADS</span><span class="o">=</span><span class="m">4</span><span class="w"> </span><span class="nv">MACHINE</span><span class="o">=</span>unmatched<span class="w"> </span>bitbake<span class="w"> </span>demo-coreip-cli
 </pre></div>
 </div>
 <ul class="simple">
 <li><p>最后将镜像写入uSD Card：</p></li>
 </ul>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>xzcat demo-coreip-cli-unmatched.wic.xz <span class="p">|</span> sudo dd <span class="nv">of</span><span class="o">=</span>/dev/sdX <span class="nv">bs</span><span class="o">=</span>512K <span class="nv">iflag</span><span class="o">=</span>fullblock <span class="nv">oflag</span><span class="o">=</span>direct <span class="nv">conv</span><span class="o">=</span>fsync <span class="nv">status</span><span class="o">=</span>progress
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>xzcat<span class="w"> </span>demo-coreip-cli-unmatched.wic.xz<span class="w"> </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>dd<span class="w"> </span><span class="nv">of</span><span class="o">=</span>/dev/sdX<span class="w"> </span><span class="nv">bs</span><span class="o">=</span>512K<span class="w"> </span><span class="nv">iflag</span><span class="o">=</span>fullblock<span class="w"> </span><span class="nv">oflag</span><span class="o">=</span>direct<span class="w"> </span><span class="nv">conv</span><span class="o">=</span>fsync<span class="w"> </span><span class="nv">status</span><span class="o">=</span>progress
 </pre></div>
 </div>
 </div>
@@ -530,31 +530,31 @@ bash ./freedom-u-sdk/setup.sh
 <li><p>BitBake是一个Python程序，由用户创建的配置驱动，为用户指定的目标执行用户创建的任务（recipes）；解决依赖关系；提供可配置的方式，将一些常见的任务例如下载源码包、解压、运行configure、运行make等进行抽象封装和重用</p></li>
 <li><p>BitBake可以从<a class="reference external" href="https://github.com/openembedded/bitbake">这里</a>进行下载，按照文档的要求，将仓库下载到指定地址后，可以在<code class="docutils literal notranslate"><span class="pre">.bashrc</span></code>或<code class="docutils literal notranslate"><span class="pre">.zshrc</span></code>等配置文件中添加（建议先根据需求确定好版本，执行<code class="docutils literal notranslate"><span class="pre">bitbake</span> <span class="pre">--version</span></code>检查安装是否成功及当前版本</p></li>
 </ul>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nb">export</span> <span class="nv">PATH</span><span class="o">=</span>/path/to/bbtutor/bitbake/bin:<span class="nv">$PATH</span>
-<span class="nb">export</span> <span class="nv">PYTHONPATH</span><span class="o">=</span>/path/to/bbtutor/bitbake/lib:<span class="nv">$PYTHONPATH</span>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nb">export</span><span class="w"> </span><span class="nv">PATH</span><span class="o">=</span>/path/to/bbtutor/bitbake/bin:<span class="nv">$PATH</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">PYTHONPATH</span><span class="o">=</span>/path/to/bbtutor/bitbake/lib:<span class="nv">$PYTHONPATH</span>
 </pre></div>
 </div>
 </div>
 <div class="section" id="gpt">
 <h3>GPT<a class="headerlink" href="#gpt" title="永久链接至标题">#</a></h3>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="c1">// GPT header</span>
-<span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">  </span><span class="kt">uint64_t</span><span class="w"> </span><span class="n">signature</span><span class="p">;</span><span class="w"></span>
-<span class="w">  </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">revision</span><span class="p">;</span><span class="w"></span>
-<span class="w">  </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">header_size</span><span class="p">;</span><span class="w"></span>
-<span class="w">  </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">header_crc</span><span class="p">;</span><span class="w"></span>
+<span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="kt">uint64_t</span><span class="w"> </span><span class="n">signature</span><span class="p">;</span>
+<span class="w">  </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">revision</span><span class="p">;</span>
+<span class="w">  </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">header_size</span><span class="p">;</span>
+<span class="w">  </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">header_crc</span><span class="p">;</span>
 <span class="w">  </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">reserved</span><span class="p">;</span><span class="w"> </span><span class="c1">// Reserved part must be 0x0</span>
-<span class="w">  </span><span class="kt">uint64_t</span><span class="w"> </span><span class="n">current_lba</span><span class="p">;</span><span class="w"></span>
-<span class="w">  </span><span class="kt">uint64_t</span><span class="w"> </span><span class="n">backup_lba</span><span class="p">;</span><span class="w"></span>
-<span class="w">  </span><span class="kt">uint64_t</span><span class="w"> </span><span class="n">first_usable_lba</span><span class="p">;</span><span class="w"></span>
-<span class="w">  </span><span class="kt">uint64_t</span><span class="w"> </span><span class="n">last_usable_lba</span><span class="p">;</span><span class="w"></span>
-<span class="w">  </span><span class="n">gpt_guid</span><span class="w"> </span><span class="n">disk_guid</span><span class="p">;</span><span class="w"></span>
-<span class="w">  </span><span class="kt">uint64_t</span><span class="w"> </span><span class="n">partition_entries_lba</span><span class="p">;</span><span class="w"></span>
-<span class="w">  </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">num_partition_entries</span><span class="p">;</span><span class="w"></span>
-<span class="w">  </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">partition_entry_size</span><span class="p">;</span><span class="w"></span>
-<span class="w">  </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">partition_array_crc</span><span class="p">;</span><span class="w"></span>
-<span class="w">  </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">padding</span><span class="p">;</span><span class="w"></span>
-<span class="p">}</span><span class="w"> </span><span class="n">gpt_header</span><span class="p">;</span><span class="w"></span>
+<span class="w">  </span><span class="kt">uint64_t</span><span class="w"> </span><span class="n">current_lba</span><span class="p">;</span>
+<span class="w">  </span><span class="kt">uint64_t</span><span class="w"> </span><span class="n">backup_lba</span><span class="p">;</span>
+<span class="w">  </span><span class="kt">uint64_t</span><span class="w"> </span><span class="n">first_usable_lba</span><span class="p">;</span>
+<span class="w">  </span><span class="kt">uint64_t</span><span class="w"> </span><span class="n">last_usable_lba</span><span class="p">;</span>
+<span class="w">  </span><span class="n">gpt_guid</span><span class="w"> </span><span class="n">disk_guid</span><span class="p">;</span>
+<span class="w">  </span><span class="kt">uint64_t</span><span class="w"> </span><span class="n">partition_entries_lba</span><span class="p">;</span>
+<span class="w">  </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">num_partition_entries</span><span class="p">;</span>
+<span class="w">  </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">partition_entry_size</span><span class="p">;</span>
+<span class="w">  </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">partition_array_crc</span><span class="p">;</span>
+<span class="w">  </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">padding</span><span class="p">;</span>
+<span class="p">}</span><span class="w"> </span><span class="n">gpt_header</span><span class="p">;</span>
 </pre></div>
 </div>
 <ul class="simple">

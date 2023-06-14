@@ -11,5 +11,6 @@
     wifi
     s7
     rust
-    linux
     uint
+    daily
+    seL4

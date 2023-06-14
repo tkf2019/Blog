@@ -2,7 +2,7 @@
 <html class="no-js" lang="zh_CN">
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <meta name="color-scheme" content="light dark"><link rel="index" title="索引" href="../genindex.html" /><link rel="search" title="搜索" href="../search.html" /><link rel="next" title="SkyBridge and XPC" href="IPC.html" /><link rel="prev" title="Unikraft" href="unikraft.html" />
+    <meta name="color-scheme" content="light dark"><link rel="index" title="索引" href="../genindex.html" /><link rel="search" title="搜索" href="../search.html" /><link rel="next" title="其他" href="../others/index.html" /><link rel="prev" title="Unikraft" href="unikraft.html" />
 
     <meta name="generator" content="sphinx-4.3.2, furo 2022.06.21"/>
         <title>Redleaf - Notes</title>
@@ -161,7 +161,6 @@
 <li class="toctree-l2"><a class="reference internal" href="theseus.html">Theseus</a></li>
 <li class="toctree-l2"><a class="reference internal" href="unikraft.html">Unikraft</a></li>
 <li class="toctree-l2 current current-page"><a class="current reference internal" href="#">Redleaf</a></li>
-<li class="toctree-l2"><a class="reference internal" href="IPC.html">SkyBridge and XPC</a></li>
 </ul>
 </li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../others/index.html">其他</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
@@ -169,8 +168,9 @@
 <li class="toctree-l2"><a class="reference internal" href="../others/wifi.html">破解 WIFI</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../others/s7.html">启动 S7 核</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../others/rust.html">学习 Rust</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../others/linux.html">学习 Linux</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../others/uint.html">User Interrupt</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../others/daily.html">阅读笔记</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../others/seL4.html">seL4</a></li>
 </ul>
 </li>
 </ul>
@@ -220,13 +220,13 @@
 <div class="section" id="communication">
 <h2>Communication<a class="headerlink" href="#communication" title="永久链接至标题">#</a></h2>
 <p>核心类型 <code class="docutils literal notranslate"><span class="pre">RRef&lt;T&gt;</span></code> (Remote reference)</p>
-<div class="highlight-rust notranslate"><div class="highlight"><pre><span></span><span class="k">pub</span><span class="w"> </span><span class="k">struct</span> <span class="nc">RRef</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span><span class="w"> </span><span class="k">where</span><span class="w"> </span><span class="n">T</span>: <span class="o">&#39;</span><span class="nb">static</span> <span class="o">+</span><span class="w"> </span><span class="n">RRefable</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<div class="highlight-rust notranslate"><div class="highlight"><pre><span></span><span class="k">pub</span><span class="w"> </span><span class="k">struct</span> <span class="nc">RRef</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span><span class="w"> </span><span class="k">where</span><span class="w"> </span><span class="n">T</span>: <span class="o">&#39;</span><span class="nb">static</span> <span class="o">+</span><span class="w"> </span><span class="n">RRefable</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="c1">// 仅在 mutable borrow 时变更所有者</span>
-<span class="w">    </span><span class="n">domain_id_pointer</span>: <span class="o">*</span><span class="k">mut</span><span class="w"> </span><span class="kt">u64</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="n">domain_id_pointer</span>: <span class="o">*</span><span class="k">mut</span><span class="w"> </span><span class="kt">u64</span><span class="p">,</span>
 <span class="w">    </span><span class="c1">// 记录 immutable borrow 的数量</span>
-<span class="w">    </span><span class="k">pub</span><span class="p">(</span><span class="k">crate</span><span class="p">)</span><span class="w"> </span><span class="n">borrow_count_pointer</span>: <span class="o">*</span><span class="k">mut</span><span class="w"> </span><span class="kt">u64</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="k">pub</span><span class="p">(</span><span class="k">crate</span><span class="p">)</span><span class="w"> </span><span class="n">value_pointer</span>: <span class="o">*</span><span class="k">mut</span><span class="w"> </span><span class="n">T</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<span class="w">    </span><span class="k">pub</span><span class="p">(</span><span class="k">crate</span><span class="p">)</span><span class="w"> </span><span class="n">borrow_count_pointer</span>: <span class="o">*</span><span class="k">mut</span><span class="w"> </span><span class="kt">u64</span><span class="p">,</span>
+<span class="w">    </span><span class="k">pub</span><span class="p">(</span><span class="k">crate</span><span class="p">)</span><span class="w"> </span><span class="n">value_pointer</span>: <span class="o">*</span><span class="k">mut</span><span class="w"> </span><span class="n">T</span>
+<span class="p">}</span>
 </pre></div>
 </div>
 <p>利用 Rust 所有权机制，通过 shared heap 传递数据。在确保隔离的条件下，不引入拷贝带来的开销。Domains 之间通过 <code class="docutils literal notranslate"><span class="pre">RRef&lt;T&gt;</span></code> 类型获得数据的所有权（Redleaf 是单一地址空间的）。</p>
@@ -239,12 +239,12 @@
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="IPC.html">
+          <a class="next-page" href="../others/index.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">SkyBridge and XPC</div>
+                <div class="title">其他</div>
               </div>
               <svg><use href="#svg-arrow-right"></use></svg>
             </a>

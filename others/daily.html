@@ -2,10 +2,10 @@
 <html class="no-js" lang="zh_CN">
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <meta name="color-scheme" content="light dark"><link rel="index" title="索引" href="../genindex.html" /><link rel="search" title="搜索" href="../search.html" /><link rel="next" title="其他" href="../others/index.html" /><link rel="prev" title="Redleaf" href="redleaf.html" />
+    <meta name="color-scheme" content="light dark"><link rel="index" title="索引" href="../genindex.html" /><link rel="search" title="搜索" href="../search.html" /><link rel="next" title="seL4" href="seL4.html" /><link rel="prev" title="User Interrupt" href="uint.html" />
 
     <meta name="generator" content="sphinx-4.3.2, furo 2022.06.21"/>
-        <title>SkyBridge and XPC - Notes</title>
+        <title>阅读笔记 - Notes</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?digest=40978830699223671f4072448e654b5958f38b89" />
     <link rel="stylesheet" type="text/css" href="../_static/design-style.4045f2051d55cab465a707391d5b2007.min.css" />
@@ -157,20 +157,20 @@
 </form>
 <div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
   <ul class="current">
-<li class="toctree-l1 current has-children"><a class="reference internal" href="index.html">论文阅读</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="theseus.html">Theseus</a></li>
-<li class="toctree-l2"><a class="reference internal" href="unikraft.html">Unikraft</a></li>
-<li class="toctree-l2"><a class="reference internal" href="redleaf.html">Redleaf</a></li>
-<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">SkyBridge and XPC</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../papers/index.html">论文阅读</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../papers/theseus.html">Theseus</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../papers/unikraft.html">Unikraft</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../papers/redleaf.html">Redleaf</a></li>
 </ul>
 </li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../others/index.html">其他</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
-<li class="toctree-l2"><a class="reference internal" href="../others/loongson.html">龙芯杯比赛回顾</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../others/wifi.html">破解 WIFI</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../others/s7.html">启动 S7 核</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../others/rust.html">学习 Rust</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../others/linux.html">学习 Linux</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../others/uint.html">User Interrupt</a></li>
+<li class="toctree-l1 current has-children"><a class="reference internal" href="index.html">其他</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="loongson.html">龙芯杯比赛回顾</a></li>
+<li class="toctree-l2"><a class="reference internal" href="wifi.html">破解 WIFI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="s7.html">启动 S7 核</a></li>
+<li class="toctree-l2"><a class="reference internal" href="rust.html">学习 Rust</a></li>
+<li class="toctree-l2"><a class="reference internal" href="uint.html">User Interrupt</a></li>
+<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">阅读笔记</a></li>
+<li class="toctree-l2"><a class="reference internal" href="seL4.html">seL4</a></li>
 </ul>
 </li>
 </ul>
@@ -193,7 +193,7 @@
         </a>
         <div class="content-icon-container">
           <div class="edit-this-page">
-  <a class="muted-link" href="https://github.com/tkf2019/Blog/edit/main/source/papers/IPC.md" title="Edit this page">
+  <a class="muted-link" href="https://github.com/tkf2019/Blog/edit/main/source/others/daily.md" title="Edit this page">
     <svg aria-hidden="true" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
       <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
       <path d="M4 20h4l10.5 -10.5a1.5 1.5 0 0 0 -4 -4l-10.5 10.5v4" />
@@ -215,55 +215,8 @@
           </label>
         </div>
         <article role="main">
-          <div class="section" id="skybridge-and-xpc">
-<h1>SkyBridge and XPC<a class="headerlink" href="#skybridge-and-xpc" title="永久链接至标题">#</a></h1>
-<div class="section" id="id1">
-<h2>背景<a class="headerlink" href="#id1" title="永久链接至标题">#</a></h2>
-<ul class="simple">
-<li><p>陈老师推荐的有关微内核的两篇论文，一篇讲软件层面的优化，一篇讲硬件层面的优化</p></li>
-<li><p>两篇论文都是上交陈海波团队发表的，微内核可能会应用在鸿蒙OS中</p></li>
-</ul>
-</div>
-<div class="section" id="skybridge">
-<h2>SkyBridge<a class="headerlink" href="#skybridge" title="永久链接至标题">#</a></h2>
-<ul class="simple">
-<li><p>论文多次提到熔断漏洞，近几年受到广泛关注和研究的安全性问题；</p></li>
-<li><p>微内核最关键的机制是核间通信，在用户层实现很多系统级应用，内核只保留最基本的功能；传统的进程通信依赖于内核进程切换，带来了巨大的开销</p></li>
-<li><p>seL4的fastpath IPC</p></li>
-<li><p>SkyBridge 提出了一些应用 VMFUNC 的方法：</p>
-<ul>
-<li><p>位于microkernel下方的Rootkernel，使用巨页避免microkernel频繁触发缺页中断；采用Subkernel和Rootkernel两级分管</p></li>
-<li><p>SkyBridge巧妙地将Client的CR3映射为对应Server的CR3，Client通过EPTP list来指向不同Server的EPT</p></li>
-<li><p>安全机制在kernel处理IPC，SkyBridge检查process的二进制文件避免非法VMFUNC，通过查表来验证IPC请求</p></li>
-</ul>
-</li>
-<li><p>Rootkernel:</p>
-<ul>
-<li><p>从Subkernel启动，通过VMCALL与Subkernel通信</p></li>
-<li><p>确保大多数VM行为不触发VM exit，VM exits包含三类：</p>
-<ul>
-<li><p>特权指令：不触发VM exits</p></li>
-<li><p>硬件中断：直接将中断交给microkernel处理</p></li>
-<li><p>EPT异常（miss，invalid）：Subkernel到Rootkernel采用1GB的页，SkyBridge仅为Rootkernel保留100MB的物理空间，减少TLB miss等问题出现的次数和开销</p></li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>Subkernel：</p>
-<ul>
-<li><p>server注册：将trampoline code page和stack pages映射到server的虚拟地址空间，为server分配ID</p></li>
-<li><p>client注册：绑定到指定ID的server，同样进行映射；EPT处理，将client的CR3映射到server的CR3；将所有和server有关的EPTP添加到client的EPTP list</p></li>
-<li><p>跨虚拟地址空间执行时陷入内核的问题：Subkernel可以记录进程的信息来判断</p></li>
-</ul>
-</li>
-<li><p>Rewriting Illegal VMFUNC:</p>
-<ul>
-<li><p>替换VMFUNC指令，若只有一条指令，则直接替换，若需要执行多条指令，则替换为跳转指令，跳转到待执行代码再返回</p></li>
-<li><p>（具体策略和x86的指令编码有关，暂时还没有深入学习x86体系结构）</p></li>
-</ul>
-</li>
-</ul>
-</div>
+          <div class="section" id="id1">
+<h1>阅读笔记<a class="headerlink" href="#id1" title="永久链接至标题">#</a></h1>
 <div class="section" id="xpc">
 <h2>XPC<a class="headerlink" href="#xpc" title="永久链接至标题">#</a></h2>
 <ul class="simple">
@@ -332,9 +285,127 @@
 <li><p>xcall-cap：xcall-cap-reg保存bitmap在内存中的基址</p></li>
 <li><p>link stack：可以非阻塞方式写stack</p></li>
 <li><p>cached x-entries：利用prefetch，进程可提前将x-entry加载到cache</p></li>
-<li><p>swapseg #reg: reg-seg和seg-list中的一项交换内容：</p></li>
+<li><p>swapseg #reg: reg-seg和seg-list中的一项交换内容</p></li>
 </ul>
 <p><img alt="relay-seg-chain.png" src="../_images/relay-seg-chain.png" /></p>
+</div>
+<div class="section" id="skybridge">
+<h2>SkyBridge<a class="headerlink" href="#skybridge" title="永久链接至标题">#</a></h2>
+<ul class="simple">
+<li><p>论文多次提到熔断漏洞，近几年受到广泛关注和研究的安全性问题；</p></li>
+<li><p>微内核最关键的机制是核间通信，在用户层实现很多系统级应用，内核只保留最基本的功能；传统的进程通信依赖于内核进程切换，带来了巨大的开销</p></li>
+<li><p>seL4的fastpath IPC</p></li>
+<li><p>SkyBridge 提出了一些应用 VMFUNC 的方法：</p>
+<ul>
+<li><p>位于microkernel下方的Rootkernel，使用巨页避免microkernel频繁触发缺页中断；采用Subkernel和Rootkernel两级分管</p></li>
+<li><p>SkyBridge巧妙地将Client的CR3映射为对应Server的CR3，Client通过EPTP list来指向不同Server的EPT</p></li>
+<li><p>安全机制在kernel处理IPC，SkyBridge检查process的二进制文件避免非法VMFUNC，通过查表来验证IPC请求</p></li>
+</ul>
+</li>
+<li><p>Rootkernel:</p>
+<ul>
+<li><p>从Subkernel启动，通过VMCALL与Subkernel通信</p></li>
+<li><p>确保大多数VM行为不触发VM exit，VM exits包含三类：</p>
+<ul>
+<li><p>特权指令：不触发VM exits</p></li>
+<li><p>硬件中断：直接将中断交给microkernel处理</p></li>
+<li><p>EPT异常（miss，invalid）：Subkernel到Rootkernel采用1GB的页，SkyBridge仅为Rootkernel保留100MB的物理空间，减少TLB miss等问题出现的次数和开销</p></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>Subkernel：</p>
+<ul>
+<li><p>server注册：将trampoline code page和stack pages映射到server的虚拟地址空间，为server分配ID</p></li>
+<li><p>client注册：绑定到指定ID的server，同样进行映射；EPT处理，将client的CR3映射到server的CR3；将所有和server有关的EPTP添加到client的EPTP list</p></li>
+<li><p>跨虚拟地址空间执行时陷入内核的问题：Subkernel可以记录进程的信息来判断</p></li>
+</ul>
+</li>
+<li><p>Rewriting Illegal VMFUNC:</p>
+<ul>
+<li><p>替换VMFUNC指令，若只有一条指令，则直接替换，若需要执行多条指令，则替换为跳转指令，跳转到待执行代码再返回</p></li>
+<li><p>（具体策略和x86的指令编码有关，暂时还没有深入学习x86体系结构）</p></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="section" id="cheri-a-hybrid-capability-system-architecture-for-scalable-software-compartmentalization">
+<h2><a class="reference external" href="https://ieeexplore.ieee.org/document/7163016">CHERI: A Hybrid Capability-System Architecture for Scalable Software Compartmentalization</a><a class="headerlink" href="#cheri-a-hybrid-capability-system-architecture-for-scalable-software-compartmentalization" title="永久链接至标题">#</a></h2>
+<ul class="simple">
+<li><p>Slides: <a class="reference external" href="https://www.cl.cam.ac.uk/research/security/ctsrd/pdfs/20171109-mit-cheri-web.pdf">CHERI</a></p></li>
+<li><p>其他：<a class="reference external" href="https://www.google.com/url?sa=t&amp;rct=j&amp;q=&amp;esrc=s&amp;source=web&amp;cd=&amp;ved=2ahUKEwjlwPXovMT7AhWltFYBHfeeBAkQFnoECA0QAQ&amp;url=https%3A%2F%2Fpeople.eecs.berkeley.edu%2F~daw%2Ftalks%2FPLAS06.ps&amp;usg=AOvVaw04t4KMID2-GG-_ALG3vT9C&amp;cshid=1669212494087131">UCB PLAS06</a></p></li>
+</ul>
+<div class="section" id="id2">
+<h3>简介<a class="headerlink" href="#id2" title="永久链接至标题">#</a></h3>
+<ul class="simple">
+<li><p>目标：通过软硬件协同的方法，解决有关 TCB 安全问题</p></li>
+<li><p>将传统方法分为两类： <code class="docutils literal notranslate"><span class="pre">exploit</span> <span class="pre">mitigation</span></code> 和 <code class="docutils literal notranslate"><span class="pre">software</span> <span class="pre">compartmentalization</span></code></p>
+<ul>
+<li><p>前者局限于攻击方式</p></li>
+<li><p>后者引入性能问题和扩展性问题</p></li>
+<li><p>CPU 未提供细粒度的内存保护</p></li>
+</ul>
+</li>
+<li><p>完成的工作：</p>
+<ul>
+<li><p>提出一种新的软硬件架构支持细粒度的隔离机制</p></li>
+<li><p>在 FPGA、FreeBSD、LLVM 中对架构进行验证</p></li>
+<li><p>提出一种高效的、可扩展的 MMU 模型</p></li>
+<li><p>对安全性、性能、特别是兼容性进行分析和验证</p></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="section" id="id3">
+<h3>方法<a class="headerlink" href="#id3" title="永久链接至标题">#</a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">Ambient</span> <span class="pre">Authority</span></code>: 系统访问控制，主体指明对某一客体执行的动作并完成，称该主体使用了<strong>环境权限</strong>。请求是否授予或拒绝权限取决于动作的属性，比如动作的身份或角色。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Confused</span> <span class="pre">Deputy</span> <span class="pre">Problem</span></code>: 一个程序通过向另一个程序发起请求，来获取另一个程序的系统权限。（代理混淆问题）例如传统的文件名并不能携带发起请求的程序对这个文件的访问权限，通过代理后，系统并不会处理该程序到文件的权限。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Capability-based</span> <span class="pre">software</span> <span class="pre">compartmentalization</span></code>:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">OS-based</span></code>: HYDRA、EROS、SeL4、Capsicum</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">language-based</span></code>: E、Joe—E、Caja</p></li>
+</ul>
+</li>
+<li><p>局限性：</p>
+<ul>
+<li><p>过于依赖硬件提供的机制，侧信道攻击</p></li>
+<li><p>TCB 问题需要考虑很多因素比如编译错误，内存分配，文件描述，垃圾回收等，如何最小化 TCB</p></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div class="section" id="understanding-the-overheads-of-hardware-and-language-based-ipc-mechanisms">
+<h2>Understanding the Overheads of Hardware and Language-Based IPC Mechanisms<a class="headerlink" href="#understanding-the-overheads-of-hardware-and-language-based-ipc-mechanisms" title="永久链接至标题">#</a></h2>
+<p>这篇文章侧重于性能分析，关于 Rust 的探讨基于 RedLeaf，从参考文献中可以了解相关论文。</p>
+<p>硬件隔离机制：VMFUNC、MPK（x86）、MTE（arm）</p>
+<p>硬件隔离机制的性能仍受到保存和恢复寄存器、换栈等影响，应用 Rust 隔离可以减少这些开销。</p>
+<p>Rust 比 C++ 慢（4-8%），Rust 需要更多运行时检查（更多的分支预测失败），高度抽象和结构体封装（可能）对 Cache 不友好。</p>
+</div>
+<div class="section" id="android-binder">
+<h2>Android Binder<a class="headerlink" href="#android-binder" title="永久链接至标题">#</a></h2>
+<p>Android Binder 是 Android 中实现的（Client-Server） IPC 方式，软件层面减少进程间跨地址空间通信的拷贝次数。主要组成部分：</p>
+<ul class="simple">
+<li><p>Client 进程</p></li>
+<li><p>Server 进程</p></li>
+<li><p>Binder 驱动：mmap 向 Server 进程共享数据；线程池线程管理</p></li>
+<li><p>ServiceManager：管理 Service 注册与查询</p></li>
+</ul>
+<ol class="arabic simple">
+<li><p>注册服务：Server 进程向 Binder 驱动发起 Service 注册请求；Binder 驱动将注册请求转发给 ServiceManager 进程；ServicManager 进程添加 Server 进程信息。</p></li>
+<li><p>获取服务：Client 进程向 Binder 驱动发起获取服务的请求（服务名称）；Binder 驱动将获取请求转发给 ServiceManager 进程；ServiceManager 查找到 Server 进程信息；通过 Binder 驱动将信息返回给 Client 进程。</p></li>
+<li><p>使用服务：Binder 驱动先创建一块内核缓冲区，并将 Server 进程的用户地址映射到该区域，避免 <code class="docutils literal notranslate"><span class="pre">copy_to_user()</span></code> ，Client 进程通过系统调用 <code class="docutils literal notranslate"><span class="pre">copy_from_user()</span></code> 将数据拷贝到内核缓冲区（当前线程被挂起）；Server 进程收到 Binder 通知后，从线程池中取出对应线程对数据进行处理并将执行结果写入共享内存（相当于写入内核缓冲区）中；Binder 驱动通知内核唤醒 Client 进程，Client 进程通过 <code class="docutils literal notranslate"><span class="pre">copy_to_user()</span></code> 从内核缓冲区接收 Server 进程返回对数据。</p></li>
+</ol>
+<p>Binder 驱动位于内核空间，ServiceManager 是用户空间的进程，二者均为 Android 基础架构。</p>
+<p>可以将通信过程视为一次跨域调用，Client 向缓冲区传入参数，Server 向缓冲区传入返回值。</p>
+<p>一些问题：</p>
+<ol class="arabic simple">
+<li><p>ServiceManger 相当于路由，为什么不采用 Client 到 Server 直接的共享内存？Client 数量大时可能会占用 Server 很多地址，Binder 相比于共享内存就是更易于使用开发，抽象得好管理起来比较方便。</p></li>
+<li><p>多个 Client 同时向同一个 Service 发起请求怎么处理？应该有缓冲队列或者线程调度上的处理，反正 Client 发送请求后会挂起。</p></li>
+<li><p>通信流程涉及到多少次<strong>通知</strong>？Binder 通知 Server 处理传入数据、Binder 通知 Client 处理返回数据。</p></li>
+<li><p>Binder 还是涉及到了一次拷贝的开销，且 Client 地位比较被动，使用服务要被挂起。</p></li>
+</ol>
 </div>
 </div>
 
@@ -343,23 +414,23 @@
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="../others/index.html">
+          <a class="next-page" href="seL4.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">其他</div>
+                <div class="title">seL4</div>
               </div>
               <svg><use href="#svg-arrow-right"></use></svg>
             </a>
-          <a class="prev-page" href="redleaf.html">
+          <a class="prev-page" href="uint.html">
               <svg><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">Redleaf</div>
+                <div class="title">User Interrupt</div>
                 
               </div>
             </a>
@@ -395,10 +466,16 @@
         <div class="toc-tree-container">
           <div class="toc-tree">
             <ul>
-<li><a class="reference internal" href="#">SkyBridge and XPC</a><ul>
-<li><a class="reference internal" href="#id1">背景</a></li>
-<li><a class="reference internal" href="#skybridge">SkyBridge</a></li>
+<li><a class="reference internal" href="#">阅读笔记</a><ul>
 <li><a class="reference internal" href="#xpc">XPC</a></li>
+<li><a class="reference internal" href="#skybridge">SkyBridge</a></li>
+<li><a class="reference internal" href="#cheri-a-hybrid-capability-system-architecture-for-scalable-software-compartmentalization">CHERI: A Hybrid Capability-System Architecture for Scalable Software Compartmentalization</a><ul>
+<li><a class="reference internal" href="#id2">简介</a></li>
+<li><a class="reference internal" href="#id3">方法</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#understanding-the-overheads-of-hardware-and-language-based-ipc-mechanisms">Understanding the Overheads of Hardware and Language-Based IPC Mechanisms</a></li>
+<li><a class="reference internal" href="#android-binder">Android Binder</a></li>
 </ul>
 </li>
 </ul>

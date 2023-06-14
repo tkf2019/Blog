@@ -2,10 +2,10 @@
 <html class="no-js" lang="zh_CN">
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <meta name="color-scheme" content="light dark"><link rel="index" title="索引" href="../genindex.html" /><link rel="search" title="搜索" href="../search.html" /><link rel="next" title="User Interrupt" href="uint.html" /><link rel="prev" title="学习 Rust" href="rust.html" />
+    <meta name="color-scheme" content="light dark"><link rel="index" title="索引" href="../genindex.html" /><link rel="search" title="搜索" href="../search.html" /><link rel="prev" title="阅读笔记" href="daily.html" />
 
     <meta name="generator" content="sphinx-4.3.2, furo 2022.06.21"/>
-        <title>学习 Linux - Notes</title>
+        <title>seL4 - Notes</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?digest=40978830699223671f4072448e654b5958f38b89" />
     <link rel="stylesheet" type="text/css" href="../_static/design-style.4045f2051d55cab465a707391d5b2007.min.css" />
@@ -161,7 +161,6 @@
 <li class="toctree-l2"><a class="reference internal" href="../papers/theseus.html">Theseus</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../papers/unikraft.html">Unikraft</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../papers/redleaf.html">Redleaf</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../papers/IPC.html">SkyBridge and XPC</a></li>
 </ul>
 </li>
 <li class="toctree-l1 current has-children"><a class="reference internal" href="index.html">其他</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
@@ -169,8 +168,9 @@
 <li class="toctree-l2"><a class="reference internal" href="wifi.html">破解 WIFI</a></li>
 <li class="toctree-l2"><a class="reference internal" href="s7.html">启动 S7 核</a></li>
 <li class="toctree-l2"><a class="reference internal" href="rust.html">学习 Rust</a></li>
-<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">学习 Linux</a></li>
 <li class="toctree-l2"><a class="reference internal" href="uint.html">User Interrupt</a></li>
+<li class="toctree-l2"><a class="reference internal" href="daily.html">阅读笔记</a></li>
+<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">seL4</a></li>
 </ul>
 </li>
 </ul>
@@ -193,7 +193,7 @@
         </a>
         <div class="content-icon-container">
           <div class="edit-this-page">
-  <a class="muted-link" href="https://github.com/tkf2019/Blog/edit/main/source/others/linux.rst" title="Edit this page">
+  <a class="muted-link" href="https://github.com/tkf2019/Blog/edit/main/source/others/seL4.md" title="Edit this page">
     <svg aria-hidden="true" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
       <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
       <path d="M4 20h4l10.5 -10.5a1.5 1.5 0 0 0 -4 -4l-10.5 10.5v4" />
@@ -215,74 +215,17 @@
           </label>
         </div>
         <article role="main">
-          <div class="section" id="linux">
-<h1>学习 Linux<a class="headerlink" href="#linux" title="永久链接至标题">#</a></h1>
-<div class="section" id="posix-apis">
-<h2>POSIX APIs<a class="headerlink" href="#posix-apis" title="永久链接至标题">#</a></h2>
-<div class="section" id="fork">
-<h3>fork<a class="headerlink" href="#fork" title="永久链接至标题">#</a></h3>
-<p>创建一个新的进程，调用者称为父进程，新创建的进程称为子进程。两个进程运行在不同的地址空间，内存读写、文件映射等操作不会互相干扰。除了以下几点外，子进程会在创建时复制父进程的状态：</p>
-<ul class="simple">
-<li><p>分配新的 PID，不会于现有的 PGID 冲突</p></li>
-<li><p>父进程 PID 与调用者的 PID 一致</p></li>
-<li><p>不会继承父进程的内存锁（mlock）</p></li>
-<li><p>进程资源占用情况（getrusage），CPU 时间会清零（times）</p></li>
-<li><p>等待处理的信号集合会清空 （sigpending）</p></li>
-<li><p>不会继承 semaphore adjustments （不太理解）</p></li>
-<li><p>不会继承 process-assosiated record locks</p></li>
-<li><p>不会继承计时器（setitimer、alarm、timer_create）</p></li>
-<li><p>不会继承异步 IO 的上下文和未完成的请求</p></li>
-</ul>
-<p>一些其他需要注意的点：</p>
-<ul class="simple">
-<li><p>子进程会复制整个地址空间，父进程内锁的状态等信息也会被复制</p></li>
-<li></li>
-</ul>
+          <div class="section" id="sel4">
+<h1>seL4<a class="headerlink" href="#sel4" title="永久链接至标题">#</a></h1>
+<div class="section" id="sel4-tutorial">
+<h2>seL4 Tutorial<a class="headerlink" href="#sel4-tutorial" title="永久链接至标题">#</a></h2>
+<p>seL4 构建基于多种工具，包括 repo、ninja 等。Tutorial 测例默认在 x86 架构的 QEMU 上运行。</p>
+<p>运行 hello-world 退出后报错 <code class="docutils literal notranslate"><span class="pre">Caught</span> <span class="pre">cap</span> <span class="pre">fault</span></code>，将 return 0 改为执行 exit 后不再出现报错。</p>
+<p>ninja 构建 hello-camkes-0 报错 <code class="docutils literal notranslate"><span class="pre">make:</span> <span class="pre">stack:</span> <span class="pre">No</span> <span class="pre">such</span> <span class="pre">file</span> <span class="pre">or</span> <span class="pre">directory</span></code>，一个解决办法是执行 <code class="docutils literal notranslate"><span class="pre">curl</span> <span class="pre">-sSL</span> <span class="pre">https://get.haskellstack.org/</span> <span class="pre">|</span> <span class="pre">sh</span></code> 安装 haskell-stack，然后报错 Timeout，解决网络问题后可以正常运行。</p>
 </div>
-<div class="section" id="fcntl">
-<h3>fcntl<a class="headerlink" href="#fcntl" title="永久链接至标题">#</a></h3>
-<p><a class="reference external" href="https://saltigavv.net/articles/file-locks/">这篇博客</a> 详细地介绍了 Linux 中的文件锁。</p>
-<ul class="simple">
-<li><dl class="simple">
-<dt>BSD locks：</dt><dd><ul>
-<li><p>通过 <code class="docutils literal notranslate"><span class="pre">flock</span></code> 创建文件锁</p></li>
-<li><p>整个文件上锁</p></li>
-<li><p>和 <code class="docutils literal notranslate"><span class="pre">File</span></code> 对象关联</p></li>
-<li><p>不支持原子的读写锁类型转换</p></li>
-<li><p>复制的文件描述符（指向同一个 <code class="docutils literal notranslate"><span class="pre">File</span></code> ）不提供同步机制</p></li>
-</ul>
-</dd>
-</dl>
-</li>
-<li><dl class="simple">
-<dt>POSIX record locks:</dt><dd><ul>
-<li><p>通过 <code class="docutils literal notranslate"><span class="pre">fcntl</span></code> 创建文件锁</p></li>
-<li><p>上锁范围精确到字节</p></li>
-<li><p>和 <code class="docutils literal notranslate"><span class="pre">[inode,</span> <span class="pre">pid]</span></code> 对关联</p></li>
-<li><p>支持原子的读写锁类型转换</p></li>
-</ul>
-</dd>
-</dl>
-</li>
-</ul>
-</div>
-<div class="section" id="execve">
-<h3>execve<a class="headerlink" href="#execve" title="永久链接至标题">#</a></h3>
-</div>
-<div class="section" id="getrusage">
-<h3>getrusage<a class="headerlink" href="#getrusage" title="永久链接至标题">#</a></h3>
-<p>获取当前进程、当前进程的全部子进程或当前线程的资源占用情况。具体信息直接参考 <code class="docutils literal notranslate"><span class="pre">usage</span></code> 结构体。</p>
-</div>
-<div class="section" id="mlock">
-<h3>mlock 系列<a class="headerlink" href="#mlock" title="永久链接至标题">#</a></h3>
-<p>对某个范围内连续的页进行上锁，确保该页不会被系统换出。主要应用场景为实时算法和高安全性数据处理。</p>
-<p>实时算法需要统计任务调度等性能瓶颈带来的开销，而换页则是具有很高不确定性的机制。
-实时算法测试可以将全部页面算法，同时使用一些 dummy 写操作来避免页的强制缺失。注意 fork 调用会准备 COW 机制，也就是说这之后的写操作会触发缺页异常，因此应该在对时间精度要求较高的场景下避免使用 fork。</p>
-<p>安全性需求则是防止用户的隐私信息在处理过程中被换入外存，从而增大泄漏的风险。但是一些电脑会在挂起时将内存拷贝到外存，这一机制无法通过 mlock 来避免。</p>
-</div>
-</div>
-<div class="section" id="io-uring">
-<h2>io_uring<a class="headerlink" href="#io-uring" title="永久链接至标题">#</a></h2>
+<div class="section" id="sel4-hardware">
+<h2>seL4 Hardware<a class="headerlink" href="#sel4-hardware" title="永久链接至标题">#</a></h2>
+<p>支持 <a class="reference external" href="https://docs.sel4.systems/Hardware/rocketchip.html">Rocket</a> 硬件平台。</p>
 </div>
 </div>
 
@@ -291,23 +234,15 @@
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="uint.html">
-              <div class="page-info">
-                <div class="context">
-                  <span>Next</span>
-                </div>
-                <div class="title">User Interrupt</div>
-              </div>
-              <svg><use href="#svg-arrow-right"></use></svg>
-            </a>
-          <a class="prev-page" href="rust.html">
+          
+          <a class="prev-page" href="daily.html">
               <svg><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">学习 Rust</div>
+                <div class="title">阅读笔记</div>
                 
               </div>
             </a>
@@ -343,16 +278,9 @@
         <div class="toc-tree-container">
           <div class="toc-tree">
             <ul>
-<li><a class="reference internal" href="#">学习 Linux</a><ul>
-<li><a class="reference internal" href="#posix-apis">POSIX APIs</a><ul>
-<li><a class="reference internal" href="#fork">fork</a></li>
-<li><a class="reference internal" href="#fcntl">fcntl</a></li>
-<li><a class="reference internal" href="#execve">execve</a></li>
-<li><a class="reference internal" href="#getrusage">getrusage</a></li>
-<li><a class="reference internal" href="#mlock">mlock 系列</a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#io-uring">io_uring</a></li>
+<li><a class="reference internal" href="#">seL4</a><ul>
+<li><a class="reference internal" href="#sel4-tutorial">seL4 Tutorial</a></li>
+<li><a class="reference internal" href="#sel4-hardware">seL4 Hardware</a></li>
 </ul>
 </li>
 </ul>

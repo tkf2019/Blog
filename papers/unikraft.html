@@ -161,7 +161,6 @@
 <li class="toctree-l2"><a class="reference internal" href="theseus.html">Theseus</a></li>
 <li class="toctree-l2 current current-page"><a class="current reference internal" href="#">Unikraft</a></li>
 <li class="toctree-l2"><a class="reference internal" href="redleaf.html">Redleaf</a></li>
-<li class="toctree-l2"><a class="reference internal" href="IPC.html">SkyBridge and XPC</a></li>
 </ul>
 </li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../others/index.html">其他</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
@@ -169,8 +168,9 @@
 <li class="toctree-l2"><a class="reference internal" href="../others/wifi.html">破解 WIFI</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../others/s7.html">启动 S7 核</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../others/rust.html">学习 Rust</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../others/linux.html">学习 Linux</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../others/uint.html">User Interrupt</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../others/daily.html">阅读笔记</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../others/seL4.html">seL4</a></li>
 </ul>
 </li>
 </ul>
@@ -287,113 +287,113 @@
 <li><p>an internal allocation API called ukalloc</p></li>
 <li><p>one or more backend allocator implementations</p></li>
 </ul>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="k">struct</span><span class="w"> </span><span class="nc">uk_alloc</span><span class="p">;</span><span class="w"></span>
-<span class="linenos"> 2</span><span class="k">typedef</span><span class="w"> </span><span class="kt">void</span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">uk_alloc_malloc_func_t</span><span class="p">)</span><span class="w"></span>
-<span class="linenos"> 3</span><span class="w">            </span><span class="p">(</span><span class="k">struct</span><span class="w"> </span><span class="nc">uk_alloc</span><span class="w"> </span><span class="o">*</span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="n">__sz</span><span class="w"> </span><span class="n">size</span><span class="p">);</span><span class="w"></span>
-<span class="linenos"> 4</span><span class="k">struct</span><span class="w"> </span><span class="nc">uk_alloc</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="linenos"> 5</span><span class="w">    </span><span class="cm">/* memory allocation */</span><span class="w"></span>
-<span class="linenos"> 6</span><span class="w">    </span><span class="n">uk_alloc_malloc_func_t</span><span class="w"> </span><span class="n">malloc</span><span class="p">;</span><span class="w"></span>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="k">struct</span><span class="w"> </span><span class="nc">uk_alloc</span><span class="p">;</span>
+<span class="linenos"> 2</span><span class="k">typedef</span><span class="w"> </span><span class="kt">void</span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">uk_alloc_malloc_func_t</span><span class="p">)</span>
+<span class="linenos"> 3</span><span class="w">            </span><span class="p">(</span><span class="k">struct</span><span class="w"> </span><span class="nc">uk_alloc</span><span class="w"> </span><span class="o">*</span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="n">__sz</span><span class="w"> </span><span class="n">size</span><span class="p">);</span>
+<span class="linenos"> 4</span><span class="k">struct</span><span class="w"> </span><span class="nc">uk_alloc</span><span class="w"> </span><span class="p">{</span>
+<span class="linenos"> 5</span><span class="w">    </span><span class="cm">/* memory allocation */</span>
+<span class="linenos"> 6</span><span class="w">    </span><span class="n">uk_alloc_malloc_func_t</span><span class="w"> </span><span class="n">malloc</span><span class="p">;</span>
 <span class="linenos"> 7</span><span class="w">    </span><span class="c1">// ...</span>
-<span class="linenos"> 8</span><span class="w">    </span><span class="cm">/* internal */</span><span class="w"></span>
-<span class="linenos"> 9</span><span class="w">    </span><span class="k">struct</span><span class="w"> </span><span class="nc">uk_alloc</span><span class="w"> </span><span class="o">*</span><span class="n">next</span><span class="p">;</span><span class="w"></span>
-<span class="linenos">10</span><span class="w">    </span><span class="n">__u8</span><span class="w"> </span><span class="n">priv</span><span class="p">[];</span><span class="w"></span>
-<span class="linenos">11</span><span class="p">};</span><span class="w"></span>
+<span class="linenos"> 8</span><span class="w">    </span><span class="cm">/* internal */</span>
+<span class="linenos"> 9</span><span class="w">    </span><span class="k">struct</span><span class="w"> </span><span class="nc">uk_alloc</span><span class="w"> </span><span class="o">*</span><span class="n">next</span><span class="p">;</span>
+<span class="linenos">10</span><span class="w">    </span><span class="n">__u8</span><span class="w"> </span><span class="n">priv</span><span class="p">[];</span>
+<span class="linenos">11</span><span class="p">};</span>
 </pre></div>
 </div>
 </div>
 <div class="section" id="ukplat-memregion">
 <h3>ukplat_memregion<a class="headerlink" href="#ukplat-memregion" title="永久链接至标题">#</a></h3>
 <p><strong>Unikraft</strong> 为不同平台（KVM、Linuxu 等）下的内存管理提供 <cite>ukplat_memregion*</cite> 相关接口。</p>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="cm">/* Descriptor of a memory region */</span><span class="w"></span>
-<span class="linenos"> 2</span><span class="k">struct</span><span class="w"> </span><span class="nc">ukplat_memregion_desc</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="linenos"> 3</span><span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">base</span><span class="p">;</span><span class="w"></span>
-<span class="linenos"> 4</span><span class="w">    </span><span class="n">__sz</span><span class="w"> </span><span class="n">len</span><span class="p">;</span><span class="w"></span>
-<span class="linenos"> 5</span><span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">flags</span><span class="p">;</span><span class="w"></span>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="cm">/* Descriptor of a memory region */</span>
+<span class="linenos"> 2</span><span class="k">struct</span><span class="w"> </span><span class="nc">ukplat_memregion_desc</span><span class="w"> </span><span class="p">{</span>
+<span class="linenos"> 3</span><span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">base</span><span class="p">;</span>
+<span class="linenos"> 4</span><span class="w">    </span><span class="n">__sz</span><span class="w"> </span><span class="n">len</span><span class="p">;</span>
+<span class="linenos"> 5</span><span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">flags</span><span class="p">;</span>
 <span class="linenos"> 6</span><span class="cp">#if CONFIG_UKPLAT_MEMRNAME</span>
-<span class="linenos"> 7</span><span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">name</span><span class="p">;</span><span class="w"></span>
+<span class="linenos"> 7</span><span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">name</span><span class="p">;</span>
 <span class="linenos"> 8</span><span class="cp">#endif</span>
-<span class="linenos"> 9</span><span class="p">};</span><span class="w"></span>
+<span class="linenos"> 9</span><span class="p">};</span>
 <span class="linenos">10</span><span class="cm">/**</span>
 <span class="linenos">11</span><span class="cm">* Returns the number of available memory regions</span>
 <span class="linenos">12</span><span class="cm">* @return Number of memory regions</span>
-<span class="linenos">13</span><span class="cm">*/</span><span class="w"></span>
-<span class="linenos">14</span><span class="kt">int</span><span class="w"> </span><span class="nf">ukplat_memregion_count</span><span class="p">(</span><span class="kt">void</span><span class="p">);</span><span class="w"></span>
+<span class="linenos">13</span><span class="cm">*/</span>
+<span class="linenos">14</span><span class="kt">int</span><span class="w"> </span><span class="nf">ukplat_memregion_count</span><span class="p">(</span><span class="kt">void</span><span class="p">);</span>
 <span class="linenos">15</span><span class="cm">/**</span>
 <span class="linenos">16</span><span class="cm">* Reads a memory region to mrd</span>
 <span class="linenos">17</span><span class="cm">* @param i Memory region number</span>
 <span class="linenos">18</span><span class="cm">* @param mrd Pointer to memory region descriptor that will be filled out</span>
 <span class="linenos">19</span><span class="cm">* @return 0 on success, &lt; 0 otherwise</span>
-<span class="linenos">20</span><span class="cm">*/</span><span class="w"></span>
-<span class="linenos">21</span><span class="kt">int</span><span class="w"> </span><span class="nf">ukplat_memregion_get</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="p">,</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="nc">ukplat_memregion_desc</span><span class="w"> </span><span class="o">*</span><span class="n">mrd</span><span class="p">);</span><span class="w"></span>
+<span class="linenos">20</span><span class="cm">*/</span>
+<span class="linenos">21</span><span class="kt">int</span><span class="w"> </span><span class="nf">ukplat_memregion_get</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="p">,</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="nc">ukplat_memregion_desc</span><span class="w"> </span><span class="o">*</span><span class="n">mrd</span><span class="p">);</span>
 </pre></div>
 </div>
 </div>
 <div class="section" id="ukboot">
 <h3>ukboot<a class="headerlink" href="#ukboot" title="永久链接至标题">#</a></h3>
 <p>Unikraf 在 ukboot 中对 memory allocator 等模块进行初始化，根据编译选项（ <code class="docutils literal notranslate"><span class="pre">CONFIG_LIBUKALLOC</span></code> 等），选择对应的接口实现。</p>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="cm">/* defined in &lt;uk/plat.h&gt; */</span><span class="w"></span>
-<span class="linenos"> 2</span><span class="kt">void</span><span class="w"> </span><span class="nf">ukplat_entry</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">argc</span><span class="p">,</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">argv</span><span class="p">[])</span><span class="w"></span>
-<span class="linenos"> 3</span><span class="p">{</span><span class="w"></span>
-<span class="linenos"> 4</span><span class="w">    </span><span class="k">struct</span><span class="w"> </span><span class="nc">thread_main_arg</span><span class="w"> </span><span class="n">tma</span><span class="p">;</span><span class="w"></span>
-<span class="linenos"> 5</span><span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">kern_args</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
-<span class="linenos"> 6</span><span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">rc</span><span class="w"> </span><span class="n">__maybe_unused</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="cm">/* defined in &lt;uk/plat.h&gt; */</span>
+<span class="linenos"> 2</span><span class="kt">void</span><span class="w"> </span><span class="nf">ukplat_entry</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">argc</span><span class="p">,</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">argv</span><span class="p">[])</span>
+<span class="linenos"> 3</span><span class="p">{</span>
+<span class="linenos"> 4</span><span class="w">    </span><span class="k">struct</span><span class="w"> </span><span class="nc">thread_main_arg</span><span class="w"> </span><span class="n">tma</span><span class="p">;</span>
+<span class="linenos"> 5</span><span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">kern_args</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="linenos"> 6</span><span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">rc</span><span class="w"> </span><span class="n">__maybe_unused</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
 <span class="linenos"> 7</span><span class="cp">#if CONFIG_LIBUKALLOC</span>
-<span class="linenos"> 8</span><span class="w">    </span><span class="k">struct</span><span class="w"> </span><span class="nc">uk_alloc</span><span class="w"> </span><span class="o">*</span><span class="n">a</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span><span class="w"></span>
+<span class="linenos"> 8</span><span class="w">    </span><span class="k">struct</span><span class="w"> </span><span class="nc">uk_alloc</span><span class="w"> </span><span class="o">*</span><span class="n">a</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span>
 <span class="linenos"> 9</span><span class="cp">#endif</span>
 <span class="linenos">10</span><span class="cp">#if !CONFIG_LIBUKBOOT_NOALLOC</span>
-<span class="linenos">11</span><span class="w">    </span><span class="k">struct</span><span class="w"> </span><span class="nc">ukplat_memregion_desc</span><span class="w"> </span><span class="n">md</span><span class="p">;</span><span class="w"></span>
+<span class="linenos">11</span><span class="w">    </span><span class="k">struct</span><span class="w"> </span><span class="nc">ukplat_memregion_desc</span><span class="w"> </span><span class="n">md</span><span class="p">;</span>
 <span class="linenos">12</span><span class="cp">#endif</span>
 <span class="linenos">13</span><span class="cp">#if CONFIG_LIBUKSCHED</span>
-<span class="linenos">14</span><span class="w">    </span><span class="k">struct</span><span class="w"> </span><span class="nc">uk_sched</span><span class="w"> </span><span class="o">*</span><span class="n">s</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span><span class="w"></span>
-<span class="linenos">15</span><span class="w">    </span><span class="k">struct</span><span class="w"> </span><span class="nc">uk_thread</span><span class="w"> </span><span class="o">*</span><span class="n">main_thread</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span><span class="w"></span>
+<span class="linenos">14</span><span class="w">    </span><span class="k">struct</span><span class="w"> </span><span class="nc">uk_sched</span><span class="w"> </span><span class="o">*</span><span class="n">s</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span>
+<span class="linenos">15</span><span class="w">    </span><span class="k">struct</span><span class="w"> </span><span class="nc">uk_thread</span><span class="w"> </span><span class="o">*</span><span class="n">main_thread</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span>
 <span class="linenos">16</span><span class="cp">#endif</span>
 <span class="linenos">17</span>
 <span class="linenos">18</span><span class="c1">// ...</span>
 <span class="linenos">19</span>
 <span class="linenos">20</span><span class="cp">#if !CONFIG_LIBUKBOOT_NOALLOC</span>
-<span class="linenos">21</span><span class="w">    </span><span class="cm">/* initialize memory allocator */</span><span class="w"></span>
-<span class="linenos">22</span><span class="w">    </span><span class="n">ukplat_memregion_foreach</span><span class="p">(</span><span class="o">&amp;</span><span class="n">md</span><span class="p">,</span><span class="w"> </span><span class="n">UKPLAT_MEMRF_ALLOCATABLE</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="linenos">21</span><span class="w">    </span><span class="cm">/* initialize memory allocator */</span>
+<span class="linenos">22</span><span class="w">    </span><span class="n">ukplat_memregion_foreach</span><span class="p">(</span><span class="o">&amp;</span><span class="n">md</span><span class="p">,</span><span class="w"> </span><span class="n">UKPLAT_MEMRF_ALLOCATABLE</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 <span class="linenos">23</span>
 <span class="linenos">24</span><span class="w">        </span><span class="cm">/* try to use memory region to initialize allocator</span>
 <span class="linenos">25</span><span class="cm">        * if it fails, we will try  again with the next region.</span>
 <span class="linenos">26</span><span class="cm">        * As soon we have an allocator, we simply add every</span>
 <span class="linenos">27</span><span class="cm">        * subsequent region to it</span>
-<span class="linenos">28</span><span class="cm">        */</span><span class="w"></span>
-<span class="linenos">29</span><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">a</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="linenos">28</span><span class="cm">        */</span>
+<span class="linenos">29</span><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">a</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 <span class="linenos">30</span><span class="cp">#if CONFIG_LIBUKBOOT_INITBBUDDY</span>
-<span class="linenos">31</span><span class="w">            </span><span class="n">a</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">uk_allocbbuddy_init</span><span class="p">(</span><span class="n">md</span><span class="p">.</span><span class="n">base</span><span class="p">,</span><span class="w"> </span><span class="n">md</span><span class="p">.</span><span class="n">len</span><span class="p">);</span><span class="w"></span>
+<span class="linenos">31</span><span class="w">            </span><span class="n">a</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">uk_allocbbuddy_init</span><span class="p">(</span><span class="n">md</span><span class="p">.</span><span class="n">base</span><span class="p">,</span><span class="w"> </span><span class="n">md</span><span class="p">.</span><span class="n">len</span><span class="p">);</span>
 <span class="linenos">32</span><span class="w">            </span><span class="c1">// Other implementations...</span>
 <span class="linenos">33</span><span class="cp">#endif</span>
-<span class="linenos">34</span><span class="w">        </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="linenos">35</span><span class="w">            </span><span class="n">uk_alloc_addmem</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="n">md</span><span class="p">.</span><span class="n">base</span><span class="p">,</span><span class="w"> </span><span class="n">md</span><span class="p">.</span><span class="n">len</span><span class="p">);</span><span class="w"></span>
-<span class="linenos">36</span><span class="w">        </span><span class="p">}</span><span class="w"></span>
-<span class="linenos">37</span><span class="w">    </span><span class="p">}</span><span class="w"></span>
-<span class="linenos">38</span><span class="w">    </span><span class="n">rc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ukplat_memallocator_set</span><span class="p">(</span><span class="n">a</span><span class="p">);</span><span class="w"></span>
+<span class="linenos">34</span><span class="w">        </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<span class="linenos">35</span><span class="w">            </span><span class="n">uk_alloc_addmem</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="n">md</span><span class="p">.</span><span class="n">base</span><span class="p">,</span><span class="w"> </span><span class="n">md</span><span class="p">.</span><span class="n">len</span><span class="p">);</span>
+<span class="linenos">36</span><span class="w">        </span><span class="p">}</span>
+<span class="linenos">37</span><span class="w">    </span><span class="p">}</span>
+<span class="linenos">38</span><span class="w">    </span><span class="n">rc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ukplat_memallocator_set</span><span class="p">(</span><span class="n">a</span><span class="p">);</span>
 <span class="linenos">39</span><span class="cp">#endif</span>
 <span class="linenos">40</span>
 <span class="linenos">41</span><span class="cp">#if CONFIG_LIBUKALLOC</span>
-<span class="linenos">42</span><span class="w">    </span><span class="n">rc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ukplat_irq_init</span><span class="p">(</span><span class="n">a</span><span class="p">);</span><span class="w"></span>
+<span class="linenos">42</span><span class="w">    </span><span class="n">rc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ukplat_irq_init</span><span class="p">(</span><span class="n">a</span><span class="p">);</span>
 <span class="linenos">43</span><span class="cp">#endif</span>
 <span class="linenos">44</span>
-<span class="linenos">45</span><span class="w">    </span><span class="n">ukplat_time_init</span><span class="p">();</span><span class="w"></span>
+<span class="linenos">45</span><span class="w">    </span><span class="n">ukplat_time_init</span><span class="p">();</span>
 <span class="linenos">46</span>
 <span class="linenos">47</span><span class="cp">#if CONFIG_LIBUKSCHED</span>
-<span class="linenos">48</span><span class="w">    </span><span class="cm">/* Init scheduler. */</span><span class="w"></span>
-<span class="linenos">49</span><span class="w">    </span><span class="n">s</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">uk_sched_default_init</span><span class="p">(</span><span class="n">a</span><span class="p">);</span><span class="w"></span>
+<span class="linenos">48</span><span class="w">    </span><span class="cm">/* Init scheduler. */</span>
+<span class="linenos">49</span><span class="w">    </span><span class="n">s</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">uk_sched_default_init</span><span class="p">(</span><span class="n">a</span><span class="p">);</span>
 <span class="linenos">50</span><span class="cp">#endif</span>
 <span class="linenos">51</span>
-<span class="linenos">52</span><span class="w">    </span><span class="n">tma</span><span class="p">.</span><span class="n">argc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">argc</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">kern_args</span><span class="p">;</span><span class="w"></span>
-<span class="linenos">53</span><span class="w">    </span><span class="n">tma</span><span class="p">.</span><span class="n">argv</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&amp;</span><span class="n">argv</span><span class="p">[</span><span class="n">kern_args</span><span class="p">];</span><span class="w"></span>
+<span class="linenos">52</span><span class="w">    </span><span class="n">tma</span><span class="p">.</span><span class="n">argc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">argc</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">kern_args</span><span class="p">;</span>
+<span class="linenos">53</span><span class="w">    </span><span class="n">tma</span><span class="p">.</span><span class="n">argv</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&amp;</span><span class="n">argv</span><span class="p">[</span><span class="n">kern_args</span><span class="p">];</span>
 <span class="linenos">54</span>
 <span class="linenos">55</span><span class="cp">#if CONFIG_LIBUKSCHED</span>
-<span class="linenos">56</span><span class="w">    </span><span class="n">main_thread</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">uk_thread_create</span><span class="p">(</span><span class="s">&quot;main&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">main_thread_func</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">tma</span><span class="p">);</span><span class="w"></span>
-<span class="linenos">57</span><span class="w">    </span><span class="n">uk_sched_start</span><span class="p">(</span><span class="n">s</span><span class="p">);</span><span class="w"></span>
+<span class="linenos">56</span><span class="w">    </span><span class="n">main_thread</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">uk_thread_create</span><span class="p">(</span><span class="s">&quot;main&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">main_thread_func</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">tma</span><span class="p">);</span>
+<span class="linenos">57</span><span class="w">    </span><span class="n">uk_sched_start</span><span class="p">(</span><span class="n">s</span><span class="p">);</span>
 <span class="linenos">58</span><span class="cp">#else</span>
-<span class="linenos">59</span><span class="w">    </span><span class="cm">/* Enable interrupts before starting the application */</span><span class="w"></span>
-<span class="linenos">60</span><span class="w">    </span><span class="n">ukplat_lcpu_enable_irq</span><span class="p">();</span><span class="w"></span>
-<span class="linenos">61</span><span class="w">    </span><span class="n">main_thread_func</span><span class="p">(</span><span class="o">&amp;</span><span class="n">tma</span><span class="p">);</span><span class="w"></span>
+<span class="linenos">59</span><span class="w">    </span><span class="cm">/* Enable interrupts before starting the application */</span>
+<span class="linenos">60</span><span class="w">    </span><span class="n">ukplat_lcpu_enable_irq</span><span class="p">();</span>
+<span class="linenos">61</span><span class="w">    </span><span class="n">main_thread_func</span><span class="p">(</span><span class="o">&amp;</span><span class="n">tma</span><span class="p">);</span>
 <span class="linenos">62</span><span class="cp">#endif</span>
-<span class="linenos">63</span><span class="p">}</span><span class="w"></span>
+<span class="linenos">63</span><span class="p">}</span>
 </pre></div>
 </div>
 </div>
@@ -401,100 +401,100 @@
 <h3>uksched<a class="headerlink" href="#uksched" title="永久链接至标题">#</a></h3>
 <div class="section" id="uk-thread">
 <h4>uk_thread<a class="headerlink" href="#uk-thread" title="永久链接至标题">#</a></h4>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="k">struct</span><span class="w"> </span><span class="nc">uk_thread</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="linenos"> 2</span><span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">name</span><span class="p">;</span><span class="w"></span>
-<span class="linenos"> 3</span><span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">stack</span><span class="p">;</span><span class="w"></span>
-<span class="linenos"> 4</span><span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">tls</span><span class="p">;</span><span class="w"></span>
-<span class="linenos"> 5</span><span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">ctx</span><span class="p">;</span><span class="w"></span>
-<span class="linenos"> 6</span><span class="w">    </span><span class="n">UK_TAILQ_ENTRY</span><span class="p">(</span><span class="k">struct</span><span class="w"> </span><span class="nc">uk_thread</span><span class="p">)</span><span class="w"> </span><span class="n">thread_list</span><span class="p">;</span><span class="w"></span>
-<span class="linenos"> 7</span><span class="w">    </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">flags</span><span class="p">;</span><span class="w"></span>
-<span class="linenos"> 8</span><span class="w">    </span><span class="n">__snsec</span><span class="w"> </span><span class="n">wakeup_time</span><span class="p">;</span><span class="w"></span>
-<span class="linenos"> 9</span><span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="n">detached</span><span class="p">;</span><span class="w"></span>
-<span class="linenos">10</span><span class="w">    </span><span class="k">struct</span><span class="w"> </span><span class="nc">uk_waitq</span><span class="w"> </span><span class="n">waiting_threads</span><span class="p">;</span><span class="w"></span>
-<span class="linenos">11</span><span class="w">    </span><span class="k">struct</span><span class="w"> </span><span class="nc">uk_sched</span><span class="w"> </span><span class="o">*</span><span class="n">sched</span><span class="p">;</span><span class="w"></span>
-<span class="linenos">12</span><span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">entry</span><span class="p">)(</span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="p">);</span><span class="w"></span>
-<span class="linenos">13</span><span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">arg</span><span class="p">;</span><span class="w"></span>
-<span class="linenos">14</span><span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">prv</span><span class="p">;</span><span class="w"></span>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="k">struct</span><span class="w"> </span><span class="nc">uk_thread</span><span class="w"> </span><span class="p">{</span>
+<span class="linenos"> 2</span><span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">name</span><span class="p">;</span>
+<span class="linenos"> 3</span><span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">stack</span><span class="p">;</span>
+<span class="linenos"> 4</span><span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">tls</span><span class="p">;</span>
+<span class="linenos"> 5</span><span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">ctx</span><span class="p">;</span>
+<span class="linenos"> 6</span><span class="w">    </span><span class="n">UK_TAILQ_ENTRY</span><span class="p">(</span><span class="k">struct</span><span class="w"> </span><span class="nc">uk_thread</span><span class="p">)</span><span class="w"> </span><span class="n">thread_list</span><span class="p">;</span>
+<span class="linenos"> 7</span><span class="w">    </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">flags</span><span class="p">;</span>
+<span class="linenos"> 8</span><span class="w">    </span><span class="n">__snsec</span><span class="w"> </span><span class="n">wakeup_time</span><span class="p">;</span>
+<span class="linenos"> 9</span><span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="n">detached</span><span class="p">;</span>
+<span class="linenos">10</span><span class="w">    </span><span class="k">struct</span><span class="w"> </span><span class="nc">uk_waitq</span><span class="w"> </span><span class="n">waiting_threads</span><span class="p">;</span>
+<span class="linenos">11</span><span class="w">    </span><span class="k">struct</span><span class="w"> </span><span class="nc">uk_sched</span><span class="w"> </span><span class="o">*</span><span class="n">sched</span><span class="p">;</span>
+<span class="linenos">12</span><span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">entry</span><span class="p">)(</span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="p">);</span>
+<span class="linenos">13</span><span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">arg</span><span class="p">;</span>
+<span class="linenos">14</span><span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">prv</span><span class="p">;</span>
 <span class="linenos">15</span><span class="cp">#ifdef CONFIG_LIBNEWLIBC</span>
-<span class="linenos">16</span><span class="w">    </span><span class="k">struct</span><span class="w"> </span><span class="nc">_reent</span><span class="w"> </span><span class="n">reent</span><span class="p">;</span><span class="w"></span>
+<span class="linenos">16</span><span class="w">    </span><span class="k">struct</span><span class="w"> </span><span class="nc">_reent</span><span class="w"> </span><span class="n">reent</span><span class="p">;</span>
 <span class="linenos">17</span><span class="cp">#endif</span>
 <span class="linenos">18</span><span class="cp">#if CONFIG_LIBUKSIGNAL</span>
-<span class="linenos">19</span><span class="w">    </span><span class="cm">/* TODO: Move to `TLS` and define within uksignal */</span><span class="w"></span>
-<span class="linenos">20</span><span class="w">    </span><span class="k">struct</span><span class="w"> </span><span class="nc">uk_thread_sig</span><span class="w"> </span><span class="n">signals_container</span><span class="p">;</span><span class="w"></span>
+<span class="linenos">19</span><span class="w">    </span><span class="cm">/* TODO: Move to `TLS` and define within uksignal */</span>
+<span class="linenos">20</span><span class="w">    </span><span class="k">struct</span><span class="w"> </span><span class="nc">uk_thread_sig</span><span class="w"> </span><span class="n">signals_container</span><span class="p">;</span>
 <span class="linenos">21</span><span class="cp">#endif</span>
-<span class="linenos">22</span><span class="p">};</span><span class="w"></span>
+<span class="linenos">22</span><span class="p">};</span>
 </pre></div>
 </div>
 <p><code class="docutils literal notranslate"><span class="pre">struct</span> <span class="pre">thread</span></code> 结构类型与传统定义方式类似，内部含有上下文指针、栈指针、状态位等。</p>
 <p>以 <code class="docutils literal notranslate"><span class="pre">uk_thread_init</span></code> 函数为例，可以看出 <strong>Unikraft</strong> 模块解耦的特点。通过调用注册的内存管理模块中的函数来完成线程上下文的创建。
 此外，线程对外提供了初始化接口 <code class="docutils literal notranslate"><span class="pre">struct</span> <span class="pre">uk_thread_inittab_entry::init</span></code>，可以进一步自定义初始化方法。</p>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kt">int</span><span class="w"> </span><span class="nf">uk_thread_init</span><span class="p">(</span><span class="w"></span>
-<span class="linenos"> 2</span><span class="w">    </span><span class="k">struct</span><span class="w"> </span><span class="nc">uk_thread</span><span class="w"> </span><span class="o">*</span><span class="kr">thread</span><span class="p">,</span><span class="w"></span>
-<span class="linenos"> 3</span><span class="w">    </span><span class="k">struct</span><span class="w"> </span><span class="nc">ukplat_ctx_callbacks</span><span class="w"> </span><span class="o">*</span><span class="n">cbs</span><span class="p">,</span><span class="w"></span>
-<span class="linenos"> 4</span><span class="w">    </span><span class="k">struct</span><span class="w"> </span><span class="nc">uk_alloc</span><span class="w"> </span><span class="o">*</span><span class="n">allocator</span><span class="p">,</span><span class="w"></span>
-<span class="linenos"> 5</span><span class="w">            </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">name</span><span class="p">,</span><span class="w"></span>
-<span class="linenos"> 6</span><span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">stack</span><span class="p">,</span><span class="w"></span>
-<span class="linenos"> 7</span><span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">tls</span><span class="p">,</span><span class="w"></span>
-<span class="linenos"> 8</span><span class="w">            </span><span class="kt">void</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">function</span><span class="p">)(</span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="p">),</span><span class="w"></span>
-<span class="linenos"> 9</span><span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">arg</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kt">int</span><span class="w"> </span><span class="nf">uk_thread_init</span><span class="p">(</span>
+<span class="linenos"> 2</span><span class="w">    </span><span class="k">struct</span><span class="w"> </span><span class="nc">uk_thread</span><span class="w"> </span><span class="o">*</span><span class="kr">thread</span><span class="p">,</span>
+<span class="linenos"> 3</span><span class="w">    </span><span class="k">struct</span><span class="w"> </span><span class="nc">ukplat_ctx_callbacks</span><span class="w"> </span><span class="o">*</span><span class="n">cbs</span><span class="p">,</span>
+<span class="linenos"> 4</span><span class="w">    </span><span class="k">struct</span><span class="w"> </span><span class="nc">uk_alloc</span><span class="w"> </span><span class="o">*</span><span class="n">allocator</span><span class="p">,</span>
+<span class="linenos"> 5</span><span class="w">            </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">name</span><span class="p">,</span>
+<span class="linenos"> 6</span><span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">stack</span><span class="p">,</span>
+<span class="linenos"> 7</span><span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">tls</span><span class="p">,</span>
+<span class="linenos"> 8</span><span class="w">            </span><span class="kt">void</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">function</span><span class="p">)(</span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="p">),</span>
+<span class="linenos"> 9</span><span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">arg</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 <span class="linenos">10</span><span class="w">    </span><span class="c1">// ...</span>
-<span class="linenos">11</span><span class="w">    </span><span class="cm">/* Allocate thread context */</span><span class="w"></span>
-<span class="linenos">12</span><span class="w">    </span><span class="n">ctx</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">uk_zalloc</span><span class="p">(</span><span class="n">allocator</span><span class="p">,</span><span class="w"> </span><span class="n">ukplat_thread_ctx_size</span><span class="p">(</span><span class="n">cbs</span><span class="p">));</span><span class="w"></span>
-<span class="linenos">13</span><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">ctx</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="linenos">14</span><span class="w">        </span><span class="n">ret</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">-1</span><span class="p">;</span><span class="w"></span>
-<span class="linenos">15</span><span class="w">        </span><span class="k">goto</span><span class="w"> </span><span class="n">err_out</span><span class="p">;</span><span class="w"></span>
-<span class="linenos">16</span><span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="linenos">11</span><span class="w">    </span><span class="cm">/* Allocate thread context */</span>
+<span class="linenos">12</span><span class="w">    </span><span class="n">ctx</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">uk_zalloc</span><span class="p">(</span><span class="n">allocator</span><span class="p">,</span><span class="w"> </span><span class="n">ukplat_thread_ctx_size</span><span class="p">(</span><span class="n">cbs</span><span class="p">));</span>
+<span class="linenos">13</span><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">ctx</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="linenos">14</span><span class="w">        </span><span class="n">ret</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">-1</span><span class="p">;</span>
+<span class="linenos">15</span><span class="w">        </span><span class="k">goto</span><span class="w"> </span><span class="n">err_out</span><span class="p">;</span>
+<span class="linenos">16</span><span class="w">    </span><span class="p">}</span>
 <span class="linenos">17</span><span class="w">    </span><span class="c1">// ...</span>
-<span class="linenos">18</span><span class="w">    </span><span class="cm">/* Iterate over registered thread initialization functions */</span><span class="w"></span>
-<span class="linenos">19</span><span class="w">    </span><span class="n">uk_thread_inittab_foreach</span><span class="p">(</span><span class="n">itr</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="linenos">20</span><span class="w">        </span><span class="n">ret</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">itr</span><span class="o">-&gt;</span><span class="n">init</span><span class="p">)(</span><span class="kr">thread</span><span class="p">);</span><span class="w"></span>
-<span class="linenos">21</span><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">ret</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"></span>
-<span class="linenos">22</span><span class="w">            </span><span class="k">goto</span><span class="w"> </span><span class="n">err_fini</span><span class="p">;</span><span class="w"></span>
-<span class="linenos">23</span><span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="linenos">18</span><span class="w">    </span><span class="cm">/* Iterate over registered thread initialization functions */</span>
+<span class="linenos">19</span><span class="w">    </span><span class="n">uk_thread_inittab_foreach</span><span class="p">(</span><span class="n">itr</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="linenos">20</span><span class="w">        </span><span class="n">ret</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">itr</span><span class="o">-&gt;</span><span class="n">init</span><span class="p">)(</span><span class="kr">thread</span><span class="p">);</span>
+<span class="linenos">21</span><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">ret</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span>
+<span class="linenos">22</span><span class="w">            </span><span class="k">goto</span><span class="w"> </span><span class="n">err_fini</span><span class="p">;</span>
+<span class="linenos">23</span><span class="w">    </span><span class="p">}</span>
 <span class="linenos">24</span><span class="w">    </span><span class="c1">// ...</span>
-<span class="linenos">25</span><span class="w">    </span><span class="nl">err_fini</span><span class="p">:</span><span class="w"></span>
+<span class="linenos">25</span><span class="w">    </span><span class="nl">err_fini</span><span class="p">:</span>
 <span class="linenos">26</span><span class="w">        </span><span class="cm">/* Run fini functions starting from one level before the failed one</span>
 <span class="linenos">27</span><span class="cm">        * because we expect that the failed one cleaned up.</span>
-<span class="linenos">28</span><span class="cm">        */</span><span class="w"></span>
-<span class="linenos">29</span><span class="w">        </span><span class="n">uk_thread_inittab_foreach_reverse2</span><span class="p">(</span><span class="n">itr</span><span class="p">,</span><span class="w"> </span><span class="n">itr</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">2</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="linenos">30</span><span class="w">            </span><span class="p">(</span><span class="n">itr</span><span class="o">-&gt;</span><span class="n">fini</span><span class="p">)(</span><span class="kr">thread</span><span class="p">);</span><span class="w"></span>
-<span class="linenos">31</span><span class="w">        </span><span class="p">}</span><span class="w"></span>
-<span class="linenos">32</span><span class="w">        </span><span class="n">uk_free</span><span class="p">(</span><span class="n">allocator</span><span class="p">,</span><span class="w"> </span><span class="kr">thread</span><span class="o">-&gt;</span><span class="n">ctx</span><span class="p">);</span><span class="w"></span>
+<span class="linenos">28</span><span class="cm">        */</span>
+<span class="linenos">29</span><span class="w">        </span><span class="n">uk_thread_inittab_foreach_reverse2</span><span class="p">(</span><span class="n">itr</span><span class="p">,</span><span class="w"> </span><span class="n">itr</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">2</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="linenos">30</span><span class="w">            </span><span class="p">(</span><span class="n">itr</span><span class="o">-&gt;</span><span class="n">fini</span><span class="p">)(</span><span class="kr">thread</span><span class="p">);</span>
+<span class="linenos">31</span><span class="w">        </span><span class="p">}</span>
+<span class="linenos">32</span><span class="w">        </span><span class="n">uk_free</span><span class="p">(</span><span class="n">allocator</span><span class="p">,</span><span class="w"> </span><span class="kr">thread</span><span class="o">-&gt;</span><span class="n">ctx</span><span class="p">);</span>
 <span class="linenos">33</span><span class="w">    </span><span class="c1">// ...</span>
-<span class="linenos">34</span><span class="p">}</span><span class="w"></span>
+<span class="linenos">34</span><span class="p">}</span>
 </pre></div>
 </div>
 </div>
 <div class="section" id="uk-sched">
 <h4>uk_sched<a class="headerlink" href="#uk-sched" title="永久链接至标题">#</a></h4>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="k">struct</span><span class="w"> </span><span class="nc">uk_sched</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="linenos"> 2</span><span class="w">    </span><span class="n">uk_sched_yield_func_t</span><span class="w"> </span><span class="n">yield</span><span class="p">;</span><span class="w"></span>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="k">struct</span><span class="w"> </span><span class="nc">uk_sched</span><span class="w"> </span><span class="p">{</span>
+<span class="linenos"> 2</span><span class="w">    </span><span class="n">uk_sched_yield_func_t</span><span class="w"> </span><span class="n">yield</span><span class="p">;</span>
 <span class="linenos"> 3</span>
 <span class="linenos"> 4</span><span class="w">    </span><span class="c1">// ...</span>
 <span class="linenos"> 5</span>
-<span class="linenos"> 6</span><span class="w">    </span><span class="cm">/* internal */</span><span class="w"></span>
-<span class="linenos"> 7</span><span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="n">threads_started</span><span class="p">;</span><span class="w"></span>
-<span class="linenos"> 8</span><span class="w">    </span><span class="k">struct</span><span class="w"> </span><span class="nc">uk_thread</span><span class="w"> </span><span class="n">idle</span><span class="p">;</span><span class="w"></span>
-<span class="linenos"> 9</span><span class="w">    </span><span class="k">struct</span><span class="w"> </span><span class="nc">uk_thread_list</span><span class="w"> </span><span class="n">exited_threads</span><span class="p">;</span><span class="w"></span>
-<span class="linenos">10</span><span class="w">    </span><span class="k">struct</span><span class="w"> </span><span class="nc">ukplat_ctx_callbacks</span><span class="w"> </span><span class="n">plat_ctx_cbs</span><span class="p">;</span><span class="w"></span>
+<span class="linenos"> 6</span><span class="w">    </span><span class="cm">/* internal */</span>
+<span class="linenos"> 7</span><span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="n">threads_started</span><span class="p">;</span>
+<span class="linenos"> 8</span><span class="w">    </span><span class="k">struct</span><span class="w"> </span><span class="nc">uk_thread</span><span class="w"> </span><span class="n">idle</span><span class="p">;</span>
+<span class="linenos"> 9</span><span class="w">    </span><span class="k">struct</span><span class="w"> </span><span class="nc">uk_thread_list</span><span class="w"> </span><span class="n">exited_threads</span><span class="p">;</span>
+<span class="linenos">10</span><span class="w">    </span><span class="k">struct</span><span class="w"> </span><span class="nc">ukplat_ctx_callbacks</span><span class="w"> </span><span class="n">plat_ctx_cbs</span><span class="p">;</span>
 <span class="linenos">11</span><span class="w">    </span><span class="c1">// bind to memory allocator</span>
-<span class="linenos">12</span><span class="w">    </span><span class="k">struct</span><span class="w"> </span><span class="nc">uk_alloc</span><span class="w"> </span><span class="o">*</span><span class="n">allocator</span><span class="p">;</span><span class="w"></span>
-<span class="linenos">13</span><span class="w">    </span><span class="k">struct</span><span class="w"> </span><span class="nc">uk_sched</span><span class="w"> </span><span class="o">*</span><span class="n">next</span><span class="p">;</span><span class="w"></span>
-<span class="linenos">14</span><span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">prv</span><span class="p">;</span><span class="w"></span>
-<span class="linenos">15</span><span class="p">};</span><span class="w"></span>
+<span class="linenos">12</span><span class="w">    </span><span class="k">struct</span><span class="w"> </span><span class="nc">uk_alloc</span><span class="w"> </span><span class="o">*</span><span class="n">allocator</span><span class="p">;</span>
+<span class="linenos">13</span><span class="w">    </span><span class="k">struct</span><span class="w"> </span><span class="nc">uk_sched</span><span class="w"> </span><span class="o">*</span><span class="n">next</span><span class="p">;</span>
+<span class="linenos">14</span><span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">prv</span><span class="p">;</span>
+<span class="linenos">15</span><span class="p">};</span>
 </pre></div>
 </div>
 <p>ukboot 的入口中，对调度器进行了初始化。在调用 <code class="docutils literal notranslate"><span class="pre">uk_thread_create</span></code> 后创建主线程，并调用 <code class="docutils literal notranslate"><span class="pre">uk_sched_start</span></code> 开始执行线程。
 这个主线程绑定到用户自定义的 <code class="docutils literal notranslate"><span class="pre">main</span></code> 函数，默认采用 Weak Symbol 的方式，如果没有实现就直接 panic。</p>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="c1">// defined in lib/ukboot/boot.c</span>
 <span class="linenos"> 2</span><span class="cp">#if CONFIG_LIBUKSCHED</span>
-<span class="linenos"> 3</span><span class="w">    </span><span class="n">main_thread</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">uk_thread_create</span><span class="p">(</span><span class="s">&quot;main&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">main_thread_func</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">tma</span><span class="p">);</span><span class="w"></span>
-<span class="linenos"> 4</span><span class="w">    </span><span class="n">uk_sched_start</span><span class="p">(</span><span class="n">s</span><span class="p">);</span><span class="w"></span>
+<span class="linenos"> 3</span><span class="w">    </span><span class="n">main_thread</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">uk_thread_create</span><span class="p">(</span><span class="s">&quot;main&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">main_thread_func</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">tma</span><span class="p">);</span>
+<span class="linenos"> 4</span><span class="w">    </span><span class="n">uk_sched_start</span><span class="p">(</span><span class="n">s</span><span class="p">);</span>
 <span class="linenos"> 5</span><span class="cp">#else</span>
 <span class="linenos"> 6</span>
 <span class="linenos"> 7</span><span class="c1">// defined in lib/uksched/sched.h</span>
-<span class="linenos"> 8</span><span class="cm">/* Set s as the default scheduler. */</span><span class="w"></span>
-<span class="linenos"> 9</span><span class="kt">int</span><span class="w"> </span><span class="nf">uk_sched_set_default</span><span class="p">(</span><span class="k">struct</span><span class="w"> </span><span class="nc">uk_sched</span><span class="w"> </span><span class="o">*</span><span class="n">s</span><span class="p">);</span><span class="w"></span>
+<span class="linenos"> 8</span><span class="cm">/* Set s as the default scheduler. */</span>
+<span class="linenos"> 9</span><span class="kt">int</span><span class="w"> </span><span class="nf">uk_sched_set_default</span><span class="p">(</span><span class="k">struct</span><span class="w"> </span><span class="nc">uk_sched</span><span class="w"> </span><span class="o">*</span><span class="n">s</span><span class="p">);</span>
 <span class="linenos">10</span><span class="c1">// Other APIs...</span>
 </pre></div>
 </div>

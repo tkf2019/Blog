@@ -272,7 +272,3 @@ Then it sets the destination as target APIC id. It writes MSRs finally (or xsave
     	}
     	spin_unlock_irqrestore(&uintr_wait_lock, flags);
     }
-
-----------
-io_uring
-----------

@@ -2,7 +2,7 @@
 <html class="no-js" lang="zh_CN">
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <meta name="color-scheme" content="light dark"><link rel="index" title="索引" href="../genindex.html" /><link rel="search" title="搜索" href="../search.html" /><link rel="next" title="学习 Linux" href="linux.html" /><link rel="prev" title="启动 S7 核" href="s7.html" />
+    <meta name="color-scheme" content="light dark"><link rel="index" title="索引" href="../genindex.html" /><link rel="search" title="搜索" href="../search.html" /><link rel="next" title="User Interrupt" href="uint.html" /><link rel="prev" title="启动 S7 核" href="s7.html" />
 
     <meta name="generator" content="sphinx-4.3.2, furo 2022.06.21"/>
         <title>学习 Rust - Notes</title>
@@ -161,7 +161,6 @@
 <li class="toctree-l2"><a class="reference internal" href="../papers/theseus.html">Theseus</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../papers/unikraft.html">Unikraft</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../papers/redleaf.html">Redleaf</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../papers/IPC.html">SkyBridge and XPC</a></li>
 </ul>
 </li>
 <li class="toctree-l1 current has-children"><a class="reference internal" href="index.html">其他</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
@@ -169,8 +168,9 @@
 <li class="toctree-l2"><a class="reference internal" href="wifi.html">破解 WIFI</a></li>
 <li class="toctree-l2"><a class="reference internal" href="s7.html">启动 S7 核</a></li>
 <li class="toctree-l2 current current-page"><a class="current reference internal" href="#">学习 Rust</a></li>
-<li class="toctree-l2"><a class="reference internal" href="linux.html">学习 Linux</a></li>
 <li class="toctree-l2"><a class="reference internal" href="uint.html">User Interrupt</a></li>
+<li class="toctree-l2"><a class="reference internal" href="daily.html">阅读笔记</a></li>
+<li class="toctree-l2"><a class="reference internal" href="seL4.html">seL4</a></li>
 </ul>
 </li>
 </ul>
@@ -225,9 +225,9 @@
 <li><p>全局变量需要在编译期确定好内存布局</p></li>
 <li><p>如何定义 <code class="docutils literal notranslate"><span class="pre">static</span></code> 变量，用于全局访问，且运行时才对这一变量进行初始化？最直观的做法是使用 <code class="docutils literal notranslate"><span class="pre">lazy_static</span></code>，查看 <code class="docutils literal notranslate"><span class="pre">lazy_static</span></code> 内部源码发现，可以使用 <code class="docutils literal notranslate"><span class="pre">spin::Once</span></code> 结构对变量进行封装，在运行时调用 <code class="docutils literal notranslate"><span class="pre">call_once</span></code> 函数进行初始化。传入参数需要返回初始化后的结果。</p></li>
 </ul>
-<div class="highlight-rust notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="w">  </span><span class="k">fn</span> <span class="nf">call_once</span><span class="o">&lt;&#39;</span><span class="na">a</span><span class="p">,</span><span class="w"> </span><span class="n">F</span><span class="o">&gt;</span><span class="p">(</span><span class="o">&amp;&#39;</span><span class="na">a</span><span class="w"> </span><span class="bp">self</span><span class="p">,</span><span class="w"> </span><span class="n">builder</span>: <span class="nc">F</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="kp">&amp;</span><span class="o">&#39;</span><span class="na">a</span> <span class="nc">T</span><span class="w"></span>
-<span class="linenos">2</span><span class="w">  </span><span class="k">where</span><span class="w"></span>
-<span class="linenos">3</span><span class="w">      </span><span class="n">F</span>: <span class="nb">FnOnce</span><span class="p">()</span><span class="w"> </span>-&gt; <span class="nc">T</span><span class="p">,</span><span class="w"></span>
+<div class="highlight-rust notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="w">  </span><span class="k">fn</span> <span class="nf">call_once</span><span class="o">&lt;&#39;</span><span class="na">a</span><span class="p">,</span><span class="w"> </span><span class="n">F</span><span class="o">&gt;</span><span class="p">(</span><span class="o">&amp;&#39;</span><span class="na">a</span><span class="w"> </span><span class="bp">self</span><span class="p">,</span><span class="w"> </span><span class="n">builder</span>: <span class="nc">F</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="kp">&amp;</span><span class="o">&#39;</span><span class="na">a</span> <span class="nc">T</span>
+<span class="linenos">2</span><span class="w">  </span><span class="k">where</span>
+<span class="linenos">3</span><span class="w">      </span><span class="n">F</span>: <span class="nb">FnOnce</span><span class="p">()</span><span class="w"> </span>-&gt; <span class="nc">T</span><span class="p">,</span>
 </pre></div>
 </div>
 <hr class="docutils" />
@@ -253,6 +253,14 @@
 <li><p><code class="docutils literal notranslate"><span class="pre">Fn</span></code> 闭包可运行多次，不可以修改捕获变量的值</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">move</span></code> 强制将要捕获的变量的所有权转移到闭包内部的存储区域</p></li>
 </ul>
+<hr class="docutils" />
+<p><code class="docutils literal notranslate"><span class="pre">Module</span> <span class="pre">test</span></code></p>
+<ul class="simple">
+<li><p>在对 <code class="docutils literal notranslate"><span class="pre">lib</span></code> 或 <code class="docutils literal notranslate"><span class="pre">bin</span></code> 进行测试时，如果外部实现为 <code class="docutils literal notranslate"><span class="pre">#![no_std]</span></code>，那么可以在单独定义的 <code class="docutils literal notranslate"><span class="pre">mod</span> <span class="pre">test</span></code> 中通过 <code class="docutils literal notranslate"><span class="pre">extern</span> <span class="pre">crate</span> <span class="pre">std</span></code> 导入 std 库</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">cargo</span> <span class="pre">test</span></code> 通过是默认不打印输出的，如果想看到一些输出结果，可以使用命令``cargo test –package &lt;your package&gt; – –nocapture``</p></li>
+</ul>
+<hr class="docutils" />
+<p><code class="docutils literal notranslate"><span class="pre">paste</span></code></p>
 </div>
 
         </article>
@@ -260,12 +268,12 @@
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="linux.html">
+          <a class="next-page" href="uint.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">学习 Linux</div>
+                <div class="title">User Interrupt</div>
               </div>
               <svg><use href="#svg-arrow-right"></use></svg>
             </a>

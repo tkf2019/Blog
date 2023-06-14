@@ -11,5 +11,4 @@
     wifi
     s7
     rust
-    linux
     uint

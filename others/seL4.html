@@ -226,6 +226,61 @@
 <div class="section" id="sel4-hardware">
 <h2>seL4 Hardware<a class="headerlink" href="#sel4-hardware" title="永久链接至标题">#</a></h2>
 <p>支持 <a class="reference external" href="https://docs.sel4.systems/Hardware/rocketchip.html">Rocket</a> 硬件平台。</p>
+<p>hardware.yml 给出的硬件描述，以 uintc 为例：</p>
+<div class="highlight-yml notranslate"><div class="highlight"><pre><span></span>- compatible:
+    - riscv,uintc0
+  regions:
+    - index: 0
+      kernel: UINTC_PPTR
+      kernel_size: 0x4000
+      user: true
+</pre></div>
+</div>
+<p>其中 kernel 字段表示内核映射后的 device 起始地址。</p>
+</div>
+<div class="section" id="sel4-syscalls">
+<h2>seL4 Syscalls<a class="headerlink" href="#sel4-syscalls" title="永久链接至标题">#</a></h2>
+<p>相关定义位于 libsel4/include/api/syscall.xml 。</p>
+<ul class="simple">
+<li><p>Call</p></li>
+<li><p>ReplyRecv</p></li>
+<li><p>Send</p></li>
+<li><p>NBSend</p></li>
+<li><p>Recv</p></li>
+<li><p>Reply</p></li>
+<li><p>Yield</p></li>
+<li><p>NBRecv</p></li>
+</ul>
+</div>
+<div class="section" id="sel4-zrq-2023-6">
+<h2>seL4 改动 (ZRQ 2023.6)<a class="headerlink" href="#sel4-zrq-2023-6" title="永久链接至标题">#</a></h2>
+<p>改动类似 Linux，包括系统调用实现和外设支持。</p>
+<ul class="simple">
+<li><p>include/arch/riscv/arch/uintr.h: 定义 uintr 相关结构体，声明系统调用函数接口，声明相关状态保存与恢复函数。</p></li>
+<li><p>include/drivers/irq/riscv_uintc.h: 定义 uintc 相关结构体，声明 uintc 读写函数。</p></li>
+<li><p>libsel4/include/api/syscall.xml: 定义 syscall_register_receiver 和 syscall_register_sender</p></li>
+<li><p>src/api/syscall.c: handleSyscall 入口，跳转到新定义的 syscall</p></li>
+<li><p>src/arch/c_traps.c: trap 返回前（restore_user_context 函数）插入 uintr_return 函数恢复相关寄存器</p></li>
+<li><p>src/arch/riscv/config.cmake: 添加 uintr.c 的编译选项</p></li>
+<li><p>src/arch/riscv/traps.S: 陷入汇编代码，寄存器保存，中断异常跳转</p></li>
+<li><p>src/arch/riscv/uintr.c: Linux 内注册结构体需要利用全局变量</p>
+<ul>
+<li><p>syscall_register_receiver: 注册用户态中断接收方（每个 TCB 只能注册一次），分配 uintc 槽位，返回 uintc 下标</p></li>
+<li><p>syscall_register_sender: 注册用户态中断发送方（多次注册也只初始化一次状态表），根据 uintc 下标和对应标识号分配状态表项</p></li>
+</ul>
+</li>
+<li><p>tools/dts/spike.dts: 加入 uintc 设备书节点</p></li>
+<li><p>tools/hardware.yml: 加入 uintc 描述信息</p></li>
+<li><p>tools/tmp.h: 由 c_header.py 自动生成</p></li>
+</ul>
+<p>由于目前的结构都是全局静态分配的，所以还没有实现资源的释放。</p>
+<p>一些可能会用到的函数：</p>
+<ul class="simple">
+<li><p>NODE_STATE(ksCurThread) 获取当前 TCB 指针</p></li>
+<li><p>setRegister(tcb, a0, uintc_idx): 将 uintc_idx 作为系统调用结果返回</p></li>
+<li><p>restore_user_context: 出现在 slowpath, fastpath 和 init_kernel 之后</p></li>
+<li><p>kpptr_to_paddr 将虚拟地址翻译为物理地址</p></li>
+</ul>
 </div>
 </div>
 
@@ -281,6 +336,8 @@
 <li><a class="reference internal" href="#">seL4</a><ul>
 <li><a class="reference internal" href="#sel4-tutorial">seL4 Tutorial</a></li>
 <li><a class="reference internal" href="#sel4-hardware">seL4 Hardware</a></li>
+<li><a class="reference internal" href="#sel4-syscalls">seL4 Syscalls</a></li>
+<li><a class="reference internal" href="#sel4-zrq-2023-6">seL4 改动 (ZRQ 2023.6)</a></li>
 </ul>
 </li>
 </ul>

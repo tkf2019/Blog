@@ -217,14 +217,14 @@
         <article role="main">
           <div class="section" id="sel4">
 <h1>seL4<a class="headerlink" href="#sel4" title="永久链接至标题">#</a></h1>
-<div class="section" id="sel4-tutorial">
-<h2>seL4 Tutorial<a class="headerlink" href="#sel4-tutorial" title="永久链接至标题">#</a></h2>
+<div class="section" id="tutorial">
+<h2>Tutorial<a class="headerlink" href="#tutorial" title="永久链接至标题">#</a></h2>
 <p>seL4 构建基于多种工具，包括 repo、ninja 等。Tutorial 测例默认在 x86 架构的 QEMU 上运行。</p>
 <p>运行 hello-world 退出后报错 <code class="docutils literal notranslate"><span class="pre">Caught</span> <span class="pre">cap</span> <span class="pre">fault</span></code>，将 return 0 改为执行 exit 后不再出现报错。</p>
 <p>ninja 构建 hello-camkes-0 报错 <code class="docutils literal notranslate"><span class="pre">make:</span> <span class="pre">stack:</span> <span class="pre">No</span> <span class="pre">such</span> <span class="pre">file</span> <span class="pre">or</span> <span class="pre">directory</span></code>，一个解决办法是执行 <code class="docutils literal notranslate"><span class="pre">curl</span> <span class="pre">-sSL</span> <span class="pre">https://get.haskellstack.org/</span> <span class="pre">|</span> <span class="pre">sh</span></code> 安装 haskell-stack，然后报错 Timeout，解决网络问题后可以正常运行。</p>
 </div>
-<div class="section" id="sel4-hardware">
-<h2>seL4 Hardware<a class="headerlink" href="#sel4-hardware" title="永久链接至标题">#</a></h2>
+<div class="section" id="hardware">
+<h2>Hardware<a class="headerlink" href="#hardware" title="永久链接至标题">#</a></h2>
 <p>支持 <a class="reference external" href="https://docs.sel4.systems/Hardware/rocketchip.html">Rocket</a> 硬件平台。</p>
 <p>hardware.yml 给出的硬件描述，以 uintc 为例：</p>
 <div class="highlight-yml notranslate"><div class="highlight"><pre><span></span>- compatible:
@@ -238,8 +238,29 @@
 </div>
 <p>其中 kernel 字段表示内核映射后的 device 起始地址。</p>
 </div>
-<div class="section" id="sel4-syscalls">
-<h2>seL4 Syscalls<a class="headerlink" href="#sel4-syscalls" title="永久链接至标题">#</a></h2>
+<div class="section" id="capability-and-kernel-object">
+<h2>Capability and Kernel Object<a class="headerlink" href="#capability-and-kernel-object" title="永久链接至标题">#</a></h2>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>A capability is a unique, unforgeable token that gives the possessor permission to access an entity or object in system. 
+</pre></div>
+</div>
+<p><strong>Capability (cap)</strong> 是 seL4 的核心机制，通过唯一且不可伪造的 token 来获取对象的访问权限，可以将 cap 视为带有访问控制的指针。</p>
+<p><strong>root task</strong> 在初始化时会获取所有资源的 cap ，例如 <code class="docutils literal notranslate"><span class="pre">seL4_CapInitThreadTCB</span></code>，可以通过 API 读取或修改 TCB 的内容。</p>
+<p><strong>CSpace</strong> 表示一个 thread 持有的全部 cap 。</p>
+<p>seL4 提供了七个内核对象，它们一起构成了进程的基本运行环境。</p>
+<ul class="simple">
+<li><p><strong>CNodes &amp; CSlots</strong>：可以将 CNode 视为 cap 数组，数组元素被称为 CSlot ，CSlot 可以看成是 <code class="docutils literal notranslate"><span class="pre">Option&lt;Cap&gt;</span></code> 类型。<code class="docutils literal notranslate"><span class="pre">1</span> <span class="pre">&lt;&lt;</span> <span class="pre">info-&gt;CNodeSizeBits</span></code> 表示数组大小，<code class="docutils literal notranslate"><span class="pre">1</span> <span class="pre">&lt;&lt;</span> <span class="pre">seL4_SlotBits</span></code> 表示 CSlot 大小。每个 thread 的 TCB 中有一个 CNode cap ，即 CSpace root 。Invocation 会隐式地通过 CSpace root 访问 CNode ，并通过其中的 CSlot 访问资源。可以通过以下字段寻址 CSlot：</p>
+<ul>
+<li><p>_service/root：对应的 CNode cap</p></li>
+<li><p>index：CSlot 在 CNode 中的下标</p></li>
+<li><p>depth：默认为 <code class="docutils literal notranslate"><span class="pre">seL4_WordBits</span></code> （寻址 <code class="docutils literal notranslate"><span class="pre">index</span> <span class="pre">&lt;&lt;</span> <span class="pre">seL4_WordBits</span></code>）</p></li>
+</ul>
+</li>
+</ul>
+<p>以 root task 为例， 访问 TCB 的过程大致为 <code class="docutils literal notranslate"><span class="pre">seL4_CapInitThreadCNode</span> <span class="pre">-&gt;</span> <span class="pre">CNode</span> <span class="pre">-&gt;</span> <span class="pre">seL4_CapInitThreadTCB</span> <span class="pre">-&gt;</span> <span class="pre">TCB</span></code> 。<code class="docutils literal notranslate"><span class="pre">seL4_bootInfo</span></code> 描述了初始 CSpace 中的 cap 和空闲 CSlot 。</p>
+<p>支持 <a class="reference external" href="https://docs.sel4.systems/Hardware/rocketchip.html">Rocket</a> 硬件平台。</p>
+</div>
+<div class="section" id="syscalls">
+<h2>Syscalls<a class="headerlink" href="#syscalls" title="永久链接至标题">#</a></h2>
 <p>相关定义位于 libsel4/include/api/syscall.xml 。</p>
 <ul class="simple">
 <li><p>Call</p></li>
@@ -334,9 +355,10 @@
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">seL4</a><ul>
-<li><a class="reference internal" href="#sel4-tutorial">seL4 Tutorial</a></li>
-<li><a class="reference internal" href="#sel4-hardware">seL4 Hardware</a></li>
-<li><a class="reference internal" href="#sel4-syscalls">seL4 Syscalls</a></li>
+<li><a class="reference internal" href="#tutorial">Tutorial</a></li>
+<li><a class="reference internal" href="#hardware">Hardware</a></li>
+<li><a class="reference internal" href="#capability-and-kernel-object">Capability and Kernel Object</a></li>
+<li><a class="reference internal" href="#syscalls">Syscalls</a></li>
 <li><a class="reference internal" href="#sel4-zrq-2023-6">seL4 改动 (ZRQ 2023.6)</a></li>
 </ul>
 </li>

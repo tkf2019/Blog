@@ -48,6 +48,10 @@ seL4 提供了七个内核对象，它们一起构成了进程的基本运行环
 
 支持 [Rocket](https://docs.sel4.systems/Hardware/rocketchip.html) 硬件平台。
 
+## MCS
+
+
+
 
 ## Syscalls
 
@@ -62,29 +66,34 @@ seL4 提供了七个内核对象，它们一起构成了进程的基本运行环
 - Yield
 - NBRecv
 
-## seL4 改动 (ZRQ 2023.6)
+seL4 riscv 的 syscall 实现位于 libsel4/arch_include/riscv/sel4/arch/syscalls.h ，对上暴露的 API 保持一致，内部实现 `riscv_sys_send` ，`riscv_sys_send_null` 等函数，这些函数基本的执行逻辑为通过 `ecall` 指令陷入内核并通过寄存器传递参数。重点关注 `seL4_Signal` 这个系统调用，目前默认的实现方法为：
 
-改动类似 Linux，包括系统调用实现和外设支持。
+```c
+LIBSEL4_INLINE_FUNC void seL4_Signal(seL4_CPtr dest)
+{
+    riscv_sys_send_null(seL4_SysSend, dest, seL4_MessageInfo_new(0, 0, 0, 0).words[0]);
+}
 
-- include/arch/riscv/arch/uintr.h: 定义 uintr 相关结构体，声明系统调用函数接口，声明相关状态保存与恢复函数。
-- include/drivers/irq/riscv_uintc.h: 定义 uintc 相关结构体，声明 uintc 读写函数。
-- libsel4/include/api/syscall.xml: 定义 syscall_register_receiver 和 syscall_register_sender
-- src/api/syscall.c: handleSyscall 入口，跳转到新定义的 syscall
-- src/arch/c_traps.c: trap 返回前（restore_user_context 函数）插入 uintr_return 函数恢复相关寄存器
-- src/arch/riscv/config.cmake: 添加 uintr.c 的编译选项
-- src/arch/riscv/traps.S: 陷入汇编代码，寄存器保存，中断异常跳转
-- src/arch/riscv/uintr.c: Linux 内注册结构体需要利用全局变量
-  - syscall_register_receiver: 注册用户态中断接收方（每个 TCB 只能注册一次），分配 uintc 槽位，返回 uintc 下标
-  - syscall_register_sender: 注册用户态中断发送方（多次注册也只初始化一次状态表），根据 uintc 下标和对应标识号分配状态表项
-- tools/dts/spike.dts: 加入 uintc 设备书节点
-- tools/hardware.yml: 加入 uintc 描述信息
-- tools/tmp.h: 由 c_header.py 自动生成
+static inline void riscv_sys_send_null(seL4_Word sys, seL4_Word src, seL4_Word info_arg)
+{
+    register seL4_Word destptr asm("a0") = src;
+    register seL4_Word info asm("a1") = info_arg;
 
-由于目前的结构都是全局静态分配的，所以还没有实现资源的释放。
+    /* Perform the system call. */
+    register seL4_Word scno asm("a7") = sys;
+    asm volatile(
+        "ecall"
+        : "+r"(destptr), "+r"(info)
+        : "r"(scno)
+    );
+}
+```
 
-一些可能会用到的函数：
+相当于和 `seL4_Send` 共用了内核接口，换句话说，可以将 `seL4_Signal` 视为消息长度为空的 `seL4_Send` 。
 
-- NODE_STATE(ksCurThread) 获取当前 TCB 指针
-- setRegister(tcb, a0, uintc_idx): 将 uintc_idx 作为系统调用结果返回
-- restore_user_context: 出现在 slowpath, fastpath 和 init_kernel 之后
-- kpptr_to_paddr 将虚拟地址翻译为物理地址
+系统调用号例如 `seL4_SysYield` 等是在编译后确定的。
+
+注意到开关 MCS 参数前后，系统调用的实现方式是不一样的。
+
+
+

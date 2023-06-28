@@ -425,6 +425,9 @@
 <h2>FBMM: Using the VFS for Extensibility in Kernel Memory Management (HOTOS ‘23)<a class="headerlink" href="#fbmm-using-the-vfs-for-extensibility-in-kernel-memory-management-hotos-23" title="永久链接至标题">#</a></h2>
 <p>非易失内存（Persistent Memory）的设计目标是利用不同存储介质的特性（带宽、延时、功耗、成本等），从整体上优化存储系统。软件方面的实现（传统的 swap 机制）需要对操作系统有一定程度的修改，可以实现对数据页面更加细粒度的控制（冷热、预取、布局等），更好地适应不同应用的负载、延时、带宽要求，缺点是开发起来比较困难，业界有通过修改用户库的方式提供支持，目标是快速落地应用。硬件方面的实现一方面可以采用传统 Cache 分层机制，另一方面也可以由 Controller 进行管理（类似于 SSD），缺点是缺少灵活性且设计成本较高。</p>
 <p>这篇文章中提出的 FBMM（File-Based Memory Management）应用 VFS 的接口设计思想在 Linux 中支持易于扩展的内存管理，例如最新的内存分层技术等。现有的 Linux 无法感知物理内存的差异和联系，且内存管理代码耦合性强。MMFS（Memory-Management File System） 可以像操作文件一样分配和释放内存。类似于 HugeTLBFS（大页以文件的形式分配给进程），进程可以显式地调用 MMFS 接口来分配内存。</p>
+<p><img alt="fbmm" src="../_images/fbmm.png" /></p>
+<p>进程可以通过 mmap/brk/munmap 隐式创建（删除） mmfs 文件将虚拟地址映射到对应的内存，也可以直接通过 open/close 显式创建（删除） mmfs 文件。FBMM Shim 层会维护虚拟地址区间到文件的映射关系（FBMM Shim 的作用就是将 <code class="docutils literal notranslate"><span class="pre">MAP_ANON</span></code> 转化为到 mmfs 文件的具名映射，对应到用户库主要是 malloc 等函数）。mmfs 可以异步地进行页面置换并修改对应页表项。</p>
+<p>具体到 mmfs 的设计，这篇文章还没有进行充分测试。</p>
 </div>
 </div>
 

@@ -217,6 +217,7 @@
         <article role="main">
           <div class="section" id="sel4">
 <h1>seL4<a class="headerlink" href="#sel4" title="永久链接至标题">#</a></h1>
+<p>本文档的分析主要基于 RISC-V 架构。</p>
 <div class="section" id="tutorial">
 <h2>Tutorial<a class="headerlink" href="#tutorial" title="永久链接至标题">#</a></h2>
 <p>seL4 构建基于多种工具，包括 repo、ninja 等。Tutorial 测例默认在 x86 架构的 QEMU 上运行。</p>
@@ -238,29 +239,147 @@
 </div>
 <p>其中 kernel 字段表示内核映射后的 device 起始地址。</p>
 </div>
-<div class="section" id="capability-and-kernel-object">
-<h2>Capability and Kernel Object<a class="headerlink" href="#capability-and-kernel-object" title="永久链接至标题">#</a></h2>
+<div class="section" id="capability">
+<h2>Capability<a class="headerlink" href="#capability" title="永久链接至标题">#</a></h2>
 <div class="highlight-none notranslate"><div class="highlight"><pre><span></span>A capability is a unique, unforgeable token that gives the possessor permission to access an entity or object in system. 
 </pre></div>
 </div>
 <p><strong>Capability (cap)</strong> 是 seL4 的核心机制，通过唯一且不可伪造的 token 来获取对象的访问权限，可以将 cap 视为带有访问控制的指针。</p>
 <p><strong>root task</strong> 在初始化时会获取所有资源的 cap ，例如 <code class="docutils literal notranslate"><span class="pre">seL4_CapInitThreadTCB</span></code>，可以通过 API 读取或修改 TCB 的内容。</p>
 <p><strong>CSpace</strong> 表示一个 thread 持有的全部 cap 。</p>
-<p>seL4 提供了七个内核对象，它们一起构成了进程的基本运行环境。</p>
+<p><strong>CNodes &amp; CSlots</strong>：可以将 CNode 视为 cap 数组，数组元素被称为 CSlot ，CSlot 可以看成是 <code class="docutils literal notranslate"><span class="pre">Option&lt;Cap&gt;</span></code> 类型。<code class="docutils literal notranslate"><span class="pre">1</span> <span class="pre">&lt;&lt;</span> <span class="pre">info-&gt;CNodeSizeBits</span></code> 表示数组大小，<code class="docutils literal notranslate"><span class="pre">1</span> <span class="pre">&lt;&lt;</span> <span class="pre">seL4_SlotBits</span></code> 表示 CSlot 大小。每个 thread 的 TCB 中有一个 CNode cap ，即 CSpace root 。Invocation 会隐式地通过 CSpace root 访问 CNode ，并通过其中的 CSlot 访问资源。可以通过以下字段寻址 CSlot：</p>
 <ul class="simple">
-<li><p><strong>CNodes &amp; CSlots</strong>：可以将 CNode 视为 cap 数组，数组元素被称为 CSlot ，CSlot 可以看成是 <code class="docutils literal notranslate"><span class="pre">Option&lt;Cap&gt;</span></code> 类型。<code class="docutils literal notranslate"><span class="pre">1</span> <span class="pre">&lt;&lt;</span> <span class="pre">info-&gt;CNodeSizeBits</span></code> 表示数组大小，<code class="docutils literal notranslate"><span class="pre">1</span> <span class="pre">&lt;&lt;</span> <span class="pre">seL4_SlotBits</span></code> 表示 CSlot 大小。每个 thread 的 TCB 中有一个 CNode cap ，即 CSpace root 。Invocation 会隐式地通过 CSpace root 访问 CNode ，并通过其中的 CSlot 访问资源。可以通过以下字段寻址 CSlot：</p>
-<ul>
 <li><p>_service/root：对应的 CNode cap</p></li>
 <li><p>index：CSlot 在 CNode 中的下标</p></li>
 <li><p>depth：默认为 <code class="docutils literal notranslate"><span class="pre">seL4_WordBits</span></code> （寻址 <code class="docutils literal notranslate"><span class="pre">index</span> <span class="pre">&lt;&lt;</span> <span class="pre">seL4_WordBits</span></code>）</p></li>
 </ul>
-</li>
-</ul>
 <p>以 root task 为例， 访问 TCB 的过程大致为 <code class="docutils literal notranslate"><span class="pre">seL4_CapInitThreadCNode</span> <span class="pre">-&gt;</span> <span class="pre">CNode</span> <span class="pre">-&gt;</span> <span class="pre">seL4_CapInitThreadTCB</span> <span class="pre">-&gt;</span> <span class="pre">TCB</span></code> 。<code class="docutils literal notranslate"><span class="pre">seL4_bootInfo</span></code> 描述了初始 CSpace 中的 cap 和空闲 CSlot 。</p>
-<p>支持 <a class="reference external" href="https://docs.sel4.systems/Hardware/rocketchip.html">Rocket</a> 硬件平台。</p>
+</div>
+<div class="section" id="tcb">
+<h2>TCB<a class="headerlink" href="#tcb" title="永久链接至标题">#</a></h2>
+<p>从 <code class="docutils literal notranslate"><span class="pre">struct</span> <span class="pre">tcb</span></code> 出发，分析其成员的含义：</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">arch_tcb_t</span> <span class="pre">tcbArch</span></code>：arch 相关的状态，主要包含上下文的内容。逐级展开可以的得到 <code class="docutils literal notranslate"><span class="pre">word_t</span> <span class="pre">registers[n_contextRegisters]</span></code>，相关定义位于 <code class="docutils literal notranslate"><span class="pre">enum</span> <span class="pre">_register</span></code>，除了 31 个通用寄存器外（不包括 zero），还包含 <code class="docutils literal notranslate"><span class="pre">sstatus</span></code> 和 <code class="docutils literal notranslate"><span class="pre">scause</span></code> 等，可以在其中加入其他需要保存和恢复的用户态寄存器。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">thread_state_t</span> <span class="pre">tcbState</span></code>：线程状态，主要包括：</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">ThreadState_Inactive</span></code>：</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ThreadState_Running</span></code>：</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ThreadState_Restart</span></code>：</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ThreadState_BlockedOnReceive</span></code>：</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ThreadState_BlockedOnSend</span></code>：</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ThreadState_BlockedOnReply</span></code>：</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ThreadState_BlockedOnNotification</span></code>：</p></li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">notification_t</span> <span class="pre">*tcbBoundNotification</span></code>：指向该线程对应的 Notification ，若该指针非空，该线程可以接收 Signalsh ceshce</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">seL4_Fault_t</span> <span class="pre">tcbFault</span></code>：</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">lookup_fault_t</span> <span class="pre">tcbLookupFailure</span></code>：</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">dom_t</span> <span class="pre">tcbDomain</span></code>：</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">prio_t</span> <span class="pre">tcbMCP</span></code>：</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">prio_t</span> <span class="pre">tcbPriority</span></code>：线程优先级</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sched_context_t</span> <span class="pre">*tcbSchedContext</span></code>：该线程对应的调度上下文，若该指针为空，线程不可被加入调度队列</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sched_context_t</span> <span class="pre">*tcbYieldTo</span></code>：线程切换至的调度上下文</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">word_t</span> <span class="pre">tcbIPCBuffer</span></code>：用户空间的 IPC 缓冲区的虚拟地址</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">word_t</span> <span class="pre">tcbAffinity</span></code>：正在运行该线程的核号</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">struct</span> <span class="pre">tcb</span> <span class="pre">*tcbSchedNext,</span> <span class="pre">*tcbSchedPrev</span></code>：调度队列的链表指针</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">struct</span> <span class="pre">tcb</span> <span class="pre">*tcbEPNext,</span> <span class="pre">*tcbEPPrev</span></code>：Notification 队列的链表指针</p></li>
+</ul>
+<p>实际的 TCB 还包括头部的 <code class="docutils literal notranslate"><span class="pre">cte_t</span></code> ，<code class="docutils literal notranslate"><span class="pre">tcb_t</span></code> 默认占据 TCB 的后半部分空间。</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="c1">// A diagram of a TCB kernel object that is created from untyped:</span>
+<span class="c1">//  _______________________________________</span>
+<span class="c1">// |     |             |                   |</span>
+<span class="c1">// |     |             |                   |</span>
+<span class="c1">// |cte_t|   unused    |       tcb_t       |</span>
+<span class="c1">// |     |(debug_tcb_t)|                   |</span>
+<span class="c1">// |_____|_____________|___________________|</span>
+<span class="c1">// 0     a             b                   c</span>
+<span class="c1">// a = tcbCNodeEntries * sizeof(cte_t)</span>
+<span class="c1">// b = BIT(TCB_SIZE_BITS)</span>
+<span class="c1">// c = BIT(seL4_TCBBits)</span>
+</pre></div>
+</div>
 </div>
 <div class="section" id="mcs">
 <h2>MCS<a class="headerlink" href="#mcs" title="永久链接至标题">#</a></h2>
+</div>
+<div class="section" id="ipc">
+<h2>IPC<a class="headerlink" href="#ipc" title="永久链接至标题">#</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">block</span> <span class="n">endpoint</span> <span class="p">{</span>
+    <span class="n">field</span> <span class="n">epQueue_head</span> <span class="mi">64</span>
+    <span class="n">field_high</span> <span class="n">epQueue_tail</span> <span class="mi">37</span>
+    <span class="n">field</span> <span class="n">state</span> <span class="mi">2</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="notification">
+<h2>Notification<a class="headerlink" href="#notification" title="永久链接至标题">#</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">block</span> <span class="n">notification</span> <span class="p">{</span>
+<span class="c1">#ifdef CONFIG_KERNEL_MCS</span>
+    <span class="n">field_high</span> <span class="n">ntfnSchedContext</span> <span class="mi">39</span>
+<span class="c1">#endif</span>
+    <span class="n">field_high</span> <span class="n">ntfnBoundTCB</span> <span class="mi">39</span>
+    <span class="n">field</span> <span class="n">ntfnMsgIdentifier</span> <span class="mi">64</span>
+    <span class="n">field_high</span> <span class="n">ntfnQueue_head</span> <span class="mi">39</span>
+    <span class="n">field_high</span> <span class="n">ntfnQueue_tail</span> <span class="mi">39</span>
+    <span class="n">field</span> <span class="n">state</span> <span class="mi">2</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>三种状态：</p>
+<ul class="simple">
+<li><p>Idle</p></li>
+<li><p>Waiting</p></li>
+<li><p>Active</p></li>
+</ul>
+<p>内核函数：</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">void</span> <span class="pre">sendSignal(notification_t</span> <span class="pre">*ntfnPtr,</span> <span class="pre">word_t</span> <span class="pre">badge)</span></code>：</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">void</span> <span class="pre">cancelSignal(tcb_t</span> <span class="pre">*threadPtr,</span> <span class="pre">notification_t</span> <span class="pre">*ntfnPtr)</span></code>：</p></li>
+</ul>
+</div>
+<div class="section" id="boot">
+<h2>Boot<a class="headerlink" href="#boot" title="永久链接至标题">#</a></h2>
+<p>从 <code class="docutils literal notranslate"><span class="pre">head.S</span></code> 入手分析 kernel 的启动流程：</p>
+<div class="highlight-asm notranslate"><div class="highlight"><pre><span></span>  /* Call bootstrapping implemented in C with parameters:
+   *    a0/x10: user image physical start address
+   *    a1/x11: user image physical end address
+   *    a2/x12: physical/virtual offset
+   *    a3/x13: user image virtual entry address
+   *    a4/x14: DTB physical address (0 if there is none)
+   *    a5/x15: DTB size (0 if there is none)
+   *    a6/x16: hart ID (SMP only, unused on non-SMP)
+   *    a7/x17: core ID (SMP only, unused on non-SMP)
+   */
+_start:
+  fence.i
+.option push
+.option norelax
+1:auipc gp, %pcrel_hi(__global_pointer$)
+  addi  gp, gp, %pcrel_lo(1b)
+.option pop
+
+/* 多核下为每个核分配栈空间 */
+  la sp, (kernel_stack_alloc + BIT(CONFIG_KERNEL_STACK_BITS))
+  csrw sscratch, x0 /* zero sscratch for the init task */
+#if CONFIG_MAX_NUM_NODES &gt; 1
+  mv t0, a7
+  slli t0, t0, CONFIG_KERNEL_STACK_BITS
+  add  sp, sp, t0
+  csrw sscratch, sp
+#endif
+  /* 内核初始化 */
+  jal init_kernel
+  /* 恢复用户态上下文（返回到 rootserver） */
+  la ra, restore_user_context
+  jr ra
+
+</pre></div>
+</div>
+<p>相关函数：</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">BOOT_CODE</span> <span class="pre">tcb_t</span> <span class="pre">*create_initial_thread(cap_t</span> <span class="pre">root_cnode_cap,</span> <span class="pre">cap_t</span> <span class="pre">it_pd_cap,</span> <span class="pre">vptr_t</span> <span class="pre">ui_v_entry,</span> <span class="pre">vptr_t</span> <span class="pre">bi_frame_vptr,</span> <span class="pre">vptr_t</span> <span class="pre">ipcbuf_vptr,</span> <span class="pre">cap_t</span> <span class="pre">ipcbuf_cap)</span></code>：创建并初始化 init 线程。</p></li>
+</ul>
 </div>
 <div class="section" id="syscalls">
 <h2>Syscalls<a class="headerlink" href="#syscalls" title="永久链接至标题">#</a></h2>
@@ -354,8 +473,12 @@
 <li><a class="reference internal" href="#">seL4</a><ul>
 <li><a class="reference internal" href="#tutorial">Tutorial</a></li>
 <li><a class="reference internal" href="#hardware">Hardware</a></li>
-<li><a class="reference internal" href="#capability-and-kernel-object">Capability and Kernel Object</a></li>
+<li><a class="reference internal" href="#capability">Capability</a></li>
+<li><a class="reference internal" href="#tcb">TCB</a></li>
 <li><a class="reference internal" href="#mcs">MCS</a></li>
+<li><a class="reference internal" href="#ipc">IPC</a></li>
+<li><a class="reference internal" href="#notification">Notification</a></li>
+<li><a class="reference internal" href="#boot">Boot</a></li>
 <li><a class="reference internal" href="#syscalls">Syscalls</a></li>
 </ul>
 </li>

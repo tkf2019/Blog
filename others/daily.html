@@ -407,6 +407,25 @@
 <li><p>Binder 还是涉及到了一次拷贝的开销，且 Client 地位比较被动，使用服务要被挂起。</p></li>
 </ol>
 </div>
+<div class="section" id="user-level-device-drivers-achieved-performance">
+<h2>User-level Device Drivers: Achieved Performance<a class="headerlink" href="#user-level-device-drivers-achieved-performance" title="永久链接至标题">#</a></h2>
+<p>用户态驱动的好处：</p>
+<ul class="simple">
+<li><p>ease of development 可以用调试用户态程序的方式调试驱动</p></li>
+<li><p>fault tolerance 驱动崩溃不会影响内核的运行</p></li>
+<li><p>maintainability 与内核接口耦合在一起使驱动变得难以维护，中断上下文要预防死锁</p></li>
+</ul>
+<p>驱动在用户态进行开发和测试，开发过程遵循严格的用户接口，这样便于后续将驱动移入内核来提高性能。</p>
+<p>驱动可能通过 DMA 直接访问内存，一些先进的硬件可以限制驱动访问的范围。这篇文章尚未涉及 DMA 的安全性。</p>
+<p>内核态驱动通过 <code class="docutils literal notranslate"><span class="pre">request_irq()</span></code> 注册中断处理函数，有很多可以让用户态驱动获得中断消息的方法，例如建立中断到信号的映射、事件队列、轮询某个文件等。这篇文章中的实现办法是用户 <code class="docutils literal notranslate"><span class="pre">open()</span></code> 和 <code class="docutils literal notranslate"><span class="pre">close()</span></code> Linux 中的 <code class="docutils literal notranslate"><span class="pre">/proc/irq/n/irq</span></code> 文件，注册或注销中断处理函数。当中断到来时，内核中断处理函数屏蔽中断并增加中断对应的信号量。用户态进程调用 <code class="docutils literal notranslate"><span class="pre">read()</span></code> 读取文件时，若有 pending requests 就返回非 0 信号量的，否则睡眠等待中断。</p>
+<p>涉及 DMA 的设备需要由驱动程序提供物理地址，这篇文章中通过增加系统调用来让用户态驱动访问 <code class="docutils literal notranslate"><span class="pre">pci_map_xxx</span></code> 函数将用户地址空间的页映射到设备通过 DMA 访问的物理地址。此外，用户态驱动可通过系统调用对某些页进行标记，防止在 DMA 事务未完成的过程中页被换出内存，目前 Linux 内核已提供了带标记的缓冲区。</p>
+<p>这篇文章的实现方法比较共同的点是使用信号量唤醒用户态驱动，使用环形缓冲区保存事务信息，例如网络驱动。测试硬件包括 IDE disk 和 Gigabit ehternet 。从测试结果可以看出，对于带宽较高且中断频率较高的设备，唤醒用户态驱动的开销比较大。本篇文章用到了共享内存，无锁队列，延迟中断唤醒和批量处理等方法，</p>
+</div>
+<div class="section" id="fbmm-using-the-vfs-for-extensibility-in-kernel-memory-management-hotos-23">
+<h2>FBMM: Using the VFS for Extensibility in Kernel Memory Management (HOTOS ‘23)<a class="headerlink" href="#fbmm-using-the-vfs-for-extensibility-in-kernel-memory-management-hotos-23" title="永久链接至标题">#</a></h2>
+<p>非易失内存（Persistent Memory）的设计目标是利用不同存储介质的特性（带宽、延时、功耗、成本等），从整体上优化存储系统。软件方面的实现（传统的 swap 机制）需要对操作系统有一定程度的修改，可以实现对数据页面更加细粒度的控制（冷热、预取、布局等），更好地适应不同应用的负载、延时、带宽要求，缺点是开发起来比较困难，业界有通过修改用户库的方式提供支持，目标是快速落地应用。硬件方面的实现一方面可以采用传统 Cache 分层机制，另一方面也可以由 Controller 进行管理（类似于 SSD），缺点是缺少灵活性且设计成本较高。</p>
+<p>这篇文章中提出的 FBMM（File-Based Memory Management）应用 VFS 的接口设计思想在 Linux 中支持易于扩展的内存管理，例如最新的内存分层技术等。现有的 Linux 无法感知物理内存的差异和联系，且内存管理代码耦合性强。MMFS（Memory-Management File System） 可以像操作文件一样分配和释放内存。类似于 HugeTLBFS（大页以文件的形式分配给进程），进程可以显式地调用 MMFS 接口来分配内存。</p>
+</div>
 </div>
 
         </article>
@@ -476,6 +495,8 @@
 </li>
 <li><a class="reference internal" href="#understanding-the-overheads-of-hardware-and-language-based-ipc-mechanisms">Understanding the Overheads of Hardware and Language-Based IPC Mechanisms</a></li>
 <li><a class="reference internal" href="#android-binder">Android Binder</a></li>
+<li><a class="reference internal" href="#user-level-device-drivers-achieved-performance">User-level Device Drivers: Achieved Performance</a></li>
+<li><a class="reference internal" href="#fbmm-using-the-vfs-for-extensibility-in-kernel-memory-management-hotos-23">FBMM: Using the VFS for Extensibility in Kernel Memory Management (HOTOS ‘23)</a></li>
 </ul>
 </li>
 </ul>

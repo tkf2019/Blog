@@ -419,7 +419,7 @@
 <p>驱动可能通过 DMA 直接访问内存，一些先进的硬件可以限制驱动访问的范围。这篇文章尚未涉及 DMA 的安全性。</p>
 <p>内核态驱动通过 <code class="docutils literal notranslate"><span class="pre">request_irq()</span></code> 注册中断处理函数，有很多可以让用户态驱动获得中断消息的方法，例如建立中断到信号的映射、事件队列、轮询某个文件等。这篇文章中的实现办法是用户 <code class="docutils literal notranslate"><span class="pre">open()</span></code> 和 <code class="docutils literal notranslate"><span class="pre">close()</span></code> Linux 中的 <code class="docutils literal notranslate"><span class="pre">/proc/irq/n/irq</span></code> 文件，注册或注销中断处理函数。当中断到来时，内核中断处理函数屏蔽中断并增加中断对应的信号量。用户态进程调用 <code class="docutils literal notranslate"><span class="pre">read()</span></code> 读取文件时，若有 pending requests 就返回非 0 信号量的，否则睡眠等待中断。</p>
 <p>涉及 DMA 的设备需要由驱动程序提供物理地址，这篇文章中通过增加系统调用来让用户态驱动访问 <code class="docutils literal notranslate"><span class="pre">pci_map_xxx</span></code> 函数将用户地址空间的页映射到设备通过 DMA 访问的物理地址。此外，用户态驱动可通过系统调用对某些页进行标记，防止在 DMA 事务未完成的过程中页被换出内存，目前 Linux 内核已提供了带标记的缓冲区。</p>
-<p>这篇文章的实现方法比较共同的点是使用信号量唤醒用户态驱动，使用环形缓冲区保存事务信息，例如网络驱动。测试硬件包括 IDE disk 和 Gigabit ehternet 。从测试结果可以看出，对于带宽较高且中断频率较高的设备，唤醒用户态驱动的开销比较大。本篇文章用到了共享内存，无锁队列，延迟中断唤醒和批量处理等方法，</p>
+<p>这篇文章的实现方法比较共同的点是使用信号量唤醒用户态驱动，使用环形缓冲区保存事务信息，例如网络驱动。测试硬件包括 IDE disk 和 Gigabit ehternet 。从测试结果可以看出，对于带宽较高且中断频率较高的设备，唤醒用户态驱动的开销比较大。</p>
 </div>
 <div class="section" id="fbmm-using-the-vfs-for-extensibility-in-kernel-memory-management-hotos-23">
 <h2>FBMM: Using the VFS for Extensibility in Kernel Memory Management (HOTOS ‘23)<a class="headerlink" href="#fbmm-using-the-vfs-for-extensibility-in-kernel-memory-management-hotos-23" title="永久链接至标题">#</a></h2>
@@ -428,6 +428,38 @@
 <p><img alt="fbmm" src="../_images/fbmm.png" /></p>
 <p>进程可以通过 mmap/brk/munmap 隐式创建（删除） mmfs 文件将虚拟地址映射到对应的内存，也可以直接通过 open/close 显式创建（删除） mmfs 文件。FBMM Shim 层会维护虚拟地址区间到文件的映射关系（FBMM Shim 的作用就是将 <code class="docutils literal notranslate"><span class="pre">MAP_ANON</span></code> 转化为到 mmfs 文件的具名映射，对应到用户库主要是 malloc 等函数）。mmfs 可以异步地进行页面置换并修改对应页表项。</p>
 <p>具体到 mmfs 的设计，这篇文章还没有进行充分测试。</p>
+</div>
+<div class="section" id="a-case-against-most-context-switches-hotos-21">
+<h2>A Case Against (Most) Context Switches (HOTOS ‘21)<a class="headerlink" href="#a-case-against-most-context-switches-hotos-21" title="永久链接至标题">#</a></h2>
+<p>传统的软件线程在中断处理、VM-exit、系统调用等场景下存在切换开销。这篇文章的核心观点是：硬件应该直接提供大量的线程，硬件线程可以快速地恢复执行；软件应该直接管理硬件线程，可以通过指令扩展等方式来显式地创建或终止硬件线程。</p>
+<p>可能的应用场景：</p>
+<ul class="simple">
+<li><p>中断处理：内核指定中断对应的硬件线程，使用 MSI 将中断写入内存触发</p></li>
+<li><p>I/O 处理：不需要轮询或忙等待I/O</p></li>
+<li><p>VM-exit 和系统调用：由独立的硬件线程处理请求</p></li>
+</ul>
+<p>每个核的硬件线程用 <code class="docutils literal notranslate"><span class="pre">ptid</span></code> 表示，每个 <code class="docutils literal notranslate"><span class="pre">ptid</span></code> 对应的硬件线程有三个状态：</p>
+<ul class="simple">
+<li><p><strong>Runnable</strong>：在对应核上执行指令</p></li>
+<li><p><strong>Waiting</strong>：通过 x86 的 mwait 和 monitor 指令进入该状态</p></li>
+<li><p><strong>Disabled</strong>：不可在对应核上执行指令直至被另一个硬件线程重启（start 和 stop 指令）；硬件线程出现异常时进入该状态，异常信息会被写入到内存的对应位置，另一个硬件线程会监控该信息并处理异常。</p></li>
+</ul>
+<p>相关指令（x86）</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">monitor</span> <span class="pre">&lt;memory_address&gt;</span></code>，<code class="docutils literal notranslate"><span class="pre">mwait</span></code>：暂停某硬件线程直至对应地址被写入，在这篇文章中这个地址可以任何物理地址（可以监控 DMA 写入，甚至是 MMIO 地址）</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">start</span> <span class="pre">&lt;vtid&gt;</span></code>，<code class="docutils literal notranslate"><span class="pre">stop</span> <span class="pre">&lt;vtid&gt;</span></code>：Enable（Disable）对应的硬件线程</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">rpull</span> <span class="pre">&lt;vtid&gt;,</span> <span class="pre">&lt;local-reg&gt;,</span> <span class="pre">&lt;remote-reg&gt;</span></code>，<code class="docutils literal notranslate"><span class="pre">rpush</span> <span class="pre">&lt;vtid&gt;,</span> <span class="pre">&lt;remote-reg&gt;,</span> <span class="pre">&lt;local-reg&gt;</span></code>：读写其他硬件线程的寄存器，包括 pc ，异常地址寄存器，tid 映射表基址寄存器</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">invtid</span> <span class="pre">&lt;vtid&gt;,</span> <span class="pre">&lt;remote-vtid&gt;</span></code>：修改 TDT 要刷新硬件</p></li>
+</ul>
+<p>对于无法被处理的异常，当前核会触发硬件错误。TDT（Thread Description Table）将 vtid 映射到 ptid，只有处于 Supervisor 模式的硬件线程可以修改基址寄存器。TDT 可以对硬件线程访问控制其他硬件线程的权限加以限制（start-stop-modify some-modify most），目前的设计只支持单调的权限控制。</p>
+<p>有如下几个问题：</p>
+<ul class="simple">
+<li><p>硬件线程间的访问权限控制只针对不同特权级别，同特权级别的访问和通信仅提到了通过共享key 的方式，但还是粗粒度的控制，细粒度需要硬件的 cap 机制</p></li>
+<li><p>设计的核心是监听总线地址并唤醒对应硬件线程，每个硬件线程都需要状态寄存器来保存 monitor 指令监控的地址，具体如何实现还处于未知状态</p></li>
+<li><p>硬件线程的数量可能受到很多限制，文章中提到的在 hyperthread 基础上扩展出 hardware thread，但是仍然要考虑如何保存 hardware thread 的状态（感觉像是在核上对线程上下文进行缓存）</p></li>
+<li><p>本文提到缓存系统的问题，我觉得这个和传统的线程要面临的问题是类似的</p></li>
+<li><p>总的来说，本文的设计只是一个雏形，还缺少实现和测试，而且硬件我们很难自己做出来，一方面需要关注一下新推出的硬件特性，看一看能不能在软件上应用类似的特性，另一方面 <code class="docutils literal notranslate"><span class="pre">monitor</span></code> 指令的设计其实就是通过内存写操作将外设到线程、线程到线程、内核到线程的实时唤醒给统一起来了，这个对后续的工作有一定启发。</p></li>
+</ul>
 </div>
 </div>
 
@@ -500,6 +532,7 @@
 <li><a class="reference internal" href="#android-binder">Android Binder</a></li>
 <li><a class="reference internal" href="#user-level-device-drivers-achieved-performance">User-level Device Drivers: Achieved Performance</a></li>
 <li><a class="reference internal" href="#fbmm-using-the-vfs-for-extensibility-in-kernel-memory-management-hotos-23">FBMM: Using the VFS for Extensibility in Kernel Memory Management (HOTOS ‘23)</a></li>
+<li><a class="reference internal" href="#a-case-against-most-context-switches-hotos-21">A Case Against (Most) Context Switches (HOTOS ‘21)</a></li>
 </ul>
 </li>
 </ul>

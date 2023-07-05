@@ -298,6 +298,15 @@
 <span class="c1">// c = BIT(seL4_TCBBits)</span>
 </pre></div>
 </div>
+<p>常用内核函数：</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">void</span> <span class="pre">tcbEPDequeue(tcb_t</span> <span class="pre">*tcb,</span> <span class="pre">tcb_queue_t</span> <span class="pre">queue)</span></code>：将当前 TCB 从队列（EP 或 Ntfn 的等待队列）中移除</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">cpu_id_t</span> <span class="pre">getCurrentCPUIndex(void)</span></code>：从 <code class="docutils literal notranslate"><span class="pre">sscratch</span></code> 寄存器中读出当前核号</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">void</span> <span class="pre">tcbSchedEnqueue(tcb_t</span> <span class="pre">*tcb)</span></code>：将 TCB 置于调度队列的头部</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">void</span> <span class="pre">tcbSchedAppend(tcb_t</span> <span class="pre">*tcb)</span></code>：将 TCB 置于调度队列的头部</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">void</span> <span class="pre">remoteQueueUpdate(tcb_t</span> <span class="pre">*tcb)</span></code>：发送 <code class="docutils literal notranslate"><span class="pre">ipiReschedulePending</span></code> 更新目标核的调度目标</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">void</span> <span class="pre">setRegister(tcb_t</span> <span class="pre">*thread,</span> <span class="pre">register_t</span> <span class="pre">reg,</span> <span class="pre">word_t</span> <span class="pre">w)</span></code>：设置寄存器<code class="docutils literal notranslate"><span class="pre">thread-&gt;tcbArch.tcbContext.registers[reg]</span> <span class="pre">=</span> <span class="pre">w</span></code></p></li>
+</ul>
 </div>
 <div class="section" id="mcs">
 <h2>MCS<a class="headerlink" href="#mcs" title="永久链接至标题">#</a></h2>
@@ -318,25 +327,65 @@
 <span class="c1">#ifdef CONFIG_KERNEL_MCS</span>
     <span class="n">field_high</span> <span class="n">ntfnSchedContext</span> <span class="mi">39</span>
 <span class="c1">#endif</span>
-    <span class="n">field_high</span> <span class="n">ntfnBoundTCB</span> <span class="mi">39</span>
-    <span class="n">field</span> <span class="n">ntfnMsgIdentifier</span> <span class="mi">64</span>
-    <span class="n">field_high</span> <span class="n">ntfnQueue_head</span> <span class="mi">39</span>
-    <span class="n">field_high</span> <span class="n">ntfnQueue_tail</span> <span class="mi">39</span>
-    <span class="n">field</span> <span class="n">state</span> <span class="mi">2</span>
+    <span class="n">field_high</span> <span class="n">ntfnBoundTCB</span> <span class="mi">39</span>      <span class="o">//</span> <span class="n">指向绑定的</span> <span class="n">TCB</span>
+    <span class="n">field</span> <span class="n">ntfnMsgIdentifier</span> <span class="mi">64</span>      <span class="o">//</span> <span class="n">msg</span> <span class="n">标识符</span>
+    <span class="n">field_high</span> <span class="n">ntfnQueue_head</span> <span class="mi">39</span>    <span class="o">//</span> <span class="n">等待队列头部</span>
+    <span class="n">field_high</span> <span class="n">ntfnQueue_tail</span> <span class="mi">39</span>    <span class="o">//</span> <span class="n">等待队列尾部</span>
+    <span class="n">field</span> <span class="n">state</span> <span class="mi">2</span>                   <span class="o">//</span> <span class="n">当前状态</span>
+<span class="p">}</span>
+
+<span class="n">block</span> <span class="n">notification_cap</span> <span class="p">{</span>
+    <span class="n">field</span> <span class="n">capNtfnBadge</span> <span class="mi">64</span>      <span class="o">//</span> <span class="n">badge</span> <span class="n">标识符</span>
+    <span class="n">field</span> <span class="n">capType</span> <span class="mi">5</span>            <span class="o">//</span> <span class="n">cap</span> <span class="n">类型</span>
+    <span class="n">field</span> <span class="n">capNtfnCanReceive</span> <span class="mi">1</span>  <span class="o">//</span> <span class="n">可以接收</span>
+    <span class="n">field</span> <span class="n">capNtfnCanSend</span> <span class="mi">1</span>     <span class="o">//</span> <span class="n">可以发送</span>
+    <span class="n">field_high</span> <span class="n">capNtfnPtr</span> <span class="mi">39</span>   <span class="o">//</span> <span class="n">指向</span> <span class="n">notification</span> <span class="n">内核结构</span>
 <span class="p">}</span>
 </pre></div>
 </div>
-<p>三种状态：</p>
+<p><code class="docutils literal notranslate"><span class="pre">state</span></code> 字段指定 Notification 的三种状态：</p>
 <ul class="simple">
-<li><p>Idle</p></li>
-<li><p>Waiting</p></li>
-<li><p>Active</p></li>
+<li><p><strong>NtfnState_Waiting</strong>：TCB 在队列中等待接收信号</p></li>
+<li><p><strong>NtfnState_Active</strong>：TCB 接收到信号</p></li>
+<li><p><strong>NtfnState_Idle</strong>：以上两种状态之外的状态</p></li>
 </ul>
-<p>内核函数：</p>
+<div class="section" id="id1">
+<h3>内核相关函数<a class="headerlink" href="#id1" title="永久链接至标题">#</a></h3>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">void</span> <span class="pre">sendSignal(notification_t</span> <span class="pre">*ntfnPtr,</span> <span class="pre">word_t</span> <span class="pre">badge)</span></code>：</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">void</span> <span class="pre">cancelSignal(tcb_t</span> <span class="pre">*threadPtr,</span> <span class="pre">notification_t</span> <span class="pre">*ntfnPtr)</span></code>：</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">void</span> <span class="pre">bindNotification(tcb_t</span> <span class="pre">*tcb,</span> <span class="pre">notification_t</span> <span class="pre">*ntfnPtr)</span></code>：将 notification 绑定到指定的 TCB ，将 ntfnPtr 赋值给 tcbBoundNotification ，将 tcb 赋值给 ntfnBoundTCB</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">void</span> <span class="pre">unbindNotification(tcb_t</span> <span class="pre">*tcb)</span></code>：取消绑定</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">void</span> <span class="pre">sendSignal(notification_t</span> <span class="pre">*ntfnPtr,</span> <span class="pre">word_t</span> <span class="pre">badge)</span></code>：不同的状态处理方法不同：</p>
+<ul>
+<li><p>NtfnState_Idle：如果绑定到 TCB ，则根据 Thread 当前状态进行判断，若处于 ThreadState_BlockedOnReceive ，切换到该 TCB 开始运行，并设置 badge 标识符</p></li>
+<li><p>NtfnState_Waiting：从等待队列中取出一个唤醒并开始执行，如果队列变为空则转为 NtfnState_Idle 状态</p></li>
+<li><p>NtfnState_Active：已经有正在等待响应的 badge 了，直接与当前 badge 进行或操作</p></li>
 </ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">void</span> <span class="pre">receiveSignal(tcb_t</span> <span class="pre">*thread,</span> <span class="pre">cap_t</span> <span class="pre">cap,</span> <span class="pre">bool_t</span> <span class="pre">isBlocking)</span></code>：根据 cap 获取 Notification 对象指针，不同状态的处理方法不同：</p>
+<ul>
+<li><p>NtfnState_Idle 和 NtfnState_Waiting：若采用阻塞方法（isBlocking 为 1），则设置 TCB 状态为 ThreadState_BlockedOnNotification ，并设置 TCB 的 blockingObject 为当前 ntfnPtr ，将 TCB 放到 Ntfn 等待队列尾部等待唤醒，转为 NtfnState_Waiting 状态</p></li>
+<li><p>NtfnState_Active：将 TCB 的 badgeRegister 设置为 ntfnMsgIdentifier ，转为 NtfnState_Idle 状态</p></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="section" id="id2">
+<h3>用户相关函数<a class="headerlink" href="#id2" title="永久链接至标题">#</a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">void</span> <span class="pre">seL4_Wait(seL4_CPtr</span> <span class="pre">src,</span> <span class="pre">seL4_Word</span> <span class="pre">*sender)</span></code>：即 seL4_Recv</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">void</span> <span class="pre">seL4_Poll(seL4_CPtr</span> <span class="pre">src,</span> <span class="pre">seL4_Word</span> <span class="pre">*sender)</span></code>：即 seL4_NBRecv</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">void</span> <span class="pre">seL4_Signal(seL4_CPtr</span> <span class="pre">dest)</span></code>：即 seL4_Send</p></li>
+</ul>
+</div>
+</div>
+<div class="section" id="irq">
+<h2>IRQ<a class="headerlink" href="#irq" title="永久链接至标题">#</a></h2>
+<p>相关 Cap 如下：</p>
+<ul class="simple">
+<li><p><strong>IRQControl</strong>：由 root 进行管理，不可被复制</p></li>
+<li><p><strong>IRQHandler</strong>：通过调用 IRQControl 获取对应中断的访问权限，可以被复制；通过 <code class="docutils literal notranslate"><span class="pre">seL4_IRQControl_Get(seL4_IRQControl</span> <span class="pre">_service,</span> <span class="pre">seL4_Word</span> <span class="pre">irq,</span> <span class="pre">seL4_CNode</span> <span class="pre">root,</span> <span class="pre">seL4_Word</span> <span class="pre">index,</span> <span class="pre">seL4_Uint8</span> <span class="pre">depth)</span></code> 获取</p></li>
+</ul>
+<p><code class="docutils literal notranslate"><span class="pre">seL4_IRQHandler_SetNotification</span></code> 将 IRQHandler 绑定至 Notification 接收中断，如果想让 Notification 接收多个中断，可以让 badge 绑定至不同的 IRQHandler 。中断可以通过 <code class="docutils literal notranslate"><span class="pre">seL4_Poll</span></code> 或 <code class="docutils literal notranslate"><span class="pre">seL4_Wait</span></code> 来感知。通过 Notification 接收中断并进行处理后，可以通过 <code class="docutils literal notranslate"><span class="pre">seL4_IRQHandler_Ack</span></code> 来响应中断（准备接收下一个中断）或 <code class="docutils literal notranslate"><span class="pre">seL4_IRQHandler_Clear</span></code> 来取消绑定。</p>
 </div>
 <div class="section" id="boot">
 <h2>Boot<a class="headerlink" href="#boot" title="永久链接至标题">#</a></h2>
@@ -370,7 +419,7 @@ _start:
 #endif
   /* 内核初始化 */
   jal init_kernel
-  /* 恢复用户态上下文（返回到 rootserver） */
+  /* 恢复用户态上下文（返回到 root） */
   la ra, restore_user_context
   jr ra
 
@@ -418,6 +467,18 @@ _start:
 <p>相当于和 <code class="docutils literal notranslate"><span class="pre">seL4_Send</span></code> 共用了内核接口，换句话说，可以将 <code class="docutils literal notranslate"><span class="pre">seL4_Signal</span></code> 视为消息长度为空的 <code class="docutils literal notranslate"><span class="pre">seL4_Send</span></code> 。</p>
 <p>系统调用号例如 <code class="docutils literal notranslate"><span class="pre">seL4_SysYield</span></code> 等是在编译后确定的。</p>
 <p>注意到开关 MCS 参数前后，系统调用的实现方式是不一样的。</p>
+</div>
+<div class="section" id="sel4test">
+<h2><a class="reference external" href="https://github.com/seL4/sel4test/blob/master/docs/design.md">seL4test</a><a class="headerlink" href="#sel4test" title="永久链接至标题">#</a></h2>
+<p>root 是 sel4test-driver ，启动时获取 <code class="docutils literal notranslate"><span class="pre">seL4_Bootinfo_t</span></code> ，为测例的运行提供环境。bootstrap 运行环境主要是为了测试创建进程和与其通信的功能是否正常。root 通过 linker section 来在运行时选择测例，可以通过字符串匹配在编译期对测例进行选择。测例是依次运行的，root 可以选择是否在测例运行失败后中止测试。</p>
+<p>sel4test-driver 运行流程：</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">main</span> <span class="o">-&gt;</span>
+  <span class="n">main_continued</span> <span class="o">-&gt;</span>
+    <span class="n">sel4test_run_tests</span> <span class="o">-&gt;</span>
+      <span class="n">test_types</span><span class="p">[</span><span class="n">tt</span><span class="p">]</span><span class="o">-&gt;</span><span class="n">run_test</span><span class="p">(</span><span class="n">tests</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>sel4test_run_tests 根据 <code class="docutils literal notranslate"><span class="pre">__start__test_type</span></code> 到 <code class="docutils literal notranslate"><span class="pre">__stop__test_type</span></code> 加载 <code class="docutils literal notranslate"><span class="pre">struct</span> <span class="pre">test_type</span></code> 信息，对 test 进行过滤后依次运行每个 test （不同 test_type 可以有多个 test）。</p>
 </div>
 </div>
 
@@ -477,9 +538,15 @@ _start:
 <li><a class="reference internal" href="#tcb">TCB</a></li>
 <li><a class="reference internal" href="#mcs">MCS</a></li>
 <li><a class="reference internal" href="#ipc">IPC</a></li>
-<li><a class="reference internal" href="#notification">Notification</a></li>
+<li><a class="reference internal" href="#notification">Notification</a><ul>
+<li><a class="reference internal" href="#id1">内核相关函数</a></li>
+<li><a class="reference internal" href="#id2">用户相关函数</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#irq">IRQ</a></li>
 <li><a class="reference internal" href="#boot">Boot</a></li>
 <li><a class="reference internal" href="#syscalls">Syscalls</a></li>
+<li><a class="reference internal" href="#sel4test">seL4test</a></li>
 </ul>
 </li>
 </ul>

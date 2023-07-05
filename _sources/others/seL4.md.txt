@@ -88,9 +88,16 @@ hardware.yml 给出的硬件描述，以 uintc 为例：
 // c = BIT(seL4_TCBBits)
 ```
 
+常用内核函数：
+
+- `void tcbEPDequeue(tcb_t *tcb, tcb_queue_t queue)`：将当前 TCB 从队列（EP 或 Ntfn 的等待队列）中移除
+- `cpu_id_t getCurrentCPUIndex(void)`：从 `sscratch` 寄存器中读出当前核号
+- `void tcbSchedEnqueue(tcb_t *tcb)`：将 TCB 置于调度队列的头部
+- `void tcbSchedAppend(tcb_t *tcb)`：将 TCB 置于调度队列的头部
+- `void remoteQueueUpdate(tcb_t *tcb)`：发送 `ipiReschedulePending` 更新目标核的调度目标
+- `void setRegister(tcb_t *thread, register_t reg, word_t w)`：设置寄存器`thread->tcbArch.tcbContext.registers[reg] = w`
+
 ## MCS
-
-
 
 ## IPC
 
@@ -102,6 +109,7 @@ block endpoint {
 }
 ```
 
+
 ## Notification
 
 ```
@@ -109,24 +117,54 @@ block notification {
 #ifdef CONFIG_KERNEL_MCS
     field_high ntfnSchedContext 39
 #endif
-    field_high ntfnBoundTCB 39
-    field ntfnMsgIdentifier 64
-    field_high ntfnQueue_head 39
-    field_high ntfnQueue_tail 39
-    field state 2
+    field_high ntfnBoundTCB 39      // 指向绑定的 TCB
+    field ntfnMsgIdentifier 64      // msg 标识符
+    field_high ntfnQueue_head 39    // 等待队列头部
+    field_high ntfnQueue_tail 39    // 等待队列尾部
+    field state 2                   // 当前状态
+}
+
+block notification_cap {
+    field capNtfnBadge 64      // badge 标识符
+    field capType 5            // cap 类型
+    field capNtfnCanReceive 1  // 可以接收
+    field capNtfnCanSend 1     // 可以发送
+    field_high capNtfnPtr 39   // 指向 notification 内核结构
 }
 ```
 
-三种状态：
+`state` 字段指定 Notification 的三种状态：
 
-- Idle
-- Waiting
-- Active
+- **NtfnState_Waiting**：TCB 在队列中等待接收信号
+- **NtfnState_Active**：TCB 接收到信号
+- **NtfnState_Idle**：以上两种状态之外的状态
 
-内核函数：
+### 内核相关函数
 
-- `void sendSignal(notification_t *ntfnPtr, word_t badge)`：
-- `void cancelSignal(tcb_t *threadPtr, notification_t *ntfnPtr)`：
+- `void bindNotification(tcb_t *tcb, notification_t *ntfnPtr)`：将 notification 绑定到指定的 TCB ，将 ntfnPtr 赋值给 tcbBoundNotification ，将 tcb 赋值给 ntfnBoundTCB 
+- `void unbindNotification(tcb_t *tcb)`：取消绑定
+- `void sendSignal(notification_t *ntfnPtr, word_t badge)`：不同的状态处理方法不同：
+  - NtfnState_Idle：如果绑定到 TCB ，则根据 Thread 当前状态进行判断，若处于 ThreadState_BlockedOnReceive ，切换到该 TCB 开始运行，并设置 badge 标识符
+  - NtfnState_Waiting：从等待队列中取出一个唤醒并开始执行，如果队列变为空则转为 NtfnState_Idle 状态
+  - NtfnState_Active：已经有正在等待响应的 badge 了，直接与当前 badge 进行或操作
+- `void receiveSignal(tcb_t *thread, cap_t cap, bool_t isBlocking)`：根据 cap 获取 Notification 对象指针，不同状态的处理方法不同：
+  - NtfnState_Idle 和 NtfnState_Waiting：若采用阻塞方法（isBlocking 为 1），则设置 TCB 状态为 ThreadState_BlockedOnNotification ，并设置 TCB 的 blockingObject 为当前 ntfnPtr ，将 TCB 放到 Ntfn 等待队列尾部等待唤醒，转为 NtfnState_Waiting 状态
+  - NtfnState_Active：将 TCB 的 badgeRegister 设置为 ntfnMsgIdentifier ，转为 NtfnState_Idle 状态
+
+### 用户相关函数
+
+- `void seL4_Wait(seL4_CPtr src, seL4_Word *sender)`：即 seL4_Recv
+- `void seL4_Poll(seL4_CPtr src, seL4_Word *sender)`：即 seL4_NBRecv
+- `void seL4_Signal(seL4_CPtr dest)`：即 seL4_Send
+
+## IRQ
+
+相关 Cap 如下：
+
+- **IRQControl**：由 root 进行管理，不可被复制
+- **IRQHandler**：通过调用 IRQControl 获取对应中断的访问权限，可以被复制；通过 `seL4_IRQControl_Get(seL4_IRQControl _service, seL4_Word irq, seL4_CNode root, seL4_Word index, seL4_Uint8 depth)` 获取
+
+`seL4_IRQHandler_SetNotification` 将 IRQHandler 绑定至 Notification 接收中断，如果想让 Notification 接收多个中断，可以让 badge 绑定至不同的 IRQHandler 。中断可以通过 `seL4_Poll` 或 `seL4_Wait` 来感知。通过 Notification 接收中断并进行处理后，可以通过 `seL4_IRQHandler_Ack` 来响应中断（准备接收下一个中断）或 `seL4_IRQHandler_Clear` 来取消绑定。 
 
 ## Boot
 
@@ -162,7 +200,7 @@ _start:
 #endif
   /* 内核初始化 */
   jal init_kernel
-  /* 恢复用户态上下文（返回到 rootserver） */
+  /* 恢复用户态上下文（返回到 root） */
   la ra, restore_user_context
   jr ra
 
@@ -214,5 +252,17 @@ static inline void riscv_sys_send_null(seL4_Word sys, seL4_Word src, seL4_Word i
 
 注意到开关 MCS 参数前后，系统调用的实现方式是不一样的。
 
+## [seL4test](https://github.com/seL4/sel4test/blob/master/docs/design.md)
 
+root 是 sel4test-driver ，启动时获取 `seL4_Bootinfo_t` ，为测例的运行提供环境。bootstrap 运行环境主要是为了测试创建进程和与其通信的功能是否正常。root 通过 linker section 来在运行时选择测例，可以通过字符串匹配在编译期对测例进行选择。测例是依次运行的，root 可以选择是否在测例运行失败后中止测试。
 
+sel4test-driver 运行流程：
+
+```
+main ->
+  main_continued ->
+    sel4test_run_tests ->
+      test_types[tt]->run_test(tests[i])
+```
+
+sel4test_run_tests 根据 `__start__test_type` 到 `__stop__test_type` 加载 `struct test_type` 信息，对 test 进行过滤后依次运行每个 test （不同 test_type 可以有多个 test）。

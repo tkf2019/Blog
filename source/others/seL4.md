@@ -52,13 +52,13 @@ hardware.yml 给出的硬件描述，以 uintc 为例：
 
 - `arch_tcb_t tcbArch`：arch 相关的状态，主要包含上下文的内容。逐级展开可以的得到 `word_t registers[n_contextRegisters]`，相关定义位于 `enum _register`，除了 31 个通用寄存器外（不包括 zero），还包含 `sstatus` 和 `scause` 等，可以在其中加入其他需要保存和恢复的用户态寄存器。
 - `thread_state_t tcbState`：线程状态，主要包括：
-  - `ThreadState_Inactive`：
-  - `ThreadState_Running`：
-  - `ThreadState_Restart`：
-  - `ThreadState_BlockedOnReceive`：
-  - `ThreadState_BlockedOnSend`：
-  - `ThreadState_BlockedOnReply`：
-  - `ThreadState_BlockedOnNotification`：
+  - `ThreadState_Inactive`
+  - `ThreadState_Running`
+  - `ThreadState_Restart`
+  - `ThreadState_BlockedOnReceive`
+  - `ThreadState_BlockedOnSend`
+  - `ThreadState_BlockedOnReply`
+  - `ThreadState_BlockedOnNotification`
 - `notification_t *tcbBoundNotification`：指向该线程对应的 Notification ，若该指针非空，该线程可以接收 Signalsh ceshce
 - `seL4_Fault_t tcbFault`：
 - `lookup_fault_t tcbLookupFailure`：
@@ -101,14 +101,90 @@ hardware.yml 给出的硬件描述，以 uintc 为例：
 
 ## IPC
 
+seL4 中的 IPC 机制可以在线程之间传递消息（**endpoint**结构），也可以让线程和内核服务进行通信（其他内核结构）。IPC 传递的消息被保存在 Message Register 中（简称 MR），如果消息长度较短，可直接通过物理寄存器来传递，否则使用 IPC buffer 。消息的元结构为 `seL4_MessageInfo_t` ，包含以下字段：
+
 ```
-block endpoint {
-    field epQueue_head 64
-    field_high epQueue_tail 37
-    field state 2
+block seL4_MessageInfo {
+    field label 52        // 原始信息
+    field capsUnwrapped 3 // 
+    field extraCaps 2     // cap 数量
+    field length 7        // 消息长度
 }
 ```
 
+IPC buffer 结构包含以下字段：
+
+```c
+typedef struct seL4_IPCBuffer_ {
+    seL4_MessageInfo_t tag;           // 元信息
+    seL4_Word msg[seL4_MsgMaxLength]; // 消息内容
+    seL4_Word userData;               // 该结构起始地址
+    // 发送的 cap 或标识符
+    seL4_Word caps_or_badges[seL4_MsgMaxExtraCaps];
+    // 以下结构用于定位接收 cap 的 slot
+    seL4_CPtr receiveCNode;
+    seL4_CPtr receiveIndex;
+    seL4_Word receiveDepth;
+} seL4_IPCBuffer __attribute__((__aligned__(sizeof(struct seL4_IPCBuffer_))));
+```
+
+内核结构包含以下字段：
+
+```
+block endpoint {
+    field epQueue_head 64       // 等待队列头部
+    field_high epQueue_tail 37  // 等待队列尾部
+    field state 2               // 当前状态
+}
+
+block endpoint_cap {
+    field capEPBadge 64          // 标识符，非0标识符不可被修改
+    field capType 5              // cap 类型
+    field capCanGrantReply 1     //  
+    field capCanGrant 1          //
+    field capCanReceive 1        // 可以接收
+    field capCanSend 1           // 可以发送
+    field_high capEPPtr 39       // 指向 endpoint 内核结构
+}
+
+block reply_cap {
+    field capTCBPtr 64           // 指向绑定的 TCB 
+    field capType 5              // cap 类型
+    field capReplyCanGrant 1     // 源自 endpoint_cap 的 capCanGrant 字段
+#ifndef CONFIG_KERNEL_MCS
+    field capReplyMaster 1
+#endif
+}
+```
+
+`state` 字段指定 EP 的三种状态：
+
+- **EPState_Send**：等待队列中有 TCB 等待发送
+- **EPState_Recv**：等待队列中有 TCB 等待接收
+- **EPState_Idle**：等待队列为空 
+
+IPC 的发送与接收都是阻塞的，也就是说当调用 `seL4_Send` 或 `seL4_Call` 时如果没有接收方，发送方会进入等待队列；当调用 `seL4_Recv` 和 `seL4_ReplyRecv` 时如果没有发送方，接收方会进入等待队列。无写权限的 Send 和 Call 不会触发错误，但是有读权限的 Recv 会触发 `seL4_Fault_*` 错误。IPC 可以发送 cap ，但 sender 必须有 Grant 权限。如果发送了表示内核结构的 cap ，这些额外的 cap 会被标记在 tag 的 capsUnwrapped 字段，只有 badge 被发送，这样接收方的 slot 可以用来保存其他 cap 。
+
+将一次 IPC 发送或接收看成一次事务，该事务是非原子的。也就是说错误发生前的操作可以被正常完成，错误后的操作会被中止。
+
+reply_cap 在发送方调用 `seL4_Call` 时自动生成，其中的 capTCBPtr 字段指向发送方。可以通过 seL4_Reply 直接调用 reply_cap ，也可以通过 seL4_CNode_SaveCaller 将该 cap 保存在其他 slot ，这样可以之后通过 seL4_Send 进行调用。capReplyCanGrant 字段表示是否可以通过 reply_cap 在回复的消息中发送 cap 。对于 reply_cap 的调用一定是非阻塞的，也就是说一定指向某个正在等待回复的 sender 。caller 接收回复的消息和 seL4_Recv 的流程类似。
+
+内核相关函数：
+
+> 注：内核函数参数类型为 `tcb_t *` 时名称却不一样，下面统一为 `tcb_t *tcb`
+
+- `void sendIPC(bool_t blocking, bool_t do_call, word_t badge, bool_t canGrant, bool_t canGrantReply, tcb_t *tcb, endpoint_t *epptr)`：不同的状态处理方法不同：
+  - EPState_Idle 和 EPState_Send：如果指定为 blocking ，则将当前 TCB 状态设置为 ThreadState_BlockingOnSend，并设置 blockingObject、blockingIPCBadge、blockingIPCCanGrant、blockingIPCCanGrantReply、blockingIPCIsCall 属性，将该 TCB 放入 EP 等待队列中
+  - EPState_Recv：从等待队列头部取出 TCB ，若此时等待队列为空，则转为 EPState_Idle ；调用 `doIPCTransfer`；如果是 IPC Call ，通过 `setupCallerCap` 创建 reply_cap ，否则将目标 TCB 的状态设置为 `ThreadState_Running` 并进行调度
+- `void receiveIPC(tcb_t *tcb, cap_t cap, bool_t isBlocking)`：首先检查 TCB 是否有待接收的 Signal ，如果有则优先调用 `completeSignal` （Signal 是消息长度为 0 的 IPC）；不同的状态处理方法不同：
+  - EPState_Idle 和 EPState_Recv：如果指定为 blocking ，则将当前 TCB 状态设置为 ThreadState_BlockingOnReceive，设置 blockingObject 和 blokcingIPCCanGrant ，将 TCB 加入 EP 的等待队列中，状态转为 EPState_Recv
+  - EPState_Send：从等待队列头部取出 sender ，如果等待队列为空，转为 EPState_Idle 状态；获取 sender 保存的 badge，canGrant，canGrantReply 信息，调用 `doIPCTransfer`；如果是 IPC Call ，通过 `setupCallerCap` 创建 reply_cap ，否则将目标 TCB 的状态设置为 `ThreadState_Running` 并进行调度
+- `void cancelIPC(tcb_t *tcb)`：根据 TCB 状态进行判断：
+  - ThreadState_BlockOnSend 和 ThreadState_BlockOnReceive：从等待队列中移除该 TCB ，并将 TCB 状态设置为 ThreadState_Inactive
+  - ThreadState_BlockedOnNotification：调用 `cancelSignal`
+  - ThreadState_BlockedOnReply：移除 reply_cap
+- `void cancelAllIPC(endpoint_t *epptr)`：状态转为 EPState_Idle ，清空等待队列，将其中所有 TCB 加入调度队列，状态设置为 ThreadState_Restart
+- 
 
 ## Notification
 
@@ -136,26 +212,26 @@ block notification_cap {
 `state` 字段指定 Notification 的三种状态：
 
 - **NtfnState_Waiting**：TCB 在队列中等待接收信号
-- **NtfnState_Active**：TCB 接收到信号
+- **NtfnState_Active**：TCB 接收到信号但等待队列为空
 - **NtfnState_Idle**：以上两种状态之外的状态
 
-### 内核相关函数
+内核相关函数：
+
+> 注：内核函数参数类型为 `tcb_t *` 时名称却不一样，下面统一为 `tcb_t *tcb`
 
 - `void bindNotification(tcb_t *tcb, notification_t *ntfnPtr)`：将 notification 绑定到指定的 TCB ，将 ntfnPtr 赋值给 tcbBoundNotification ，将 tcb 赋值给 ntfnBoundTCB 
 - `void unbindNotification(tcb_t *tcb)`：取消绑定
 - `void sendSignal(notification_t *ntfnPtr, word_t badge)`：不同的状态处理方法不同：
-  - NtfnState_Idle：如果绑定到 TCB ，则根据 Thread 当前状态进行判断，若处于 ThreadState_BlockedOnReceive ，切换到该 TCB 开始运行，并设置 badge 标识符
+  - NtfnState_Idle：如果绑定到 TCB ，则根据 TCB 当前状态进行判断，若处于 ThreadState_BlockedOnReceive ，切换到该 TCB 开始运行，并设置 badge 标识符，否则转为 NtfnState_Active 状态
   - NtfnState_Waiting：从等待队列中取出一个唤醒并开始执行，如果队列变为空则转为 NtfnState_Idle 状态
   - NtfnState_Active：已经有正在等待响应的 badge 了，直接与当前 badge 进行或操作
-- `void receiveSignal(tcb_t *thread, cap_t cap, bool_t isBlocking)`：根据 cap 获取 Notification 对象指针，不同状态的处理方法不同：
+- `void receiveSignal(tcb_t *tcb, cap_t cap, bool_t isBlocking)`：根据 cap 获取 Notification 对象指针，不同状态的处理方法不同：
   - NtfnState_Idle 和 NtfnState_Waiting：若采用阻塞方法（isBlocking 为 1），则设置 TCB 状态为 ThreadState_BlockedOnNotification ，并设置 TCB 的 blockingObject 为当前 ntfnPtr ，将 TCB 放到 Ntfn 等待队列尾部等待唤醒，转为 NtfnState_Waiting 状态
   - NtfnState_Active：将 TCB 的 badgeRegister 设置为 ntfnMsgIdentifier ，转为 NtfnState_Idle 状态
-
-### 用户相关函数
-
-- `void seL4_Wait(seL4_CPtr src, seL4_Word *sender)`：即 seL4_Recv
-- `void seL4_Poll(seL4_CPtr src, seL4_Word *sender)`：即 seL4_NBRecv
-- `void seL4_Signal(seL4_CPtr dest)`：即 seL4_Send
+- `void cancelSignal(tcb_t *tcb, notification_t *ntfnPtr)`：将 TCB 从 Ntfn 等待队列中移除，若等待队列为空则转为 NtfnState_Idle 状态，将 TCB 当前状态设置为 ThreadState_Inactive
+- `void completeSignal(notification_t *ntfnPtr, tcb_t *tcb)`：若当前状态为 NtfnState_Active ，则
+设置对应 tcb 的 badge 寄存器，转为 NtfnState_Idle
+- `void cancelAllSignals(notification_t *ntfnPtr)`：状态转为 NtfnState_Idle ，清空等待队列，将其中所有 TCB 加入调度队列，状态设置为 ThreadState_Restart
 
 ## IRQ
 
@@ -205,10 +281,6 @@ _start:
   jr ra
 
 ```
-
-相关函数：
-
-- `BOOT_CODE tcb_t *create_initial_thread(cap_t root_cnode_cap, cap_t it_pd_cap, vptr_t ui_v_entry, vptr_t bi_frame_vptr, vptr_t ipcbuf_vptr, cap_t ipcbuf_cap)`：创建并初始化 init 线程。
 
 ## Syscalls
 

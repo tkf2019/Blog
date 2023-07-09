@@ -262,13 +262,13 @@
 <li><p><code class="docutils literal notranslate"><span class="pre">arch_tcb_t</span> <span class="pre">tcbArch</span></code>：arch 相关的状态，主要包含上下文的内容。逐级展开可以的得到 <code class="docutils literal notranslate"><span class="pre">word_t</span> <span class="pre">registers[n_contextRegisters]</span></code>，相关定义位于 <code class="docutils literal notranslate"><span class="pre">enum</span> <span class="pre">_register</span></code>，除了 31 个通用寄存器外（不包括 zero），还包含 <code class="docutils literal notranslate"><span class="pre">sstatus</span></code> 和 <code class="docutils literal notranslate"><span class="pre">scause</span></code> 等，可以在其中加入其他需要保存和恢复的用户态寄存器。</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">thread_state_t</span> <span class="pre">tcbState</span></code>：线程状态，主要包括：</p>
 <ul>
-<li><p><code class="docutils literal notranslate"><span class="pre">ThreadState_Inactive</span></code>：</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">ThreadState_Running</span></code>：</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">ThreadState_Restart</span></code>：</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">ThreadState_BlockedOnReceive</span></code>：</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">ThreadState_BlockedOnSend</span></code>：</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">ThreadState_BlockedOnReply</span></code>：</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">ThreadState_BlockedOnNotification</span></code>：</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ThreadState_Inactive</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ThreadState_Running</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ThreadState_Restart</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ThreadState_BlockedOnReceive</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ThreadState_BlockedOnSend</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ThreadState_BlockedOnReply</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ThreadState_BlockedOnNotification</span></code></p></li>
 </ul>
 </li>
 <li><p><code class="docutils literal notranslate"><span class="pre">notification_t</span> <span class="pre">*tcbBoundNotification</span></code>：指向该线程对应的 Notification ，若该指针非空，该线程可以接收 Signalsh ceshce</p></li>
@@ -313,13 +313,92 @@
 </div>
 <div class="section" id="ipc">
 <h2>IPC<a class="headerlink" href="#ipc" title="永久链接至标题">#</a></h2>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">block</span> <span class="n">endpoint</span> <span class="p">{</span>
-    <span class="n">field</span> <span class="n">epQueue_head</span> <span class="mi">64</span>
-    <span class="n">field_high</span> <span class="n">epQueue_tail</span> <span class="mi">37</span>
-    <span class="n">field</span> <span class="n">state</span> <span class="mi">2</span>
+<p>seL4 中的 IPC 机制可以在线程之间传递消息（<strong>endpoint</strong>结构），也可以让线程和内核服务进行通信（其他内核结构）。IPC 传递的消息被保存在 Message Register 中（简称 MR），如果消息长度较短，可直接通过物理寄存器来传递，否则使用 IPC buffer 。消息的元结构为 <code class="docutils literal notranslate"><span class="pre">seL4_MessageInfo_t</span></code> ，包含以下字段：</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">block</span> <span class="n">seL4_MessageInfo</span> <span class="p">{</span>
+    <span class="n">field</span> <span class="n">label</span> <span class="mi">52</span>        <span class="o">//</span> <span class="n">原始信息</span>
+    <span class="n">field</span> <span class="n">capsUnwrapped</span> <span class="mi">3</span> <span class="o">//</span> 
+    <span class="n">field</span> <span class="n">extraCaps</span> <span class="mi">2</span>     <span class="o">//</span> <span class="n">cap</span> <span class="n">数量</span>
+    <span class="n">field</span> <span class="n">length</span> <span class="mi">7</span>        <span class="o">//</span> <span class="n">消息长度</span>
 <span class="p">}</span>
 </pre></div>
 </div>
+<p>IPC buffer 结构包含以下字段：</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="nc">seL4_IPCBuffer_</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">seL4_MessageInfo_t</span><span class="w"> </span><span class="n">tag</span><span class="p">;</span><span class="w">           </span><span class="c1">// 元信息</span>
+<span class="w">    </span><span class="n">seL4_Word</span><span class="w"> </span><span class="n">msg</span><span class="p">[</span><span class="n">seL4_MsgMaxLength</span><span class="p">];</span><span class="w"> </span><span class="c1">// 消息内容</span>
+<span class="w">    </span><span class="n">seL4_Word</span><span class="w"> </span><span class="n">userData</span><span class="p">;</span><span class="w">               </span><span class="c1">// 该结构起始地址</span>
+<span class="w">    </span><span class="c1">// 发送的 cap 或标识符</span>
+<span class="w">    </span><span class="n">seL4_Word</span><span class="w"> </span><span class="n">caps_or_badges</span><span class="p">[</span><span class="n">seL4_MsgMaxExtraCaps</span><span class="p">];</span>
+<span class="w">    </span><span class="c1">// 以下结构用于定位接收 cap 的 slot</span>
+<span class="w">    </span><span class="n">seL4_CPtr</span><span class="w"> </span><span class="n">receiveCNode</span><span class="p">;</span>
+<span class="w">    </span><span class="n">seL4_CPtr</span><span class="w"> </span><span class="n">receiveIndex</span><span class="p">;</span>
+<span class="w">    </span><span class="n">seL4_Word</span><span class="w"> </span><span class="n">receiveDepth</span><span class="p">;</span>
+<span class="p">}</span><span class="w"> </span><span class="n">seL4_IPCBuffer</span><span class="w"> </span><span class="n">__attribute__</span><span class="p">((</span><span class="n">__aligned__</span><span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="k">struct</span><span class="w"> </span><span class="nc">seL4_IPCBuffer_</span><span class="p">))));</span>
+</pre></div>
+</div>
+<p>内核结构包含以下字段：</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>block endpoint {
+    field epQueue_head 64       // 等待队列头部
+    field_high epQueue_tail 37  // 等待队列尾部
+    field state 2               // 当前状态
+}
+
+block endpoint_cap {
+    field capEPBadge 64          // 标识符，非0标识符不可被修改
+    field capType 5              // cap 类型
+    field capCanGrantReply 1     //  
+    field capCanGrant 1          //
+    field capCanReceive 1        // 可以接收
+    field capCanSend 1           // 可以发送
+    field_high capEPPtr 39       // 指向 endpoint 内核结构
+}
+
+block reply_cap {
+    field capTCBPtr 64           // 指向绑定的 TCB 
+    field capType 5              // cap 类型
+    field capReplyCanGrant 1     // 源自 endpoint_cap 的 capCanGrant 字段
+#ifndef CONFIG_KERNEL_MCS
+    field capReplyMaster 1
+#endif
+}
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">state</span></code> 字段指定 EP 的三种状态：</p>
+<ul class="simple">
+<li><p><strong>EPState_Send</strong>：等待队列中有 TCB 等待发送</p></li>
+<li><p><strong>EPState_Recv</strong>：等待队列中有 TCB 等待接收</p></li>
+<li><p><strong>EPState_Idle</strong>：等待队列为空</p></li>
+</ul>
+<p>IPC 的发送与接收都是阻塞的，也就是说当调用 <code class="docutils literal notranslate"><span class="pre">seL4_Send</span></code> 或 <code class="docutils literal notranslate"><span class="pre">seL4_Call</span></code> 时如果没有接收方，发送方会进入等待队列；当调用 <code class="docutils literal notranslate"><span class="pre">seL4_Recv</span></code> 和 <code class="docutils literal notranslate"><span class="pre">seL4_ReplyRecv</span></code> 时如果没有发送方，接收方会进入等待队列。无写权限的 Send 和 Call 不会触发错误，但是有读权限的 Recv 会触发 <code class="docutils literal notranslate"><span class="pre">seL4_Fault_*</span></code> 错误。IPC 可以发送 cap ，但 sender 必须有 Grant 权限。如果发送了表示内核结构的 cap ，这些额外的 cap 会被标记在 tag 的 capsUnwrapped 字段，只有 badge 被发送，这样接收方的 slot 可以用来保存其他 cap 。</p>
+<p>将一次 IPC 发送或接收看成一次事务，该事务是非原子的。也就是说错误发生前的操作可以被正常完成，错误后的操作会被中止。</p>
+<p>reply_cap 在发送方调用 <code class="docutils literal notranslate"><span class="pre">seL4_Call</span></code> 时自动生成，其中的 capTCBPtr 字段指向发送方。可以通过 seL4_Reply 直接调用 reply_cap ，也可以通过 seL4_CNode_SaveCaller 将该 cap 保存在其他 slot ，这样可以之后通过 seL4_Send 进行调用。capReplyCanGrant 字段表示是否可以通过 reply_cap 在回复的消息中发送 cap 。对于 reply_cap 的调用一定是非阻塞的，也就是说一定指向某个正在等待回复的 sender 。caller 接收回复的消息和 seL4_Recv 的流程类似。</p>
+<p>内核相关函数：</p>
+<blockquote>
+<div><p>注：内核函数参数类型为 <code class="docutils literal notranslate"><span class="pre">tcb_t</span> <span class="pre">*</span></code> 时名称却不一样，下面统一为 <code class="docutils literal notranslate"><span class="pre">tcb_t</span> <span class="pre">*tcb</span></code></p>
+</div></blockquote>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">void</span> <span class="pre">sendIPC(bool_t</span> <span class="pre">blocking,</span> <span class="pre">bool_t</span> <span class="pre">do_call,</span> <span class="pre">word_t</span> <span class="pre">badge,</span> <span class="pre">bool_t</span> <span class="pre">canGrant,</span> <span class="pre">bool_t</span> <span class="pre">canGrantReply,</span> <span class="pre">tcb_t</span> <span class="pre">*tcb,</span> <span class="pre">endpoint_t</span> <span class="pre">*epptr)</span></code>：不同的状态处理方法不同：</p>
+<ul>
+<li><p>EPState_Idle 和 EPState_Send：如果指定为 blocking ，则将当前 TCB 状态设置为 ThreadState_BlockingOnSend，并设置 blockingObject、blockingIPCBadge、blockingIPCCanGrant、blockingIPCCanGrantReply、blockingIPCIsCall 属性，将该 TCB 放入 EP 等待队列中</p></li>
+<li><p>EPState_Recv：从等待队列头部取出 TCB ，若此时等待队列为空，则转为 EPState_Idle ；调用 <code class="docutils literal notranslate"><span class="pre">doIPCTransfer</span></code>；如果是 IPC Call ，通过 <code class="docutils literal notranslate"><span class="pre">setupCallerCap</span></code> 创建 reply_cap ，否则将目标 TCB 的状态设置为 <code class="docutils literal notranslate"><span class="pre">ThreadState_Running</span></code> 并进行调度</p></li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">void</span> <span class="pre">receiveIPC(tcb_t</span> <span class="pre">*tcb,</span> <span class="pre">cap_t</span> <span class="pre">cap,</span> <span class="pre">bool_t</span> <span class="pre">isBlocking)</span></code>：首先检查 TCB 是否有待接收的 Signal ，如果有则优先调用 <code class="docutils literal notranslate"><span class="pre">completeSignal</span></code> （Signal 是消息长度为 0 的 IPC）；不同的状态处理方法不同：</p>
+<ul>
+<li><p>EPState_Idle 和 EPState_Recv：如果指定为 blocking ，则将当前 TCB 状态设置为 ThreadState_BlockingOnReceive，设置 blockingObject 和 blokcingIPCCanGrant ，将 TCB 加入 EP 的等待队列中，状态转为 EPState_Recv</p></li>
+<li><p>EPState_Send：从等待队列头部取出 sender ，如果等待队列为空，转为 EPState_Idle 状态；获取 sender 保存的 badge，canGrant，canGrantReply 信息，调用 <code class="docutils literal notranslate"><span class="pre">doIPCTransfer</span></code>；如果是 IPC Call ，通过 <code class="docutils literal notranslate"><span class="pre">setupCallerCap</span></code> 创建 reply_cap ，否则将目标 TCB 的状态设置为 <code class="docutils literal notranslate"><span class="pre">ThreadState_Running</span></code> 并进行调度</p></li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">void</span> <span class="pre">cancelIPC(tcb_t</span> <span class="pre">*tcb)</span></code>：根据 TCB 状态进行判断：</p>
+<ul>
+<li><p>ThreadState_BlockOnSend 和 ThreadState_BlockOnReceive：从等待队列中移除该 TCB ，并将 TCB 状态设置为 ThreadState_Inactive</p></li>
+<li><p>ThreadState_BlockedOnNotification：调用 <code class="docutils literal notranslate"><span class="pre">cancelSignal</span></code></p></li>
+<li><p>ThreadState_BlockedOnReply：移除 reply_cap</p></li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">void</span> <span class="pre">cancelAllIPC(endpoint_t</span> <span class="pre">*epptr)</span></code>：状态转为 EPState_Idle ，清空等待队列，将其中所有 TCB 加入调度队列，状态设置为 ThreadState_Restart</p></li>
+<li></li>
+</ul>
 </div>
 <div class="section" id="notification">
 <h2>Notification<a class="headerlink" href="#notification" title="永久链接至标题">#</a></h2>
@@ -346,37 +425,34 @@
 <p><code class="docutils literal notranslate"><span class="pre">state</span></code> 字段指定 Notification 的三种状态：</p>
 <ul class="simple">
 <li><p><strong>NtfnState_Waiting</strong>：TCB 在队列中等待接收信号</p></li>
-<li><p><strong>NtfnState_Active</strong>：TCB 接收到信号</p></li>
+<li><p><strong>NtfnState_Active</strong>：TCB 接收到信号但等待队列为空</p></li>
 <li><p><strong>NtfnState_Idle</strong>：以上两种状态之外的状态</p></li>
 </ul>
-<div class="section" id="id1">
-<h3>内核相关函数<a class="headerlink" href="#id1" title="永久链接至标题">#</a></h3>
+<p>内核相关函数：</p>
+<blockquote>
+<div><p>注：内核函数参数类型为 <code class="docutils literal notranslate"><span class="pre">tcb_t</span> <span class="pre">*</span></code> 时名称却不一样，下面统一为 <code class="docutils literal notranslate"><span class="pre">tcb_t</span> <span class="pre">*tcb</span></code></p>
+</div></blockquote>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">void</span> <span class="pre">bindNotification(tcb_t</span> <span class="pre">*tcb,</span> <span class="pre">notification_t</span> <span class="pre">*ntfnPtr)</span></code>：将 notification 绑定到指定的 TCB ，将 ntfnPtr 赋值给 tcbBoundNotification ，将 tcb 赋值给 ntfnBoundTCB</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">void</span> <span class="pre">unbindNotification(tcb_t</span> <span class="pre">*tcb)</span></code>：取消绑定</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">void</span> <span class="pre">sendSignal(notification_t</span> <span class="pre">*ntfnPtr,</span> <span class="pre">word_t</span> <span class="pre">badge)</span></code>：不同的状态处理方法不同：</p>
 <ul>
-<li><p>NtfnState_Idle：如果绑定到 TCB ，则根据 Thread 当前状态进行判断，若处于 ThreadState_BlockedOnReceive ，切换到该 TCB 开始运行，并设置 badge 标识符</p></li>
+<li><p>NtfnState_Idle：如果绑定到 TCB ，则根据 TCB 当前状态进行判断，若处于 ThreadState_BlockedOnReceive ，切换到该 TCB 开始运行，并设置 badge 标识符，否则转为 NtfnState_Active 状态</p></li>
 <li><p>NtfnState_Waiting：从等待队列中取出一个唤醒并开始执行，如果队列变为空则转为 NtfnState_Idle 状态</p></li>
 <li><p>NtfnState_Active：已经有正在等待响应的 badge 了，直接与当前 badge 进行或操作</p></li>
 </ul>
 </li>
-<li><p><code class="docutils literal notranslate"><span class="pre">void</span> <span class="pre">receiveSignal(tcb_t</span> <span class="pre">*thread,</span> <span class="pre">cap_t</span> <span class="pre">cap,</span> <span class="pre">bool_t</span> <span class="pre">isBlocking)</span></code>：根据 cap 获取 Notification 对象指针，不同状态的处理方法不同：</p>
+<li><p><code class="docutils literal notranslate"><span class="pre">void</span> <span class="pre">receiveSignal(tcb_t</span> <span class="pre">*tcb,</span> <span class="pre">cap_t</span> <span class="pre">cap,</span> <span class="pre">bool_t</span> <span class="pre">isBlocking)</span></code>：根据 cap 获取 Notification 对象指针，不同状态的处理方法不同：</p>
 <ul>
 <li><p>NtfnState_Idle 和 NtfnState_Waiting：若采用阻塞方法（isBlocking 为 1），则设置 TCB 状态为 ThreadState_BlockedOnNotification ，并设置 TCB 的 blockingObject 为当前 ntfnPtr ，将 TCB 放到 Ntfn 等待队列尾部等待唤醒，转为 NtfnState_Waiting 状态</p></li>
 <li><p>NtfnState_Active：将 TCB 的 badgeRegister 设置为 ntfnMsgIdentifier ，转为 NtfnState_Idle 状态</p></li>
 </ul>
 </li>
+<li><p><code class="docutils literal notranslate"><span class="pre">void</span> <span class="pre">cancelSignal(tcb_t</span> <span class="pre">*tcb,</span> <span class="pre">notification_t</span> <span class="pre">*ntfnPtr)</span></code>：将 TCB 从 Ntfn 等待队列中移除，若等待队列为空则转为 NtfnState_Idle 状态，将 TCB 当前状态设置为 ThreadState_Inactive</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">void</span> <span class="pre">completeSignal(notification_t</span> <span class="pre">*ntfnPtr,</span> <span class="pre">tcb_t</span> <span class="pre">*tcb)</span></code>：若当前状态为 NtfnState_Active ，则
+设置对应 tcb 的 badge 寄存器，转为 NtfnState_Idle</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">void</span> <span class="pre">cancelAllSignals(notification_t</span> <span class="pre">*ntfnPtr)</span></code>：状态转为 NtfnState_Idle ，清空等待队列，将其中所有 TCB 加入调度队列，状态设置为 ThreadState_Restart</p></li>
 </ul>
-</div>
-<div class="section" id="id2">
-<h3>用户相关函数<a class="headerlink" href="#id2" title="永久链接至标题">#</a></h3>
-<ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">void</span> <span class="pre">seL4_Wait(seL4_CPtr</span> <span class="pre">src,</span> <span class="pre">seL4_Word</span> <span class="pre">*sender)</span></code>：即 seL4_Recv</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">void</span> <span class="pre">seL4_Poll(seL4_CPtr</span> <span class="pre">src,</span> <span class="pre">seL4_Word</span> <span class="pre">*sender)</span></code>：即 seL4_NBRecv</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">void</span> <span class="pre">seL4_Signal(seL4_CPtr</span> <span class="pre">dest)</span></code>：即 seL4_Send</p></li>
-</ul>
-</div>
 </div>
 <div class="section" id="irq">
 <h2>IRQ<a class="headerlink" href="#irq" title="永久链接至标题">#</a></h2>
@@ -425,10 +501,6 @@ _start:
 
 </pre></div>
 </div>
-<p>相关函数：</p>
-<ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">BOOT_CODE</span> <span class="pre">tcb_t</span> <span class="pre">*create_initial_thread(cap_t</span> <span class="pre">root_cnode_cap,</span> <span class="pre">cap_t</span> <span class="pre">it_pd_cap,</span> <span class="pre">vptr_t</span> <span class="pre">ui_v_entry,</span> <span class="pre">vptr_t</span> <span class="pre">bi_frame_vptr,</span> <span class="pre">vptr_t</span> <span class="pre">ipcbuf_vptr,</span> <span class="pre">cap_t</span> <span class="pre">ipcbuf_cap)</span></code>：创建并初始化 init 线程。</p></li>
-</ul>
 </div>
 <div class="section" id="syscalls">
 <h2>Syscalls<a class="headerlink" href="#syscalls" title="永久链接至标题">#</a></h2>
@@ -538,11 +610,7 @@ _start:
 <li><a class="reference internal" href="#tcb">TCB</a></li>
 <li><a class="reference internal" href="#mcs">MCS</a></li>
 <li><a class="reference internal" href="#ipc">IPC</a></li>
-<li><a class="reference internal" href="#notification">Notification</a><ul>
-<li><a class="reference internal" href="#id1">内核相关函数</a></li>
-<li><a class="reference internal" href="#id2">用户相关函数</a></li>
-</ul>
-</li>
+<li><a class="reference internal" href="#notification">Notification</a></li>
 <li><a class="reference internal" href="#irq">IRQ</a></li>
 <li><a class="reference internal" href="#boot">Boot</a></li>
 <li><a class="reference internal" href="#syscalls">Syscalls</a></li>

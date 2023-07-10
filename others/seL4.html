@@ -306,6 +306,7 @@
 <li><p><code class="docutils literal notranslate"><span class="pre">void</span> <span class="pre">tcbSchedAppend(tcb_t</span> <span class="pre">*tcb)</span></code>：将 TCB 置于调度队列的头部</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">void</span> <span class="pre">remoteQueueUpdate(tcb_t</span> <span class="pre">*tcb)</span></code>：发送 <code class="docutils literal notranslate"><span class="pre">ipiReschedulePending</span></code> 更新目标核的调度目标</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">void</span> <span class="pre">setRegister(tcb_t</span> <span class="pre">*thread,</span> <span class="pre">register_t</span> <span class="pre">reg,</span> <span class="pre">word_t</span> <span class="pre">w)</span></code>：设置寄存器<code class="docutils literal notranslate"><span class="pre">thread-&gt;tcbArch.tcbContext.registers[reg]</span> <span class="pre">=</span> <span class="pre">w</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">NODE_STATE(ksCurThread)</span></code>：获取当前正在运行的 TCB （多用于系统调用）</p></li>
 </ul>
 </div>
 <div class="section" id="mcs">
@@ -313,6 +314,9 @@
 </div>
 <div class="section" id="ipc">
 <h2>IPC<a class="headerlink" href="#ipc" title="永久链接至标题">#</a></h2>
+<blockquote>
+<div><p><a class="reference external" href="https://microkerneldude.org/2019/03/07/how-to-and-how-not-to-use-sel4-ipc/">这篇文章</a>辨析了 seL4 IPC 机制。</p>
+</div></blockquote>
 <p>seL4 中的 IPC 机制可以在线程之间传递消息（<strong>endpoint</strong>结构），也可以让线程和内核服务进行通信（其他内核结构）。IPC 传递的消息被保存在 Message Register 中（简称 MR），如果消息长度较短，可直接通过物理寄存器来传递，否则使用 IPC buffer 。消息的元结构为 <code class="docutils literal notranslate"><span class="pre">seL4_MessageInfo_t</span></code> ，包含以下字段：</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">block</span> <span class="n">seL4_MessageInfo</span> <span class="p">{</span>
     <span class="n">field</span> <span class="n">label</span> <span class="mi">52</span>        <span class="o">//</span> <span class="n">原始信息</span>
@@ -397,7 +401,6 @@ block reply_cap {
 </ul>
 </li>
 <li><p><code class="docutils literal notranslate"><span class="pre">void</span> <span class="pre">cancelAllIPC(endpoint_t</span> <span class="pre">*epptr)</span></code>：状态转为 EPState_Idle ，清空等待队列，将其中所有 TCB 加入调度队列，状态设置为 ThreadState_Restart</p></li>
-<li></li>
 </ul>
 </div>
 <div class="section" id="notification">
@@ -504,18 +507,8 @@ _start:
 </div>
 <div class="section" id="syscalls">
 <h2>Syscalls<a class="headerlink" href="#syscalls" title="永久链接至标题">#</a></h2>
-<p>相关定义位于 libsel4/include/api/syscall.xml 。</p>
-<ul class="simple">
-<li><p>Call</p></li>
-<li><p>ReplyRecv</p></li>
-<li><p>Send</p></li>
-<li><p>NBSend</p></li>
-<li><p>Recv</p></li>
-<li><p>Reply</p></li>
-<li><p>Yield</p></li>
-<li><p>NBRecv</p></li>
-</ul>
-<p>seL4 riscv 的 syscall 实现位于 libsel4/arch_include/riscv/sel4/arch/syscalls.h ，对上暴露的 API 保持一致，内部实现 <code class="docutils literal notranslate"><span class="pre">riscv_sys_send</span></code> ，<code class="docutils literal notranslate"><span class="pre">riscv_sys_send_null</span></code> 等函数，这些函数基本的执行逻辑为通过 <code class="docutils literal notranslate"><span class="pre">ecall</span></code> 指令陷入内核并通过寄存器传递参数。重点关注 <code class="docutils literal notranslate"><span class="pre">seL4_Signal</span></code> 这个系统调用，目前默认的实现方法为：</p>
+<p>可在<a class="reference external" href="https://docs.sel4.systems/projects/sel4/api-doc.html">官网</a>查看 API 说明，相关定义位于 libsel4/include/api/syscall.xml 。</p>
+<p>seL4 riscv 的 syscall 实现位于 libsel4/arch_include/riscv/sel4/arch/syscalls.h ，对上暴露的 API 保持一致，内部实现 <code class="docutils literal notranslate"><span class="pre">riscv_sys_send</span></code> ，<code class="docutils literal notranslate"><span class="pre">riscv_sys_send_null</span></code> 等函数，这些函数基本的执行逻辑为通过 <code class="docutils literal notranslate"><span class="pre">ecall</span></code> 指令陷入内核并通过寄存器传递参数。以 <code class="docutils literal notranslate"><span class="pre">seL4_Signal</span></code> 为例，目前默认的实现方法为：</p>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">LIBSEL4_INLINE_FUNC</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="n">seL4_Signal</span><span class="p">(</span><span class="n">seL4_CPtr</span><span class="w"> </span><span class="n">dest</span><span class="p">)</span>
 <span class="p">{</span>
 <span class="w">    </span><span class="n">riscv_sys_send_null</span><span class="p">(</span><span class="n">seL4_SysSend</span><span class="p">,</span><span class="w"> </span><span class="n">dest</span><span class="p">,</span><span class="w"> </span><span class="n">seL4_MessageInfo_new</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">).</span><span class="n">words</span><span class="p">[</span><span class="mi">0</span><span class="p">]);</span>
@@ -537,8 +530,51 @@ _start:
 </pre></div>
 </div>
 <p>相当于和 <code class="docutils literal notranslate"><span class="pre">seL4_Send</span></code> 共用了内核接口，换句话说，可以将 <code class="docutils literal notranslate"><span class="pre">seL4_Signal</span></code> 视为消息长度为空的 <code class="docutils literal notranslate"><span class="pre">seL4_Send</span></code> 。</p>
-<p>系统调用号例如 <code class="docutils literal notranslate"><span class="pre">seL4_SysYield</span></code> 等是在编译后确定的。</p>
-<p>注意到开关 MCS 参数前后，系统调用的实现方式是不一样的。</p>
+<p>注意到开关 MCS 参数前后，系统调用的实现方式是不一样的，以 <code class="docutils literal notranslate"><span class="pre">seL4_Poll</span></code> 为例：</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">LIBSEL4_INLINE_FUNC</span><span class="w"> </span><span class="n">seL4_MessageInfo_t</span><span class="w"> </span><span class="n">seL4_Poll</span><span class="p">(</span><span class="n">seL4_CPtr</span><span class="w"> </span><span class="n">src</span><span class="p">,</span><span class="w"> </span><span class="n">seL4_Word</span><span class="w"> </span><span class="o">*</span><span class="n">sender</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="cp">#ifdef CONFIG_KERNEL_MCS</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">seL4_NBWait</span><span class="p">(</span><span class="n">src</span><span class="p">,</span><span class="w"> </span><span class="n">sender</span><span class="p">);</span>
+<span class="cp">#else</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">seL4_NBRecv</span><span class="p">(</span><span class="n">src</span><span class="p">,</span><span class="w"> </span><span class="n">sender</span><span class="p">);</span>
+<span class="cp">#endif</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>内核系统调用处理函数入口为 <code class="docutils literal notranslate"><span class="pre">exception_t</span> <span class="pre">handleSyscall(syscall_t</span> <span class="pre">syscall)</span></code> 。下面分别对不同系统调用的处理进行分析。</p>
+<p><code class="docutils literal notranslate"><span class="pre">static</span> <span class="pre">exception_t</span> <span class="pre">handleInvocation(bool_t</span> <span class="pre">isCall,</span> <span class="pre">bool_t</span> <span class="pre">isBlocking)</span></code> 函数主要用来处理 Send 和 Call 等系统调用：</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="c1">// 获取 a0 和 a1 寄存器中的 cap 和 msg 元信息</span>
+<span class="n">seL4_MessageInfo_t</span><span class="w"> </span><span class="n">info</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">messageInfoFromWord</span><span class="p">(</span><span class="n">getRegister</span><span class="p">(</span><span class="kr">thread</span><span class="p">,</span><span class="w"> </span><span class="n">msgInfoRegister</span><span class="p">));</span>
+<span class="n">cptr_t</span><span class="w"> </span><span class="n">cptr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">getRegister</span><span class="p">(</span><span class="kr">thread</span><span class="p">,</span><span class="w"> </span><span class="n">capRegister</span><span class="p">);</span>
+<span class="c1">// 在当前 cspace 中查找 cptr（权限检查）</span>
+<span class="n">lookupCapAndSlot_ret_t</span><span class="w"> </span><span class="n">lu_ret</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">lookupCapAndSlot</span><span class="p">(</span><span class="kr">thread</span><span class="p">,</span><span class="w"> </span><span class="n">cptr</span><span class="p">);</span>
+<span class="c1">// 获取 IPC buffer 的起始地址，对 Buffer 的类型和读写权限进行检查</span>
+<span class="n">word_t</span><span class="w"> </span><span class="o">*</span><span class="n">buffer</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">lookupIPCBuffer</span><span class="p">(</span><span class="nb">false</span><span class="p">,</span><span class="w"> </span><span class="kr">thread</span><span class="p">);</span>
+<span class="c1">// 在 buffer 中遍历 extra caps</span>
+<span class="n">exception_t</span><span class="w"> </span><span class="n">status</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">lookupExtraCaps</span><span class="p">(</span><span class="kr">thread</span><span class="p">,</span><span class="w"> </span><span class="n">buffer</span><span class="p">,</span><span class="w"> </span><span class="n">info</span><span class="p">);</span>
+<span class="c1">// 根据 cap 类型进行处理，检查 cap 是否可以发送（CanSend）</span>
+<span class="n">status</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">decodeInvocation</span><span class="p">(</span><span class="n">seL4_MessageInfo_get_label</span><span class="p">(</span><span class="n">info</span><span class="p">),</span><span class="w"> </span><span class="n">length</span><span class="p">,</span>
+<span class="w">                          </span><span class="n">cptr</span><span class="p">,</span><span class="w"> </span><span class="n">lu_ret</span><span class="p">.</span><span class="n">slot</span><span class="p">,</span><span class="w"> </span><span class="n">lu_ret</span><span class="p">.</span><span class="n">cap</span><span class="p">,</span>
+<span class="w">                          </span><span class="n">isBlocking</span><span class="p">,</span><span class="w"> </span><span class="n">isCall</span><span class="p">,</span><span class="w"> </span><span class="n">buffer</span><span class="p">);</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">static</span> <span class="pre">void</span> <span class="pre">handleRecv(bool_t</span> <span class="pre">isBlocking)</span></code> 函数主要用来处理 Recv 和 NBRecv 等系统嗲用：</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="c1">// 获取 a0 寄存器中的 cap</span>
+<span class="n">cptr_t</span><span class="w"> </span><span class="n">cptr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">getRegister</span><span class="p">(</span><span class="kr">thread</span><span class="p">,</span><span class="w"> </span><span class="n">capRegister</span><span class="p">);</span>
+<span class="c1">// 在当前 cspace 中查找 cptr（权限检查）</span>
+<span class="n">lookupCapAndSlot_ret_t</span><span class="w"> </span><span class="n">lu_ret</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">lookupCapAndSlot</span><span class="p">(</span><span class="kr">thread</span><span class="p">,</span><span class="w"> </span><span class="n">cptr</span><span class="p">);</span>
+<span class="c1">// 根据 cap 类型进行处理</span>
+<span class="k">switch</span><span class="w"> </span><span class="p">(</span><span class="n">cap_get_capType</span><span class="p">(</span><span class="n">lu_ret</span><span class="p">.</span><span class="n">cap</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">case</span><span class="w"> </span><span class="no">cap_endpoint_cap</span><span class="p">:</span>
+<span class="w">    </span><span class="c1">// 检查 ep 是否可以接收（CanReceive）</span>
+<span class="w">    </span><span class="n">receiveIPC</span><span class="p">(</span><span class="kr">thread</span><span class="p">,</span><span class="w"> </span><span class="n">lu_ret</span><span class="p">.</span><span class="n">cap</span><span class="p">,</span><span class="w"> </span><span class="n">isBlocking</span><span class="p">);</span>
+<span class="w">  </span><span class="k">case</span><span class="w"> </span><span class="no">cap_notification_cap</span><span class="p">:</span>
+<span class="w">    </span><span class="c1">// 检查 cap 是否对应该线程绑定的 ntfn</span>
+<span class="w">    </span><span class="n">receiveSignal</span><span class="p">(</span><span class="n">NODE_STATE</span><span class="p">(</span><span class="n">ksCurThread</span><span class="p">),</span><span class="w"> </span><span class="n">lu_ret</span><span class="p">.</span><span class="n">cap</span><span class="p">,</span><span class="w"> </span><span class="n">isBlocking</span><span class="p">);</span>
+<span class="w">  </span><span class="k">default</span><span class="o">:</span>
+<span class="p">}</span>
+</pre></div>
+</div>
 </div>
 <div class="section" id="sel4test">
 <h2><a class="reference external" href="https://github.com/seL4/sel4test/blob/master/docs/design.md">seL4test</a><a class="headerlink" href="#sel4test" title="永久链接至标题">#</a></h2>
@@ -551,6 +587,27 @@ _start:
 </pre></div>
 </div>
 <p>sel4test_run_tests 根据 <code class="docutils literal notranslate"><span class="pre">__start__test_type</span></code> 到 <code class="docutils literal notranslate"><span class="pre">__stop__test_type</span></code> 加载 <code class="docutils literal notranslate"><span class="pre">struct</span> <span class="pre">test_type</span></code> 信息，对 test 进行过滤后依次运行每个 test （不同 test_type 可以有多个 test）。</p>
+<p>ipc.c 测例集中的测例大部分是基于 <code class="docutils literal notranslate"><span class="pre">test_ipc_pair</span></code> 这个函数，下面对代码中的一些关键片段进行分析：</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="c1">// 分配 endpoint_cap</span>
+<span class="n">seL4_CPtr</span><span class="w"> </span><span class="n">ep</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">vka_alloc_endpoint_leaky</span><span class="p">(</span><span class="n">vka</span><span class="p">);</span>
+<span class="c1">// 分配 reply_cap</span>
+<span class="n">seL4_CPtr</span><span class="w"> </span><span class="n">a_reply</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">vka_alloc_reply_leaky</span><span class="p">(</span><span class="n">vka</span><span class="p">);</span>
+<span class="c1">// 将当前进程的 cspace 复制到新创建的进程，目的是为了让 sender 和 receiver 间能共享 endpoint</span>
+<span class="n">cspacepath_t</span><span class="w"> </span><span class="n">path</span><span class="p">;</span>
+<span class="n">create_helper_process</span><span class="p">(</span><span class="n">env</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">thread_a</span><span class="p">);</span>
+<span class="n">vka_cspace_make_path</span><span class="p">(</span><span class="o">&amp;</span><span class="n">env</span><span class="o">-&gt;</span><span class="n">vka</span><span class="p">,</span><span class="w"> </span><span class="n">ep</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">path</span><span class="p">);</span>
+<span class="n">thread_a_arg0</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sel4utils_copy_path_to_process</span><span class="p">(</span><span class="o">&amp;</span><span class="n">thread_a</span><span class="p">.</span><span class="n">process</span><span class="p">,</span><span class="w"> </span><span class="n">path</span><span class="p">);</span>
+<span class="c1">// 线程默认共享 cspace ，所以可以直接创建</span>
+<span class="n">create_helper_thread</span><span class="p">(</span><span class="n">env</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">thread_a</span><span class="p">);</span>
+<span class="c1">// 设置 sender 的调度优先级</span>
+<span class="n">set_helper_priority</span><span class="p">(</span><span class="n">env</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">thread_a</span><span class="p">,</span><span class="w"> </span><span class="n">sender_prio</span><span class="p">);</span>
+<span class="c1">// 绑定 sender 运行的核</span>
+<span class="n">set_helper_affinity</span><span class="p">(</span><span class="n">env</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">thread_a</span><span class="p">,</span><span class="w"> </span><span class="n">core_a</span><span class="p">);</span>
+<span class="c1">// 开始执行线程（进程）</span>
+<span class="n">start_helper</span><span class="p">(</span><span class="n">env</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">thread_a</span><span class="p">,</span><span class="w"> </span><span class="p">(</span><span class="n">helper_fn_t</span><span class="p">)</span><span class="w"> </span><span class="n">fa</span><span class="p">,</span><span class="w"> </span><span class="n">thread_a_arg0</span><span class="p">,</span><span class="w"> </span><span class="n">start_number</span><span class="p">,</span>
+<span class="w">             </span><span class="n">thread_a_reply</span><span class="p">,</span><span class="w"> </span><span class="n">nbwait_should_wait</span><span class="p">);</span>
+</pre></div>
+</div>
 </div>
 </div>
 

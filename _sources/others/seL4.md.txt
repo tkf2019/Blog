@@ -402,3 +402,67 @@ set_helper_affinity(env, &thread_a, core_a);
 start_helper(env, &thread_a, (helper_fn_t) fa, thread_a_arg0, start_number,
              thread_a_reply, nbwait_should_wait);
 ```
+
+## [sel4-riscv-vmm](https://github.com/SEL4PROJ/sel4_riscv_vmm/blob/master/src/vmm.c)
+
+该项目还处于试验阶段，支持 v0.6.1 RISC-V Hypervisor 指令扩展。
+
+**irq_server_node**
+
+```c
+struct irq_server_node {
+/// Information about the IRQ that is assigned to each badge bit
+    struct irq_data irqs[NIRQS_PER_NODE];
+/// The notification object that IRQs arrive on
+    seL4_CPtr notification;
+/// A mask for the badge. All set bits within the badge are treated as reserved.
+    seL4_Word badge_mask;
+};
+```
+
+`struct irq_server_node` 维护由该 node 处理的 irq (`struct irq_data`) ，一个 irq 对应 badge 的一位，通过 Notification 从接收 irq ，由 `irq_server_node_handle_irq` 根据 badge 通过调用预先注册的 handler 对所有收到的 irq 进行处理。`irq_bind` 函数根据 irq 序号分配 irq_cap ，并设置 notification_cap 中 badge 的对应位，最后将该 notification_cap 绑定到 irq_cap 。`irq_server_node_register_irq` 注册由该 node 处理的 irq 和 handler。 
+
+**irq_server_thread**
+
+```c
+struct irq_server_thread {
+/// IRQ data which this thread is responsible for
+    struct irq_server_node *node;
+/// A synchronous endpoint to deliver IRQ messages to.
+    seL4_CPtr delivery_sep;
+/// The label that should be assigned to outgoing synchronous messages.
+    seL4_Word label;
+/// Thread data
+    sel4utils_thread_t thread;
+/// notification object data
+    vka_object_t notification;
+/// Linked list chain
+    struct irq_server_thread *next;
+};
+```
+
+函数 `irq_server_thread_new` 初始化内核结构，并创建 irqserver 线程，入口为 `_irq_thread_entry` ，其中 delivery_sep 为可选结构，用来向其他 ep 发送 irq 信息。`_irq_thread_entry` 轮询 notification 消息来获取中断，如果未注册用于同步发送消息的 sep 就直接调用 handler 。
+
+这部分函数比较关键，感觉用户态中断可以支持这部分功能。 
+
+**irq_server**
+
+```c
+struct irq_server {
+    seL4_CPtr delivery_ep;
+    vka_object_t reply;
+    seL4_Word label;
+    int max_irqs;
+    vspace_t *vspace;
+    seL4_CPtr cspace;
+    vka_t* vka;
+    seL4_Word thread_priority;
+    simple_t simple;
+    struct irq_server_thread *server_threads;
+    void *vm;
+    /* affinity of the server threads */
+    int affinity;
+};
+```
+
+函数 `irq_server_handle_irq_ipc` 用于其他线程处理 irqserver 以 IPC 形式转发的 irq 信息。函数 `irq_server_register_irq` 先遍历当前 irq nodes 并将 irq 委托给其中一个 thread ，否则创建新的 thread 。函数 `irq_server_new` 初始化 server 结构，如果需要处理默认指定的 irq ，则根据传入的 irq 数量创建 thread 。 

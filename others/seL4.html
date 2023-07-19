@@ -609,6 +609,60 @@ _start:
 </pre></div>
 </div>
 </div>
+<div class="section" id="sel4-riscv-vmm">
+<h2><a class="reference external" href="https://github.com/SEL4PROJ/sel4_riscv_vmm/blob/master/src/vmm.c">sel4-riscv-vmm</a><a class="headerlink" href="#sel4-riscv-vmm" title="永久链接至标题">#</a></h2>
+<p>该项目还处于试验阶段，支持 v0.6.1 RISC-V Hypervisor 指令扩展。</p>
+<p><strong>irq_server_node</strong></p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">struct</span><span class="w"> </span><span class="nc">irq_server_node</span><span class="w"> </span><span class="p">{</span>
+<span class="c1">/// Information about the IRQ that is assigned to each badge bit</span>
+<span class="w">    </span><span class="k">struct</span><span class="w"> </span><span class="nc">irq_data</span><span class="w"> </span><span class="n">irqs</span><span class="p">[</span><span class="n">NIRQS_PER_NODE</span><span class="p">];</span>
+<span class="c1">/// The notification object that IRQs arrive on</span>
+<span class="w">    </span><span class="n">seL4_CPtr</span><span class="w"> </span><span class="n">notification</span><span class="p">;</span>
+<span class="c1">/// A mask for the badge. All set bits within the badge are treated as reserved.</span>
+<span class="w">    </span><span class="n">seL4_Word</span><span class="w"> </span><span class="n">badge_mask</span><span class="p">;</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">struct</span> <span class="pre">irq_server_node</span></code> 维护由该 node 处理的 irq (<code class="docutils literal notranslate"><span class="pre">struct</span> <span class="pre">irq_data</span></code>) ，一个 irq 对应 badge 的一位，通过 Notification 从接收 irq ，由 <code class="docutils literal notranslate"><span class="pre">irq_server_node_handle_irq</span></code> 根据 badge 通过调用预先注册的 handler 对所有收到的 irq 进行处理。<code class="docutils literal notranslate"><span class="pre">irq_bind</span></code> 函数根据 irq 序号分配 irq_cap ，并设置 notification_cap 中 badge 的对应位，最后将该 notification_cap 绑定到 irq_cap 。<code class="docutils literal notranslate"><span class="pre">irq_server_node_register_irq</span></code> 注册由该 node 处理的 irq 和 handler。</p>
+<p><strong>irq_server_thread</strong></p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">struct</span><span class="w"> </span><span class="nc">irq_server_thread</span><span class="w"> </span><span class="p">{</span>
+<span class="c1">/// IRQ data which this thread is responsible for</span>
+<span class="w">    </span><span class="k">struct</span><span class="w"> </span><span class="nc">irq_server_node</span><span class="w"> </span><span class="o">*</span><span class="n">node</span><span class="p">;</span>
+<span class="c1">/// A synchronous endpoint to deliver IRQ messages to.</span>
+<span class="w">    </span><span class="n">seL4_CPtr</span><span class="w"> </span><span class="n">delivery_sep</span><span class="p">;</span>
+<span class="c1">/// The label that should be assigned to outgoing synchronous messages.</span>
+<span class="w">    </span><span class="n">seL4_Word</span><span class="w"> </span><span class="n">label</span><span class="p">;</span>
+<span class="c1">/// Thread data</span>
+<span class="w">    </span><span class="n">sel4utils_thread_t</span><span class="w"> </span><span class="kr">thread</span><span class="p">;</span>
+<span class="c1">/// notification object data</span>
+<span class="w">    </span><span class="n">vka_object_t</span><span class="w"> </span><span class="n">notification</span><span class="p">;</span>
+<span class="c1">/// Linked list chain</span>
+<span class="w">    </span><span class="k">struct</span><span class="w"> </span><span class="nc">irq_server_thread</span><span class="w"> </span><span class="o">*</span><span class="n">next</span><span class="p">;</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+<p>函数 <code class="docutils literal notranslate"><span class="pre">irq_server_thread_new</span></code> 初始化内核结构，并创建 irqserver 线程，入口为 <code class="docutils literal notranslate"><span class="pre">_irq_thread_entry</span></code> ，其中 delivery_sep 为可选结构，用来向其他 ep 发送 irq 信息。<code class="docutils literal notranslate"><span class="pre">_irq_thread_entry</span></code> 轮询 notification 消息来获取中断，如果未注册用于同步发送消息的 sep 就直接调用 handler 。</p>
+<p>这部分函数比较关键，感觉用户态中断可以支持这部分功能。</p>
+<p><strong>irq_server</strong></p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">struct</span><span class="w"> </span><span class="nc">irq_server</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">seL4_CPtr</span><span class="w"> </span><span class="n">delivery_ep</span><span class="p">;</span>
+<span class="w">    </span><span class="n">vka_object_t</span><span class="w"> </span><span class="n">reply</span><span class="p">;</span>
+<span class="w">    </span><span class="n">seL4_Word</span><span class="w"> </span><span class="n">label</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">max_irqs</span><span class="p">;</span>
+<span class="w">    </span><span class="n">vspace_t</span><span class="w"> </span><span class="o">*</span><span class="n">vspace</span><span class="p">;</span>
+<span class="w">    </span><span class="n">seL4_CPtr</span><span class="w"> </span><span class="n">cspace</span><span class="p">;</span>
+<span class="w">    </span><span class="n">vka_t</span><span class="o">*</span><span class="w"> </span><span class="n">vka</span><span class="p">;</span>
+<span class="w">    </span><span class="n">seL4_Word</span><span class="w"> </span><span class="n">thread_priority</span><span class="p">;</span>
+<span class="w">    </span><span class="n">simple_t</span><span class="w"> </span><span class="n">simple</span><span class="p">;</span>
+<span class="w">    </span><span class="k">struct</span><span class="w"> </span><span class="nc">irq_server_thread</span><span class="w"> </span><span class="o">*</span><span class="n">server_threads</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">vm</span><span class="p">;</span>
+<span class="w">    </span><span class="cm">/* affinity of the server threads */</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">affinity</span><span class="p">;</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+<p>函数 <code class="docutils literal notranslate"><span class="pre">irq_server_handle_irq_ipc</span></code> 用于其他线程处理 irqserver 以 IPC 形式转发的 irq 信息。函数 <code class="docutils literal notranslate"><span class="pre">irq_server_register_irq</span></code> 先遍历当前 irq nodes 并将 irq 委托给其中一个 thread ，否则创建新的 thread 。函数 <code class="docutils literal notranslate"><span class="pre">irq_server_new</span></code> 初始化 server 结构，如果需要处理默认指定的 irq ，则根据传入的 irq 数量创建 thread 。</p>
+</div>
 </div>
 
         </article>
@@ -672,6 +726,7 @@ _start:
 <li><a class="reference internal" href="#boot">Boot</a></li>
 <li><a class="reference internal" href="#syscalls">Syscalls</a></li>
 <li><a class="reference internal" href="#sel4test">seL4test</a></li>
+<li><a class="reference internal" href="#sel4-riscv-vmm">sel4-riscv-vmm</a></li>
 </ul>
 </li>
 </ul>

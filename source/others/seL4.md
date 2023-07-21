@@ -465,4 +465,10 @@ struct irq_server {
 };
 ```
 
-函数 `irq_server_handle_irq_ipc` 用于其他线程处理 irqserver 以 IPC 形式转发的 irq 信息。函数 `irq_server_register_irq` 先遍历当前 irq nodes 并将 irq 委托给其中一个 thread ，否则创建新的 thread 。函数 `irq_server_new` 初始化 server 结构，如果需要处理默认指定的 irq ，则根据传入的 irq 数量创建 thread 。 
+函数 `irq_server_handle_irq_ipc` 用于其他线程处理 irqserver 以 IPC 形式转发的 irq 信息。函数 `irq_server_register_irq` 先遍历当前 irq nodes 并将 irq 委托给其中一个 thread ，否则创建新的 thread 。函数 `irq_server_new` 初始化 server 结构，如果需要处理默认指定的 irq ，则根据传入的 irq 数量创建 thread 。
+
+函数 `vm_add_vcpu` 在 vm 中添加 vcpu 同时指定核号，配置参数 `CONFIG_PER_VCPU_VMM` 决定是否为每个 vcpu 创建 vmm_thread （源码仓库默认关闭）；此外还包括一些资源分配：为 vcpu 分配 badge 中的一位，创建 TCB 来对 vcpu 进行调度，并将 vcpu 绑定到物理核上。函数 `vm_create` 创建 0 号 vcpu ，并对 fault system 进行初始化。函数 `vmm_init` 对 vmm 进行初始化，boot 参数配置并初始化全局 irq_server 。
+
+`linux_irq` 包括 UART 和每个 vcpu 对应的 VTIMER （vcpu 数量取决于配置参数 `CONFIG_MAX_NUM_NODES`）。当 irq_server 的某个 thread 收到 irq 后，会进入 `irq_handler` 并调用 `vm_inject_IRQ` 将中断注入到对应的 vcpu 中，中断的编号由 token 中包含的 virq 信息指定。
+
+Linux 默认通过 sbi call 来完成 putchar 、settimer、ipi 等操作，在 VM 中会转换为 HYPCALL ，例如 IPI （send 或 clear）就是直接向目标 vcpu 进行注入。

@@ -472,3 +472,5 @@ struct irq_server {
 `linux_irq` 包括 UART 和每个 vcpu 对应的 VTIMER （vcpu 数量取决于配置参数 `CONFIG_MAX_NUM_NODES`）。当 irq_server 的某个 thread 收到 irq 后，会进入 `irq_handler` 并调用 `vm_inject_IRQ` 将中断注入到对应的 vcpu 中，中断的编号由 token 中包含的 virq 信息指定。
 
 Linux 默认通过 sbi call 来完成 putchar 、settimer、ipi 等操作，在 VM 中会转换为 HYPCALL ，例如 IPI （send 或 clear）就是直接向目标 vcpu 进行注入。
+
+![sel4vmm](../_static/sel4vmm.png)

@@ -467,10 +467,32 @@
 <div class="section" id="harmonizing-performance-and-isolation-in-microkernels-with-efficient-intra-kernel-isolation-and-communication-osdi-20">
 <h2>Harmonizing Performance and Isolation in Microkernels with Efficient Intra-kernel Isolation and Communication (OSDI ‘20)<a class="headerlink" href="#harmonizing-performance-and-isolation-in-microkernels-with-efficient-intra-kernel-isolation-and-communication-osdi-20" title="永久链接至标题">#</a></h2>
 </div>
-<div class="section" id="userspace-bypass-accelerating-syscall-intensive-applications-osdi-23">
-<h2>Userspace Bypass: Accelerating Syscall-intensive Applications (OSDI ‘23)<a class="headerlink" href="#userspace-bypass-accelerating-syscall-intensive-applications-osdi-23" title="永久链接至标题">#</a></h2>
+<div class="section" id="osdi-23">
+<h2>OSDI ‘23<a class="headerlink" href="#osdi-23" title="永久链接至标题">#</a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://www.usenix.org/conference/osdi23/presentation/zhou-zhe">Userspace Bypass: Accelerating Syscall-intensive Applications</a></p></li>
+<li><p><a class="reference external" href="https://www.usenix.org/conference/osdi23/presentation/chen">Security and Performance in the Delegated User-level Virtualization</a></p></li>
+<li><p><a class="reference external" href="https://www.usenix.org/conference/osdi23/presentation/lepers">Johnny Cache: the End of DRAM Cache Conflicts (in Tiered Main Memory Systems)</a></p></li>
+<li><p><a class="reference external" href="https://www.usenix.org/conference/osdi23/presentation/sadok">Ensō: A Streaming Interface for NIC-Application Communication</a></p></li>
+</ul>
+<div class="section" id="userspace-bypass-accelerating-syscall-intensive-applications">
+<h3>Userspace Bypass: Accelerating Syscall-intensive Applications<a class="headerlink" href="#userspace-bypass-accelerating-syscall-intensive-applications" title="永久链接至标题">#</a></h3>
 <p>优化 Syscall 开销的传统思路：将数据处理和 driver 放一起（用户态驱动）、提供诸如 io_uring 的编程接口。本文的设计综合考虑性能和兼容性，UB （Userspace Bypass）在不需要修改或重新构建已有应用的前提下，将两个系统调用之间的代码也放入内核执行。</p>
 <p>实验思路：运行 micro-benchmark 和真实应用 Redis 和 Nginx （I/O 密集型），运行平台为 VM 和物理机器，KPTI 开启的情况下性能优势更明显；对比其他优化方法：io_uring 、F-Stack DPDK 、eBPF ，性能没有明显优势，但是不需要对应用进行任何修改。</p>
+</div>
+</div>
+<div class="section" id="atc-23">
+<h2>ATC ‘23<a class="headerlink" href="#atc-23" title="永久链接至标题">#</a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://www.usenix.org/conference/atc23/presentation/hodgkins">Zhuque: Failure is Not an Option, it’s an Exception</a></p></li>
+<li><p><a class="reference external" href="https://www.usenix.org/conference/atc23/presentation/jiang-yanyan">The Hitchhiker’s Guide to Operating Systems</a></p></li>
+<li><p><a class="reference external" href="https://www.usenix.org/conference/atc23/presentation/bergman">Translation Pass-Through for Near-Native Paging Performance in VMs</a></p></li>
+<li><p><a class="reference external" href="https://www.usenix.org/conference/atc23/presentation/guo">SingularFS: A Billion-Scale Distributed File System Using a Single Metadata Server</a></p></li>
+</ul>
+<div class="section" id="zhuque-failure-is-not-an-option-its-an-exception">
+<h3>Zhuque: Failure is Not an Option, it’s an Exception<a class="headerlink" href="#zhuque-failure-is-not-an-option-its-an-exception" title="永久链接至标题">#</a></h3>
+<p>这篇文章针对 PMEM 提出了一种高效的断电恢复机制，亮点在于：1. 对比事务机制和 FASE 锁机制，和操作系统联系更紧密，提供了细粒度的状态保存和恢复；2. 对应用修改较少，迁移性强，改动主要集中在 libc syscall，以及小部分内核（陷入的入口）；3. 还有很大的研究空间。问题：1. 打开普通文件用 O_SYNC 参数，为什么用同步 IO ？这里不是显式的 mmap 分配的 file-backed memory ，而是一些针对磁盘的缓存，例如 Block Cache，这些缓存不太容易通过用户态的 musl 接口进行 track，所以直接关掉了。2. 为什么 Multi-process 会冲突？context 保存在 LD_RELOAD 指向的目录，创建进程时应该创建新的目录。这里有些奇怪，进程如果是 init 进程 exec 出来的，也需要新的 LD_RELOAD。这里的 START 指的是进程被调度，那父子进程也就不会涉及到冲突了。</p>
+</div>
 </div>
 </div>
 
@@ -546,7 +568,14 @@
 <li><a class="reference internal" href="#a-case-against-most-context-switches-hotos-21">A Case Against (Most) Context Switches (HOTOS ‘21)</a></li>
 <li><a class="reference internal" href="#evolving-operating-systems-towards-secure-kernel-driver-interfaces-hotos-23">Evolving Operating Systems Towards Secure Kernel-Driver Interfaces (HOTOS ‘23)</a></li>
 <li><a class="reference internal" href="#harmonizing-performance-and-isolation-in-microkernels-with-efficient-intra-kernel-isolation-and-communication-osdi-20">Harmonizing Performance and Isolation in Microkernels with Efficient Intra-kernel Isolation and Communication (OSDI ‘20)</a></li>
-<li><a class="reference internal" href="#userspace-bypass-accelerating-syscall-intensive-applications-osdi-23">Userspace Bypass: Accelerating Syscall-intensive Applications (OSDI ‘23)</a></li>
+<li><a class="reference internal" href="#osdi-23">OSDI ‘23</a><ul>
+<li><a class="reference internal" href="#userspace-bypass-accelerating-syscall-intensive-applications">Userspace Bypass: Accelerating Syscall-intensive Applications</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#atc-23">ATC ‘23</a><ul>
+<li><a class="reference internal" href="#zhuque-failure-is-not-an-option-its-an-exception">Zhuque: Failure is Not an Option, it’s an Exception</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>

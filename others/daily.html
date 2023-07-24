@@ -477,8 +477,20 @@
 </ul>
 <div class="section" id="userspace-bypass-accelerating-syscall-intensive-applications">
 <h3>Userspace Bypass: Accelerating Syscall-intensive Applications<a class="headerlink" href="#userspace-bypass-accelerating-syscall-intensive-applications" title="永久链接至标题">#</a></h3>
-<p>优化 Syscall 开销的传统思路：将数据处理和 driver 放一起（用户态驱动）、提供诸如 io_uring 的编程接口。本文的设计综合考虑性能和兼容性，UB （Userspace Bypass）在不需要修改或重新构建已有应用的前提下，将两个系统调用之间的代码也放入内核执行。</p>
-<p>实验思路：运行 micro-benchmark 和真实应用 Redis 和 Nginx （I/O 密集型），运行平台为 VM 和物理机器，KPTI 开启的情况下性能优势更明显；对比其他优化方法：io_uring 、F-Stack DPDK 、eBPF ，性能没有明显优势，但是不需要对应用进行任何修改。</p>
+<p>优化 Syscall 开销的传统思路：async syscall 接口（Linux 大部分接口是同步的）、syscall batching（io_uring）、unikernel、in-kernel sandbox、kernel bypass（DPDK）。文中给出了一张表比较这些优化思路的开发难度、性能等方面的优劣。</p>
+<p><img alt="" src="../_images/syscall-optim.png" /></p>
+<p>这篇文章的设计综合考虑性能和兼容性，UB （Userspace Bypass）在不需要修改或重新构建已有应用的前提下，将两个系统调用之间的代码也放入内核执行。UB 分为三个部分：Hot syscall identifier、BTC translator（SFI）、BTC runtime 。</p>
+<p>Hot syscall identifier：文章中提到的很多策略都是含参数的，如何确定哪些 syscall 需要优化，如何确定哪些用户态代码需要放到内核态执行，取决于应用的特征，文章指出在
+大多数情况下（Redis 和 Nginx）可以不调参。</p>
+<p>BTC：参考 SFI 和 Nacl ：跳转目标必须已知，间接跳转通过 runtime 记录地址（exit_indirect_jump）；寄存器重命名，stack 寄存器（RSP、RBP、RIP）不能在 BTC 代码内使用，此外还包括一些保留寄存器（R12-R15）；特权指令以及特殊指令（PUSH、POP）需要处理；添加内存访问检查，并处理 BTC 遇到的 page fault。</p>
+<p>实验思路：运行 micro-benchmark 和真实应用 Redis 和 Nginx ，运行平台为 VM 和物理机器，KPTI 开启的情况下性能优势更明显；对比其他优化方法：io_uring 、F-Stack DPDK 、eBPF ，性能没有明显优势，但是不需要对应用进行任何修改。</p>
+<p>有如下几个问题：</p>
+<ul class="simple">
+<li><p>这篇文章是应用导向的研究（I/O 密集型应用），除了 Redis 和 Nginx 外是否还有其他应用场景，提出新的设计方案然后寻找应用场景的开销可能更高。</p></li>
+<li><p>unikernel 性能最优（syscall 变为 function），但是应用开发难度真有这么高吗？</p></li>
+<li><p>这篇文章的代码工作都是基于 x86 的，用 RISC-V 等精简指令集生成 BTC 更方便，但是 x86 更能展示工作的泛用性。</p></li>
+<li><p>这篇文章利用 SFI 隔离机制在内核执行动态处理过的用户代码从而实现 syscall batching，是否有办法利用语言的隔离机制（Rust）将代码放入到内核中？</p></li>
+</ul>
 </div>
 </div>
 <div class="section" id="atc-23">

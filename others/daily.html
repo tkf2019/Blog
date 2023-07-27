@@ -480,8 +480,7 @@
 <p>优化 Syscall 开销的传统思路：async syscall 接口（Linux 大部分接口是同步的）、syscall batching（io_uring）、unikernel、in-kernel sandbox、kernel bypass（DPDK）。文中给出了一张表比较这些优化思路的开发难度、性能等方面的优劣。</p>
 <p><img alt="" src="../_images/syscall-optim.png" /></p>
 <p>这篇文章的设计综合考虑性能和兼容性，UB （Userspace Bypass）在不需要修改或重新构建已有应用的前提下，将两个系统调用之间的代码也放入内核执行。UB 分为三个部分：Hot syscall identifier、BTC translator（SFI）、BTC runtime 。</p>
-<p>Hot syscall identifier：文章中提到的很多策略都是含参数的，如何确定哪些 syscall 需要优化，如何确定哪些用户态代码需要放到内核态执行，取决于应用的特征，文章指出在
-大多数情况下（Redis 和 Nginx）可以不调参。</p>
+<p>Hot syscall identifier：文章中提到的很多策略都是含参数的，如何确定哪些 syscall 需要优化，如何确定哪些用户态代码需要放到内核态执行，取决于应用的特征，文章指出在大多数情况下（Redis 和 Nginx）可以不调参。</p>
 <p>BTC：参考 SFI 和 Nacl ：跳转目标必须已知，间接跳转通过 runtime 记录地址（exit_indirect_jump）；寄存器重命名，stack 寄存器（RSP、RBP、RIP）不能在 BTC 代码内使用，此外还包括一些保留寄存器（R12-R15）；特权指令以及特殊指令（PUSH、POP）需要处理；添加内存访问检查，并处理 BTC 遇到的 page fault。</p>
 <p>实验思路：运行 micro-benchmark 和真实应用 Redis 和 Nginx ，运行平台为 VM 和物理机器，KPTI 开启的情况下性能优势更明显；对比其他优化方法：io_uring 、F-Stack DPDK 、eBPF ，性能没有明显优势，但是不需要对应用进行任何修改。</p>
 <p>有如下几个问题：</p>
@@ -490,6 +489,17 @@
 <li><p>unikernel 性能最优（syscall 变为 function），但是应用开发难度真有这么高吗？</p></li>
 <li><p>这篇文章的代码工作都是基于 x86 的，用 RISC-V 等精简指令集生成 BTC 更方便，但是 x86 更能展示工作的泛用性。</p></li>
 <li><p>这篇文章利用 SFI 隔离机制在内核执行动态处理过的用户代码从而实现 syscall batching，是否有办法利用语言的隔离机制（Rust）将代码放入到内核中？</p></li>
+</ul>
+</div>
+<div class="section" id="security-and-performance-in-the-delegated-user-level-virtualization">
+<h3>Security and Performance in the Delegated User-level Virtualization<a class="headerlink" href="#security-and-performance-in-the-delegated-user-level-virtualization" title="永久链接至标题">#</a></h3>
+<p><a class="reference external" href="https://github.com/IPADS-DuVisor/DuVisor">DuVisor</a> 是由 Rust 语言编写的用户态虚拟机，通过将大部分功能放在用户态来减少安全隐患。主要由几个部分构成：HU 态 Hypervisor (DuVisor) 、DV (Delegated Virtualization) 硬件扩展 (Du-Ext)、HS 态驱动 (DV-driver)。</p>
+<p>在 RISC-V 架构下增加 HU 特权态，该特权态用于 VS 态的异常处理。DV-driver 用于处理时钟中断及上下文保存与恢复。DuVisor 可以直接修改二级页表并向 VM 分配或回收物理内存页，DV-driver 可以通过设置 PMP 寄存器来限制 VM 对内存的访问。由于目前 RISC-V 没有支持 IOMMU ，所以 DuVisor 没办法直接访问物理外设。DuVisor 可以创建多个 IO 线程用于处理 IO 请求，例如转发网络包等。DuVisor 可以向 vcpu 注入虚拟中断，通过用户态中断机制来避免 vmexit 的开销。</p>
+<p>重点关注 DuVisor 的中断机制：</p>
+<ul class="simple">
+<li><p>只有同一个 VM 中的 vcpu 可以互相发送 IPI，h_vmid 寄存器标识当前核上运行的 VM ，h_vcpuid 寄存器标识当前核上运行的 vcpu 。</p></li>
+<li><p>DV-Ext 可以向不同的核发送中断，发送中断前向当前核的 hu_vitr 中写入目标 vcpuid ，DV-Ext 会查找 vcpuid 对应的核。</p></li>
+<li><p>接收方 vcpu 不在线触发异常并陷入 DV-driver 进行处理，将对应中断注入到 vcpu 的上下文中以便下次调度时触发。</p></li>
 </ul>
 </div>
 </div>
@@ -582,6 +592,7 @@
 <li><a class="reference internal" href="#harmonizing-performance-and-isolation-in-microkernels-with-efficient-intra-kernel-isolation-and-communication-osdi-20">Harmonizing Performance and Isolation in Microkernels with Efficient Intra-kernel Isolation and Communication (OSDI ‘20)</a></li>
 <li><a class="reference internal" href="#osdi-23">OSDI ‘23</a><ul>
 <li><a class="reference internal" href="#userspace-bypass-accelerating-syscall-intensive-applications">Userspace Bypass: Accelerating Syscall-intensive Applications</a></li>
+<li><a class="reference internal" href="#security-and-performance-in-the-delegated-user-level-virtualization">Security and Performance in the Delegated User-level Virtualization</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#atc-23">ATC ‘23</a><ul>

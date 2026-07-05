@@ -35,6 +35,10 @@ Education
 Research
 ========
 
+- Kaifu Tian, Youjie Zheng, Yiren Zhang, Yuyang You, Keyang Hu, Kang Chen, Yu Chen.
+  **Flux: Unleashing Linux as a High-Performance Application Kernel**.
+  *SOSP 2026*.
+
 - Yuekai Jia*, **Kaifu Tian***, Yuyang You, Yu Chen, Kang Chen.
   **Skyloft: A General High-Efficient Scheduling Framework in User Space**.
   *SOSP 2024*.

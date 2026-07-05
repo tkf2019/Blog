@@ -35,7 +35,7 @@ Education
 Research
 ========
 
-- Kaifu Tian, Youjie Zheng, Yiren Zhang, Yuyang You, Keyang Hu, Kang Chen, Yu Chen.
+- **Kaifu Tian**, Youjie Zheng, Yiren Zhang, Yuyang You, Keyang Hu, Kang Chen, Yu Chen.
   **Flux: Unleashing Linux as a High-Performance Application Kernel**.
   *SOSP 2026*.
 

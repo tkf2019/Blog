@@ -68,39 +68,8 @@
   background: color-mix(in srgb, var(--pst-color-primary) 10%, transparent);
   color: color-mix(in srgb, var(--pst-color-primary) 65%, var(--pst-color-text-base));
   flex-shrink: 0;
-  font-style: normal;
-}
-
-.contact-icon::before {
-  display: block;
   font-size: 0.74rem;
   line-height: 1;
-}
-
-.icon-solid::before {
-  font-family: "Font Awesome 6 Free", "Font Awesome 5 Free";
-  font-weight: 900;
-}
-
-.icon-brands::before {
-  font-family: "Font Awesome 6 Brands", "Font Awesome 5 Brands";
-  font-weight: 400;
-}
-
-.icon-envelope::before {
-  content: "\f0e0";
-}
-
-.icon-phone::before {
-  content: "\f095";
-}
-
-.icon-location::before {
-  content: "\f3c5";
-}
-
-.icon-github::before {
-  content: "\f09b";
 }
 
 .profile-preload {

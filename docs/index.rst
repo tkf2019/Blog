@@ -7,10 +7,10 @@
        <p class="profile-title">Ph.D. Student / Systems Researcher</p>
        <p class="profile-affiliation">Department of Computer Science and Technology, Tsinghua University</p>
         <ul class="contact-list">
-          <li><i class="contact-icon icon-solid icon-envelope" aria-hidden="true"></i><a href="mailto:kaifu6821@qq.com">kaifu6821@qq.com</a></li>
-          <li><i class="contact-icon icon-solid icon-phone" aria-hidden="true"></i>+86 15944806118</li>
-          <li><i class="contact-icon icon-solid icon-location" aria-hidden="true"></i>Beijing, China</li>
-          <li><i class="contact-icon icon-brands icon-github" aria-hidden="true"></i><a href="https://github.com/tkf2019" target="_blank" rel="noopener noreferrer">github.com/tkf2019</a></li>
+          <li><i class="contact-icon fa-solid fa-envelope" aria-hidden="true"></i><a href="mailto:kaifu6821@qq.com">kaifu6821@qq.com</a></li>
+          <li><i class="contact-icon fa-solid fa-phone" aria-hidden="true"></i><a href="tel:+8615944806118">+86 15944806118</a></li>
+          <li><i class="contact-icon fa-solid fa-location-dot" aria-hidden="true"></i><span>Beijing, China</span></li>
+          <li><i class="contact-icon fa-brands fa-github" aria-hidden="true"></i><a href="https://github.com/tkf2019" target="_blank" rel="noopener noreferrer">github.com/tkf2019</a></li>
         </ul>
      </aside>
 

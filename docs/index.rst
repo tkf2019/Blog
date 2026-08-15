@@ -36,8 +36,18 @@ Research
 ========
 
 - **Kaifu Tian**, Youjie Zheng, Yiren Zhang, Yuyang You, Keyang Hu, Kang Chen, Yu Chen.
-  **Flux: Unleashing Linux as a High-Performance Application Kernel**.
+  **Turning Linux into a High-Performance Library OS with Flux**.
   *SOSP 2026*.
+
+  .. raw:: html
+
+      <div class="paper-actions">
+        <a class="paper-btn" href="https://github.com/THU-OSLAB/flux" target="_blank" rel="noopener noreferrer">Code</a>
+      </div>
+
+  - Flux turns Linux into a high-performance library OS while keeping mature Linux subsystems, including schedulers and file systems, largely unchanged. Unmodified applications invoke Linux system calls through direct function calls, while DPDK, SPDK, and a fast network path provide kernel-bypass I/O.
+  - Flux combines single-level scheduling, Intel User Interrupts, optimized system-call paths, and a host-assisted process abstraction. It supports page-table-isolated processes and copy-on-write ``fork`` without sacrificing direct-call system calls.
+  - Flux passes 92.2% of the selected Linux Test Project cases, improves ext4 Filebench throughput by up to 47% over Linux, comes within 4% of Junction's Memcached throughput under a 100-microsecond p99 latency target, and improves eight-worker Nginx throughput by up to 18.5x over Linux under the same target.
 
 - Yuekai Jia*, **Kaifu Tian***, Yuyang You, Yu Chen, Kang Chen.
   **Skyloft: A General High-Efficient Scheduling Framework in User Space**.
@@ -47,7 +57,6 @@ Research
 
       <div class="paper-actions">
         <a class="paper-btn" href="_static/sosp24-skyloft.pdf" target="_blank" rel="noopener noreferrer">Paper</a>
-        <a class="paper-btn" href="papers/paper-skyloft.html">Overview</a>
       </div>
 
   - Skyloft leverages user interrupts to support kernel-bypassing preemption, and is the first general user-space scheduling framework for multi-application workloads with microsecond-scale preemptive scheduling.
@@ -80,4 +89,3 @@ Competition Awards
    :hidden:
 
    logs/index
-   papers/index
